@@ -2,3 +2,4 @@
 docs/
 pkg/
 *.cache
+src/tests
