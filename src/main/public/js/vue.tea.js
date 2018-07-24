@@ -49,6 +49,8 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
 
         if (typeof(contextFn) === "function") {
             var context = new contextFn();
+            context.Tea = window.Tea;
+
             var backup = {};
             for (var key in context) {
                 if (!context.hasOwnProperty(key)) {
@@ -86,13 +88,16 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
             });
         }
         else {
-            var context = {};
+            var context = {
+                Tea: window.Tea
+            };
             for (key in data) {
                 if (!data.hasOwnProperty(key)) {
                     continue;
                 }
                 context[key] = data[key];
             }
+
             window.Tea.Vue = new Vue({
                 el: "#tea-app",
                 data: context

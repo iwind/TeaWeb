@@ -3,3 +3,10 @@ docs/
 pkg/
 *.cache
 src/tests
+src/github.com/go-yaml
+src/github.com/kr
+src/github.com/pbnjay
+src/github.com/pquerna
+src/gopkg.in
+src/main/tmp/*
+src/main/logs/*
