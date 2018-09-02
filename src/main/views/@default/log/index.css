@@ -1,0 +1,31 @@
+.ui.statistic {
+}
+
+.ui.statistic .value .unit {
+    font-weight: normal;
+    font-size: 0.7em;
+}
+
+.ui.statistic .label.unit {
+    text-transform: none;
+    font-weight: normal;
+}
+
+.log-table .log-row table {
+    background: #eee;
+    font-size: 12px;
+    margin-top: 0.5em;
+    width: 100%;
+}
+
+.log-table .log-row p {
+    color: #999;
+}
+
+.log-table .log-row p em {
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.log-table .log-row .error {
+    color: #dc143c;
+}

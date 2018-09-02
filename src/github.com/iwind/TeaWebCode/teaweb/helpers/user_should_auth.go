@@ -10,8 +10,8 @@ type UserShouldAuth struct {
 	action *actions.ActionObject
 }
 
-func (auth *UserShouldAuth) RunAction(actionPtr interface{}, paramName string) (goNext bool) {
-	auth.action = actionPtr.(actions.ActionWrapper).Object()
+func (auth *UserShouldAuth) BeforeAction(actionPtr actions.ActionWrapper, paramName string) (goNext bool) {
+	auth.action = actionPtr.Object()
 	return true
 }
 

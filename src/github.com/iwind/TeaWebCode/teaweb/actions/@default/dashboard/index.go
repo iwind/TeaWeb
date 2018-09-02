@@ -7,9 +7,9 @@ import (
 
 type IndexAction actions.Action
 
-func (action *IndexAction) Run(params struct {
+func (this *IndexAction) Run(params struct {
 	Auth *helpers.UserMustAuth
 }) {
-	action.Data["teaMenu"] = "dashboard"
-	action.Show()
+	this.Data["teaMenu"] = "dashboard"
+	this.Show()
 }

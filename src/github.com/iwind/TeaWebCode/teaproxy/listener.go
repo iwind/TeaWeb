@@ -41,7 +41,13 @@ func (listener *Listener) Start() {
 	})
 
 	logs.Println("start listener on", listener.config.Address)
-	err := http.ListenAndServe(listener.config.Address, httpHandler)
+	var err error
+	if listener.config.SSL != nil && listener.config.SSL.On {
+		err = http.ListenAndServeTLS(listener.config.Address, listener.config.SSL.Certificate, listener.config.SSL.CertificateKey, httpHandler)
+	} else {
+		err = http.ListenAndServe(listener.config.Address, httpHandler)
+	}
+
 	if err != nil {
 		logs.Error(err)
 		return

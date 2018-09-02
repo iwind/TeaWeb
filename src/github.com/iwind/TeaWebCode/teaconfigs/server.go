@@ -13,7 +13,14 @@ type ServerConfig struct {
 	Notify  []string `yaml:"notify"`  // @TODO
 	LogOnly bool     `yaml:"logOnly"` // @TODO
 
-	AccessLog []*AccessLogConfig `yaml:"accessLog"` // @TODO
+	// 访问日志
+	AccessLog []*AccessLogConfig `yaml:"accessLog"`
+
+	// @TODO 支持ErrorLog
+
+	// SSL
+	// @TODO
+	SSL *SSLConfig `yaml:"ssl"`
 
 	// 参考 http://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header
 	Headers []*HeaderConfig `yaml:"header"` // @TODO

@@ -104,7 +104,7 @@ func (server *Server) handle(writer http.ResponseWriter, req *http.Request) {
 		for _, location := range server.config.Locations {
 			if location.Match(request.URL().Path) {
 				// @TODO 日志
-				logs.Println(location.AccessLog)
+				logs.Println("accessLog:", location.AccessLog)
 				if len(location.AccessLog) > 0 {
 
 				}
@@ -117,10 +117,10 @@ func (server *Server) handle(writer http.ResponseWriter, req *http.Request) {
 						cachePath = "cache"
 					}
 					if !filepath.IsAbs(cachePath) {
-						cachePath = Tea.Root + Tea.Ds + cachePath
+						cachePath = Tea.Root + Tea.DS + cachePath
 					}
 
-					cacheFile := cachePath + Tea.Ds + cacheKey + ".cache"
+					cacheFile := cachePath + Tea.DS + cacheKey + ".cache"
 					if request.ReadCache(writer, cacheFile) {
 						return
 					}

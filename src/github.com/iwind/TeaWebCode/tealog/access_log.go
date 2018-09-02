@@ -25,50 +25,50 @@ var accessLogVars = map[string]string{}
 
 // 参考：http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format
 type AccessLog struct {
-	Id int64
+	Id int64 `var:"id" bson:"id" json:"id"`
 
-	TeaVersion      string  `var:"teaVersion"`
-	RemoteAddr      string  `var:"remoteAddr"`
-	RemotePort      string  `var:"remotePort"`
-	RemoteUser      string  `var:"remoteUser"`
-	RequestURI      string  `var:"requestURI"`
-	RequestPath     string  `var:"requestPath"`
-	RequestLength   int64   `var:"requestLength"`
-	RequestTime     float64 `var:"requestTime"` // 从请求到所有响应数据发送到请求端所花时间，单位为带有小数点的秒，精确到纳秒，比如：0.000260081
-	RequestMethod   string  `var:"requestMethod"`
-	RequestFilename string  `var:"requestFilename"` // @TODO
-	Scheme          string  `var:"requestScheme"`
-	Proto           string  `var:"proto"`
-	BytesSent       int64   `var:"bytesSent"`     // 响应的字节数
-	BodyBytesSent   int64   `var:"bodyBytesSent"` // 响应的字节数（目前同BytesSent）
-	Status          int     `var:"status"`        // 响应的状态码
-	StatusMessage   string  `var:"statusMessage"` // 响应的信息
-	TimeISO8601     string  `var:"timeISO8601"`   // ISO 8601格式的本地时间，比如 2018-07-16T23:52:24.839+08:00
-	TimeLocal       string  `var:"timeLocal"`     // 本地时间，比如 17/Jul/2018:09:52:24 +0800
-	Msec            string  `var:"msec"`          // 带有毫秒的时间，比如 1531756823.054
-	Host            string  `var:"host"`
-	Referer         string  `var:"referer"`
-	UserAgent       string  `var:"userAgent"`
-	Request         string  `var:"request"`
-	ContentType     string  `var:"contentType"`
-	Cookie          map[string]string              // Cookie cookie.name, cookie.sid
-	Arg             map[string][]string            // arg_name, arg_id
-	Args            string  `var:"args"`           // name=liu&age=20
-	QueryString     string  `var:"queryString"`    // 同 Args
-	Header          map[string][]string            // 请求的头部信息，支持header_*和http_*，header_content_type, header_expires, http_content_type, http_user_agent
-	ServerName      string  `var:"serverName"`     // @TODO
-	ServerPort      string  `var:"serverPort"`     // @TODO
-	ServerProtocol  string  `var:"serverProtocol"` // @TODO
+	TeaVersion      string              `var:"teaVersion" bson:"teaVersion" json:"teaVersion"`
+	RemoteAddr      string              `var:"remoteAddr" bson:"remoteAddr" json:"remoteAddr"`
+	RemotePort      string              `var:"remotePort" bson:"remotePort" json:"remotePort"`
+	RemoteUser      string              `var:"remoteUser" bson:"remoteUser" json:"remoteUser"` // @TODO 应该为basic authentication的用户名
+	RequestURI      string              `var:"requestURI" bson:"requestURI" json:"requestURI"`
+	RequestPath     string              `var:"requestPath" bson:"requestPath" json:"requestPath"`
+	RequestLength   int64               `var:"requestLength" bson:"requestLength" json:"requestLength"`
+	RequestTime     float64             `var:"requestTime" bson:"requestTime" json:"requestTime"` // 从请求到所有响应数据发送到请求端所花时间，单位为带有小数点的秒，精确到纳秒，比如：0.000260081
+	RequestMethod   string              `var:"requestMethod" bson:"requestMethod" json:"requestMethod"`
+	RequestFilename string              `var:"requestFilename" bson:"requestFilename" json:"requestFilename"` // @TODO
+	Scheme          string              `var:"requestScheme" bson:"requestScheme" json:"requestScheme"`
+	Proto           string              `var:"proto" bson:"proto" json:"proto"`
+	BytesSent       int64               `var:"bytesSent" bson:"bytesSent" json:"bytesSent"`             // 响应的字节数
+	BodyBytesSent   int64               `var:"bodyBytesSent" bson:"bodyBytesSent" json:"bodyBytesSent"` // 响应的字节数（目前同BytesSent）
+	Status          int                 `var:"status" bson:"status" json:"status"`                      // 响应的状态码
+	StatusMessage   string              `var:"statusMessage" bson:"statusMessage" json:"statusMessage"` // 响应的信息
+	TimeISO8601     string              `var:"timeISO8601" bson:"timeISO8601" json:"timeISO8601"`       // ISO 8601格式的本地时间，比如 2018-07-16T23:52:24.839+08:00
+	TimeLocal       string              `var:"timeLocal" bson:"timeLocal" json:"timeLocal"`             // 本地时间，比如 17/Jul/2018:09:52:24 +0800
+	Msec            string              `var:"msec" bson:"msec" json:"msec"`                            // 带有毫秒的时间，比如 1531756823.054
+	Host            string              `var:"host" bson:"host" json:"host"`
+	Referer         string              `var:"referer" bson:"referer" json:"referer"`
+	UserAgent       string              `var:"userAgent" bson:"userAgent" json:"userAgent"`
+	Request         string              `var:"request" bson:"request" json:"request"`
+	ContentType     string              `var:"contentType" bson:"contentType" json:"contentType"`
+	Cookie          map[string]string   `bson:"cookie" json:"cookie"`                                      // Cookie cookie.name, cookie.sid
+	Arg             map[string][]string `bson:"arg" json:"arg"`                                            // arg_name, arg_id
+	Args            string              `var:"args" bson:"args" json:"args"`                               // name=liu&age=20
+	QueryString     string              `var:"queryString" bson:"queryString" json:"queryString"`          // 同 Args
+	Header          map[string][]string `bson:"header" json:"header"`                                      // 请求的头部信息，支持header_*和http_*，header_content_type, header_expires, http_content_type, http_user_agent
+	ServerName      string              `var:"serverName" bson:"serverName" json:"serverName"`             // @TODO
+	ServerPort      string              `var:"serverPort" bson:"serverPort" json:"serverPort"`             // @TODO
+	ServerProtocol  string              `var:"serverProtocol" bson:"serverProtocol" json:"serverProtocol"` // @TODO
 
 	// 代理相关
-	BackendAddress string // 代理的后端的地址
+	BackendAddress string `var:"backendAddress" bson:"backendAddress" json:"backendAddress"` // 代理的后端的地址
 
 	// 扩展
 	Extend struct {
-		File   AccessLogFile
-		Client AccessLogClient
-		Geo    AccessLogGeo
-	}
+		File   AccessLogFile   `bson:"file" json:"file"`
+		Client AccessLogClient `bson:"client" json:"client"`
+		Geo    AccessLogGeo    `bson:"geo" json:"geo"`
+	} `bson:"extend" json:"extend"`
 
 	// 格式化的正则表达式
 	formatReg *regexp.Regexp
@@ -76,55 +76,55 @@ type AccessLog struct {
 }
 
 type AccessLogFile struct {
-	MimeType  string // 类似于 image/jpeg
-	Extension string // 扩展名，不带点（.）
-	Charset   string // 字符集，统一大写
+	MimeType  string `bson:"mimeType" json:"mimeType"`   // 类似于 image/jpeg
+	Extension string `bson:"extension" json:"extension"` // 扩展名，不带点（.）
+	Charset   string `bson:"charset" json:"charset"`     // 字符集，统一大写
 }
 
 type AccessLogClient struct {
-	OS      AccessLogClientOS
-	Device  AccessLogClientDevice
-	Browser AccessLogClientBrowser
+	OS      AccessLogClientOS      `bson:"os" json:"os"`
+	Device  AccessLogClientDevice  `bson:"device" json:"device"`
+	Browser AccessLogClientBrowser `bson:"browser" json:"browser"`
 }
 
 type AccessLogClientOS struct {
-	Family     string
-	Major      string
-	Minor      string
-	Patch      string
-	PatchMinor string
+	Family     string `bson:"family" json:"family"`
+	Major      string `bson:"major" json:"major"`
+	Minor      string `bson:"minor" json:"minor"`
+	Patch      string `bson:"patch" json:"patch"`
+	PatchMinor string `bson:"patchMinor" json:"patchMinor"`
 }
 
 type AccessLogClientDevice struct {
-	Family string
-	Brand  string
-	Model  string
+	Family string `bson:"family" json:"family"`
+	Brand  string `bson:"brand" json:"brand"`
+	Model  string `bson:"model" json:"model"`
 }
 
 type AccessLogClientBrowser struct {
-	Family string
-	Major  string
-	Minor  string
-	Patch  string
+	Family string `bson:"family" json:"family"`
+	Major  string `bson:"major" json:"major"`
+	Minor  string `bson:"minor" json:"minor"`
+	Patch  string `bson:"patch" json:"patch"`
 }
 
 type AccessLogGeo struct {
-	Country  string
-	City     string
-	Location AccessLogGeoLocation
+	Country  string               `bson:"country" json:"country"`
+	City     string               `bson:"city" json:"city"`
+	Location AccessLogGeoLocation `bson:"location" json:"location"`
 }
 
 type AccessLogGeoLocation struct {
-	Latitude       float64
-	Longitude      float64
-	TimeZone       string
-	AccuracyRadius uint16
-	MetroCode      uint
+	Latitude       float64 `bson:"latitude" json:"latitude"`
+	Longitude      float64 `bson:"longitude" json:"longitude"`
+	TimeZone       string  `bson:"timeZone" json:"timeZone"`
+	AccuracyRadius uint16  `bson:"accuracyRadius" json:"accuracyRadius"`
+	MetroCode      uint    `bson:"metroCode" json:"metroCode"`
 }
 
 func init() {
 	var err error
-	userAgentParser, err = uaparser.New(Tea.Root + Tea.Ds + "resources" + Tea.Ds + "regexes.yaml")
+	userAgentParser, err = uaparser.New(Tea.Root + Tea.DS + "resources" + Tea.DS + "regexes.yaml")
 	if err != nil {
 		logs.Error(err)
 	}
@@ -334,7 +334,9 @@ func (log *AccessLog) parseUserAgent() {
 }
 
 func (log *AccessLog) parseGeoIP() {
-	log.RemoteAddr = "111.197.170.6" //@TODO
+	if geoDB == nil {
+		return
+	}
 
 	// 参考：https://dev.maxmind.com/geoip/geoip2/geolite2/
 	ip := net.ParseIP(log.RemoteAddr)

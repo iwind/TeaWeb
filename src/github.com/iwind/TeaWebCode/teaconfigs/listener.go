@@ -11,6 +11,7 @@ import (
 
 type ListenerConfig struct {
 	Address string
+	SSL     *SSLConfig
 	Servers []*ServerConfig
 }
 
@@ -18,7 +19,7 @@ func ParseConfigs() ([]*ListenerConfig, error) {
 	listenerConfigMap := map[string]*ListenerConfig{}
 
 	configsDir := Tea.ConfigDir()
-	files, err := filepath.Glob(configsDir + Tea.Ds + "*.proxy.conf")
+	files, err := filepath.Glob(configsDir + Tea.DS + "*.proxy.conf")
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +48,11 @@ func ParseConfigs() ([]*ListenerConfig, error) {
 		for _, address := range config.Listen {
 			// 是否有端口
 			if strings.Index(address, ":") == -1 {
-				// @TODO 如果是tls，则为443
-				address += ":80"
+				if config.SSL != nil && config.SSL.On {
+					address += ":443"
+				} else {
+					address += ":80"
+				}
 			}
 
 			listenerConfig, found := listenerConfigMap[address]
@@ -61,6 +65,10 @@ func ParseConfigs() ([]*ListenerConfig, error) {
 				listenerConfigMap[address] = listenerConfig
 			} else {
 				listenerConfig.Servers = append(listenerConfig.Servers, config)
+			}
+
+			if config.SSL != nil {
+				listenerConfig.SSL = config.SSL
 			}
 		}
 	}

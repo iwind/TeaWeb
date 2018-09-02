@@ -18,7 +18,7 @@ func (writer *AccessLogStdoutWriter) Init() {
 func (writer *AccessLogStdoutWriter) Write(log *AccessLog) error {
 	format := writer.config.Format
 	if len(format) == 0 {
-		format = "${remoteAddr} - ${remoteUser} [${timeLocal}] \"${request}\" ${status} ${bodyBytesSent} \"${http.Referer}\" \"${http.UserAgent}\""
+		format = "${remoteAddr} - [${timeLocal}] \"${request}\" ${status} ${bodyBytesSent} \"${http.Referer}\" \"${http.UserAgent}\""
 	}
 
 	logString := log.Format(format)

@@ -6,7 +6,10 @@ import (
 	"log"
 	"github.com/iwind/TeaGo/Tea"
 	"time"
-	"github.com/iwind/TeaWebCode/teautils"
+	"github.com/iwind/TeaWebCode/teamongo"
+	"context"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo/findopt"
 )
 
 func TestLogParseMimeType(t *testing.T) {
@@ -71,7 +74,7 @@ func TestLogParseExtension(t *testing.T) {
 
 func TestLogOSParser1(t *testing.T) {
 	userAgent := "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.59 Safari/537.36"
-	parser, err := uaparser.New(Tea.Root + Tea.Ds + "resources" + Tea.Ds + "regexes.yaml")
+	parser, err := uaparser.New(Tea.Root + Tea.DS + "resources" + Tea.DS + "regexes.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -97,7 +100,7 @@ func TestLogOSParser1(t *testing.T) {
 
 func TestLogOSParser2(t *testing.T) {
 	userAgent := "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.59 Safari/537.36"
-	parser, err := uaparser.New(Tea.Root + Tea.Ds + "resources" + Tea.Ds + "regexes.yaml")
+	parser, err := uaparser.New(Tea.Root + Tea.DS + "resources" + Tea.DS + "regexes.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -113,7 +116,7 @@ func TestLogOSParser2(t *testing.T) {
 
 func TestLogOSParser3(t *testing.T) {
 	userAgent := " Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)"
-	parser, err := uaparser.New(Tea.Root + Tea.Ds + "resources" + Tea.Ds + "regexes.yaml")
+	parser, err := uaparser.New(Tea.Root + Tea.DS + "resources" + Tea.DS + "regexes.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -132,7 +135,7 @@ func TestLogOSParser3(t *testing.T) {
 
 func TestLogOSParser4(t *testing.T) {
 	userAgent := "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36"
-	parser, err := uaparser.New(Tea.Root + Tea.Ds + "resources" + Tea.Ds + "regexes.yaml")
+	parser, err := uaparser.New(Tea.Root + Tea.DS + "resources" + Tea.DS + "regexes.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -191,25 +194,45 @@ func TestLogParse5(t *testing.T) {
 }
 
 func TestAccessLogger_DB(t *testing.T) {
-	if SharedLogger().db == nil {
-		t.Fatal("db not open")
+	client := teamongo.SharedClient()
+	if client == nil {
+		t.Fatal("client=nil")
 	}
-	query := SharedLogger().db.NewQuery("ACCESSLOG")
-	ones, err := query.FindAll()
+
+	accessLog := AccessLog{
+		Id:   time.Now().UnixNano(),
+		Args: "a=b",
+		Arg: map[string][]string{
+			"name": {"liu", "lu"},
+		},
+		Cookie: map[string]string{
+			"sid": "123456",
+		},
+		RemoteAddr:    "127.0.0.1",
+		RemotePort:    "80",
+		TimeLocal:     "23/Jul/2018:22:23:35 +0800",
+		TimeISO8601:   "2018-07-23T22:23:35+08:00",
+		Status:        200,
+		BodyBytesSent: 1048,
+		Request:       "GET / HTTP/1.1",
+	}
+
+	r, err := client.
+		Database("teaweb").
+		Collection("accessLogs").
+		InsertOne(context.Background(), accessLog)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, one := range ones {
-		t.Log(one.Id(), one.Value)
-	}
+	t.Log(r)
 }
 
 func TestAccessLog_Format(t *testing.T) {
 	accessLog := AccessLog{
 		Args: "a=b",
 		Arg: map[string][]string{
-			"name": []string{"liu", "lu"},
+			"name": {"liu", "lu"},
 		},
 		Cookie: map[string]string{
 			"sid": "123456",
@@ -229,18 +252,9 @@ func TestAccessLog_Format(t *testing.T) {
 				"https://www.baidu.com/",
 			},
 		},
-		Extend: struct {
-			File   AccessLogFile
-			Client AccessLogClient
-			Geo    AccessLogGeo
-		}{File: AccessLogFile{
-			Extension: "go",
-		}, Client: AccessLogClient{}, Geo: AccessLogGeo{
-			City: "Beijing",
-		}},
 	}
 
-	format := "${args} ${arg.name} ${cookie.sid} ${remoteAddr} - ${remoteUser} [${timeLocal}] \"${request}\" ${status} ${bodyBytesSent} \"${http.Referer}\" \"${http.UserAgent}\""
+	format := "${args} ${arg.name} ${cookie.sid} ${remoteAddr} - [${timeLocal}] \"${request}\" ${status} ${bodyBytesSent} \"${http.Referer}\" \"${http.UserAgent}\""
 	t.Log(accessLog.Format(format))
 
 	format = "Extend:${extend.File} ${extend.Geo}"
@@ -248,21 +262,35 @@ func TestAccessLog_Format(t *testing.T) {
 }
 
 func TestAccessLog_Decode(t *testing.T) {
-	db := SharedLogger().db
-	record, err := db.NewQuery("ACCESSLOG").Reverse(true).Find()
+	client := teamongo.SharedClient()
+	if client == nil {
+		t.Fatal("client=nil")
+	}
+
+	r, err := client.
+		Database("teaweb").
+		Collection("accessLogs").
+		Find(context.Background(), bson.NewDocument(
+			//bson.EC.String("remoteAddr", "127.0.0.1"),
+			bson.EC.SubDocument("id", bson.NewDocument(bson.EC.Int64("$gt", 1535886567943382000))),
+		), findopt.Skip(0), findopt.Limit(2), findopt.Sort(bson.NewDocument(
+
+			bson.EC.Int32("_id", 1),
+		)))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if record == nil {
-		return
+	for r.Next(context.Background()) {
+		accessLog := AccessLog{}
+		err = r.Decode(&accessLog)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		t.Log("mongoId:", accessLog.Id)
+		t.Log(accessLog)
 	}
 
-	accessLog := AccessLog{}
-	err = teautils.MapToObjectJSON(record.Value, &accessLog)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Log(accessLog)
+	client.Disconnect(context.Background())
 }

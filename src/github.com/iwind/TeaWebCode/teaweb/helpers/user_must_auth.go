@@ -8,8 +8,8 @@ type UserMustAuth struct {
 	Username string
 }
 
-func (auth *UserMustAuth) RunAction(actionPtr interface{}, paramName string) (goNext bool) {
-	var action = actionPtr.(actions.ActionWrapper).Object()
+func (auth *UserMustAuth) BeforeAction(actionPtr actions.ActionWrapper, paramName string) (goNext bool) {
+	var action = actionPtr.Object()
 	var session = action.Session()
 	var username = session.StringValue("username")
 	if len(username) == 0 {

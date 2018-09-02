@@ -19,14 +19,15 @@ func Start() {
 
 	// 启动管理界面
 	TeaGo.NewServer().
-		Get("/", index.IndexAction{}).
-		GetPost("/login", login.IndexAction{}).
-		Get("/logout", logout.IndexAction{}).
-		Get("/dashboard", dashboard.IndexAction{}).
-		Get("/proxy", proxy.IndexAction{}).
-		Get("/log", log.IndexAction{}).
-		Get("/log/get", log.GetAction{}).
-		Get("/settings", settings.IndexAction{}).
+		AccessLog(false).
+		Get("/", new(index.IndexAction)).
+		GetPost("/login", new(login.IndexAction)).
+		Get("/logout", new(logout.IndexAction)).
+		Get("/dashboard", new(dashboard.IndexAction)).
+		Get("/proxy", new(proxy.IndexAction)).
+		Get("/log", new(log.IndexAction)).
+		Get("/log/get", new(log.GetAction)).
+		Get("/settings", new(settings.IndexAction)).
 
 		Session(sessions.NewFileSessionManager(86400, "gSeDQJJ67tAVdnguDAQdGmnDVrjFd2I9")).
 		Start()

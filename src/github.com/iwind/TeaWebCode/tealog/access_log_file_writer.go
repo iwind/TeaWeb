@@ -18,7 +18,7 @@ type AccessLogFileWriter struct {
 
 func (writer *AccessLogFileWriter) Init() {
 	if !filepath.IsAbs(writer.config.Path) {
-		writer.config.Path = Tea.Root + Tea.Ds + writer.config.Path
+		writer.config.Path = Tea.Root + Tea.DS + writer.config.Path
 	}
 
 	file, err := os.OpenFile(writer.config.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
@@ -38,7 +38,7 @@ func (writer *AccessLogFileWriter) Write(log *AccessLog) error {
 
 	format := writer.config.Format
 	if len(format) == 0 {
-		format = "${remoteAddr} - ${remoteUser} [${timeLocal}] \"${request}\" ${status} ${bodyBytesSent} \"${http.Referer}\" \"${http.UserAgent}\""
+		format = "${remoteAddr} - [${timeLocal}] \"${request}\" ${status} ${bodyBytesSent} \"${http.Referer}\" \"${http.UserAgent}\""
 	}
 
 	logString := log.Format(format)

@@ -2,9 +2,13 @@ package tealog
 
 import (
 	"github.com/iwind/TeaGo/logs"
-	"github.com/iwind/TeaWebCode/teadb"
-	"github.com/iwind/TeaGo/Tea"
-	"github.com/iwind/TeaWebCode/teautils"
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/iwind/TeaWebCode/teamongo"
+	"context"
+	"time"
+	"github.com/mongodb/mongo-go-driver/mongo/findopt"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/iwind/TeaGo/lists"
 )
 
 var (
@@ -12,8 +16,8 @@ var (
 )
 
 type AccessLogger struct {
-	queue chan *AccessLogItem
-	db    *teadb.DB
+	queue  chan *AccessLogItem
+	client *mongo.Client
 }
 
 type AccessLogItem struct {
@@ -23,14 +27,8 @@ type AccessLogItem struct {
 
 func NewAccessLogger() *AccessLogger {
 	logger := &AccessLogger{
-		queue: make(chan *AccessLogItem, 10240),
-	}
-
-	accessDB, err := teadb.NewDB(Tea.LogFile("accesslog"))
-	if err != nil {
-		logs.Error(err)
-	} else {
-		logger.db = accessDB
+		queue:  make(chan *AccessLogItem, 10240),
+		client: teamongo.SharedClient(),
 	}
 
 	go logger.wait()
@@ -41,24 +39,39 @@ func SharedLogger() *AccessLogger {
 	return accessLogger
 }
 
-func (logger *AccessLogger) Push(log *AccessLog, writers []AccessLogWriter) {
-	logger.queue <- &AccessLogItem{
+func (this *AccessLogger) Push(log *AccessLog, writers []AccessLogWriter) {
+	this.queue <- &AccessLogItem{
 		log:     log,
 		writers: writers,
 	}
 }
 
-func (logger *AccessLogger) wait() {
+func (this *AccessLogger) wait() {
+	lastId := int64(0)
+
 	for {
-		item := <-logger.queue
+		item := <-this.queue
 		log := item.log
+
+		newId := time.Now().UnixNano()
+		if newId == lastId {
+			time.Sleep(1 * time.Nanosecond)
+			newId = time.Now().UnixNano()
+		}
+		lastId = newId
+		log.Id = newId
 
 		// 分析日志
 		log.parse()
 
 		// 写入到本地数据库
-		if logger.db != nil {
-			logger.db.PutStruct("ACCESSLOG", log)
+		// @TODO 批量写入
+		if this.client != nil {
+			logs.Println("write access log to db")
+			this.client.
+				Database("teaweb").
+				Collection("accessLogs").
+				InsertOne(context.Background(), log)
 		}
 
 		// 输出日志到各个接口
@@ -70,14 +83,14 @@ func (logger *AccessLogger) wait() {
 	}
 }
 
-func (logger *AccessLogger) Close() {
-	if logger.db != nil {
-		logger.db.Close()
+func (this *AccessLogger) Close() {
+	if this.client != nil {
+		this.client.Disconnect(context.Background())
 	}
 }
 
-func (logger *AccessLogger) ReadLogs(fromId int64, size int64) []AccessLog {
-	if logger.db == nil {
+func (this *AccessLogger) ReadNewLogs(fromId int64, size int64) []AccessLog {
+	if this.client == nil {
 		return []AccessLog{}
 	}
 
@@ -86,25 +99,63 @@ func (logger *AccessLogger) ReadLogs(fromId int64, size int64) []AccessLog {
 	}
 
 	result := []AccessLog{}
-	records, err := logger.db.NewQuery("ACCESSLOG").
-		Reverse(true).
-		Limit(size).
-		FindAll()
-	if err != nil {
-		return result
+	coll := this.client.Database("teaweb").Collection("accessLogs")
+
+	filter := bson.NewDocument(bson.EC.SubDocument("id", bson.NewDocument(bson.EC.Int64("$gt", fromId))))
+
+	opts := []findopt.Find{}
+	isReverse := false
+	if fromId <= 0 {
+		opts = append(opts, findopt.Sort(bson.NewDocument(bson.EC.Int32("id", -1))))
+		opts = append(opts, findopt.Limit(100))
+		isReverse = true
+	} else {
+		opts = append(opts, findopt.Sort(bson.NewDocument(bson.EC.Int32("id", 1))))
+		opts = append(opts, findopt.Limit(size))
 	}
 
-	for _, record := range records {
+	cursor, err := coll.Find(context.Background(), filter, opts ...)
+	if err != nil {
+		logs.Error(err)
+		return []AccessLog{}
+	}
+
+	for cursor.Next(context.Background()) {
 		accessLog := AccessLog{}
-		err := teautils.MapToObjectJSON(record.Value, &accessLog)
+		err := cursor.Decode(&accessLog)
 		if err != nil {
 			logs.Error(err)
-			continue
+			return []AccessLog{}
 		}
-
-		accessLog.Id = record.Id()
 		result = append(result, accessLog)
 	}
 
+	if !isReverse {
+		lists.Reverse(result)
+	}
 	return result
+}
+
+func (this *AccessLogger) CountSuccessLogs() int64 {
+	coll := this.client.Database("teaweb").Collection("accessLogs")
+	filter := bson.NewDocument(bson.EC.SubDocument("status", bson.NewDocument(bson.EC.Int64("$lt", 400))))
+	count, err := coll.CountDocuments(context.Background(), filter)
+	if err != nil {
+		logs.Error(err)
+		return 0
+	}
+
+	return count
+}
+
+func (this *AccessLogger) CountFailLogs() int64 {
+	coll := this.client.Database("teaweb").Collection("accessLogs")
+	filter := bson.NewDocument(bson.EC.SubDocument("status", bson.NewDocument(bson.EC.Int64("$gte", 400))))
+	count, err := coll.CountDocuments(context.Background(), filter)
+	if err != nil {
+		logs.Error(err)
+		return 0
+	}
+
+	return count
 }

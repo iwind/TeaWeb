@@ -1,2 +1,101 @@
 {$layout}
 
+<div>
+   <div>
+       <div class="ui grid five column">
+           <div class="ui statistic column">
+               <div class="label">
+                   QPS
+               </div>
+               <div class="value">
+                   <span v-if="qps > 0">{{qps}}</span>
+                   <span v-if="qps == 0">-</span>
+               </div>
+               <div class="label unit">
+                   Req/s
+               </div>
+           </div>
+
+           <div class="ui statistic column">
+               <div class="label">
+                   共
+               </div>
+               <div class="value">
+                   {{total}}<span class="unit">k</span>
+               </div>
+               <div class="label unit">
+                   个请求
+               </div>
+           </div>
+
+           <div class="ui statistic column">
+               <div class="label">
+                   成功
+               </div>
+               <div class="value">
+                   {{countSuccess}}<span class="unit">k</span>
+               </div>
+               <div class="label unit">
+                   个请求
+               </div>
+           </div>
+
+           <div class="ui statistic column">
+               <div class="label">
+                   失败
+               </div>
+               <div class="value">
+                {{countFail}}<span class="unit">k</span>
+               </div>
+               <div class="label unit">
+                   个请求
+               </div>
+           </div>
+       </div>
+   </div>
+
+    <div v-if="logs.length > 0">
+        <table class="ui table log-table">
+            <tr v-for="(log, index) in logs" class="log-row">
+                <td><p v-on:click.prevent="showLog(index)" v-bind:class="{ error:log.status>=400 }">
+                        {{log.remoteAddr}} [{{log.timeLocal}}] <em>{{log.request}}</em> - 耗时:{{formatCost(log.requestTime)}} ms
+                        <i class="ui icon angle" v-bind:class="{ down:!log.isOpen, up:log.isOpen }"></i>
+                    </p>
+                    <table cellpadding="0" cellspacing="0" class="ui table selectable" v-if="log.isOpen">
+                        <tr>
+                            <td width="50%">请求ID(ID)：{{log.id}}</td>
+                            <td>请求描述(Request)：{{log.request}}</td>
+                        </tr>
+                        <tr>
+                            <td>请求URI(RequestURI)：{{log.requestURI}}</td>
+                            <td>请求方法(RequestMethod)：{{log.requestMethod}}</td>
+                        </tr>
+                        <tr>
+                            <td>终端地址(RemoteAddr:RemotePort)：{{log.remoteAddr}}:{{log.remotePort}}</td>
+                            <td>终端信息(UserAgent)：{{log.userAgent}}</td>
+                        </tr>
+                        <tr>
+                            <td v-if="log.extend.client.os != null">操作系统(OS)：{{log.extend.client.os.family}} {{log.extend.client.os.major}}</td>
+                            <td>浏览器(Browser)：{{log.extend.client.browser.family}} {{log.extend.client.browser.major}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">请求来源(Referer)：<span v-if="log.referer.length == 0">-</span><span v-if="log.referer.length > 0">{{log.referer}}</span></td>
+                        </tr>
+                        <tr>
+                            <td>协议(Proto)：{{log.proto}}</td>
+                            <td v-bind:class="{error:log.status>=400}">状态(StatusMessage)：<span v-if="log.statusMessage.length == 0">-</span><span v-if="log.statusMessage.length > 0">{{log.statusMessage}}</span></td>
+                        </tr>
+                        <tr>
+                            <td>文件类型(ContentType)：<span v-if="log.contentType.length == 0">-</span><span v-if="log.contentType.length > 0">{{log.contentType}}</span></td>
+                            <td>发送字节(BytesSent)：{{log.bytesSent}}</td>
+                        </tr>
+                        <tr>
+                            <td>ISO8601时间：{{log.timeISO8601}}</td>
+                            <td>本地时间：{{log.timeLocal}}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
