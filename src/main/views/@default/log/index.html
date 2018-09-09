@@ -5,24 +5,25 @@
        <div class="ui grid five column">
            <div class="ui statistic column">
                <div class="label">
-                   QPS
+                   实时QPS
                </div>
                <div class="value">
                    <span v-if="qps > 0">{{qps}}</span>
                    <span v-if="qps == 0">-</span>
                </div>
                <div class="label unit">
-                   Req/s
+                   个请求/秒
                </div>
            </div>
 
            <div class="ui statistic column">
                <div class="label">
-                   共
+                   24小时内共
                </div>
-               <div class="value">
-                   {{total}}<span class="unit">k</span>
+               <div class="value" v-if="total > 0">
+                   {{total}}<span class="unit">万</span>
                </div>
+               <div class="value" v-if="total == 0">-</div>
                <div class="label unit">
                    个请求
                </div>
@@ -30,11 +31,12 @@
 
            <div class="ui statistic column">
                <div class="label">
-                   成功
+                   24小时内共成功
                </div>
-               <div class="value">
-                   {{countSuccess}}<span class="unit">k</span>
+               <div class="value" v-if="countSuccess > 0">
+                   {{countSuccess}}<span class="unit">万</span>
                </div>
+               <div class="value" v-if="countSuccess == 0">-</div>
                <div class="label unit">
                    个请求
                </div>
@@ -42,11 +44,12 @@
 
            <div class="ui statistic column">
                <div class="label">
-                   失败
+                   24小时内共失败
                </div>
-               <div class="value">
-                {{countFail}}<span class="unit">k</span>
+               <div class="value" v-if="countFail > 0">
+                {{countFail}}<span class="unit">万</span>
                </div>
+               <div class="value" v-if="countFail == 0">-</div>
                <div class="label unit">
                    个请求
                </div>
@@ -71,15 +74,16 @@
                             <td>请求方法(RequestMethod)：{{log.requestMethod}}</td>
                         </tr>
                         <tr>
+                            <td>主机地址(Host)：{{log.host}}</td>
+                            <td>请求来源(Referer)：<span v-if="log.referer.length == 0">-</span><span v-if="log.referer.length > 0">{{log.referer}}</span></td>
+                        </tr>
+                        <tr>
                             <td>终端地址(RemoteAddr:RemotePort)：{{log.remoteAddr}}:{{log.remotePort}}</td>
                             <td>终端信息(UserAgent)：{{log.userAgent}}</td>
                         </tr>
                         <tr>
                             <td v-if="log.extend.client.os != null">操作系统(OS)：{{log.extend.client.os.family}} {{log.extend.client.os.major}}</td>
                             <td>浏览器(Browser)：{{log.extend.client.browser.family}} {{log.extend.client.browser.major}}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">请求来源(Referer)：<span v-if="log.referer.length == 0">-</span><span v-if="log.referer.length > 0">{{log.referer}}</span></td>
                         </tr>
                         <tr>
                             <td>协议(Proto)：{{log.proto}}</td>
@@ -91,7 +95,7 @@
                         </tr>
                         <tr>
                             <td>ISO8601时间：{{log.timeISO8601}}</td>
-                            <td>本地时间：{{log.timeLocal}}</td>
+                            <td>本地时间(TimeLocal)：{{log.timeLocal}}</td>
                         </tr>
                     </table>
                 </td>

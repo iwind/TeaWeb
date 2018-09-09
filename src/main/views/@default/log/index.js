@@ -11,15 +11,19 @@ Tea.context(function () {
     });
 
     this.loadLogs = function () {
+        var size = 100;
+        if (this.fromId > 0) {
+            size = 1000;
+        }
         Tea.action(".get")
             .params({
                 "fromId": this.fromId,
-                "size": 100
+                "size": size
             })
             .success(function (response) {
-                this.total = Math.ceil(response.data.total * 100 / 1000) / 100;
-                this.countSuccess = Math.ceil(response.data.countSuccess * 100 / 1000) / 100;
-                this.countFail = Math.ceil(response.data.countFail * 100 / 1000) / 100;
+                this.total = Math.ceil(response.data.total * 100 / 10000) / 100;
+                this.countSuccess = Math.ceil(response.data.countSuccess * 100 / 10000) / 100;
+                this.countFail = Math.ceil(response.data.countFail * 100 / 10000) / 100;
                 this.qps = response.data.qps;
 
                 this.logs = response.data.logs.concat(this.logs);

@@ -7,9 +7,9 @@ import (
 
 type IndexAction actions.Action
 
-func (action *IndexAction) Run(params struct {
+func (this *IndexAction) Run(params struct {
 	Auth *helpers.UserShouldAuth
 }) {
 	params.Auth.Logout()
-	action.RedirectURL("/")
+	this.RedirectURL("/")
 }

@@ -1,4 +1,4 @@
-package settings
+package log
 
 import (
 	"github.com/iwind/TeaGo/actions"
@@ -7,9 +7,9 @@ import (
 
 type IndexAction actions.Action
 
-func (action *IndexAction) Run(params struct {
+func (this *IndexAction) Run(params struct {
 	Auth *helpers.UserMustAuth
 }) {
-	action.Data["teaMenu"] = "settings"
-	action.Show()
+	this.Data["teaMenu"] = "log"
+	this.Show()
 }

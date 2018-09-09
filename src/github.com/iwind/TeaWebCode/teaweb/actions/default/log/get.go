@@ -22,8 +22,11 @@ func (this *GetAction) Run(params struct {
 	accessLogs := logger.ReadNewLogs(params.FromId, params.Size)
 	this.Data["logs"] = accessLogs
 
-	countSuccess := logger.CountSuccessLogs()
-	countFail := logger.CountFailLogs()
+	fromTime := time.Now().Add(-24 * time.Hour)
+	toTime := time.Now()
+
+	countSuccess := logger.CountSuccessLogs(fromTime.Unix(), toTime.Unix())
+	countFail := logger.CountFailLogs(fromTime.Unix(), toTime.Unix())
 	total := countSuccess + countFail
 	this.Data["countSuccess"] = countSuccess
 	this.Data["countFail"] = countFail

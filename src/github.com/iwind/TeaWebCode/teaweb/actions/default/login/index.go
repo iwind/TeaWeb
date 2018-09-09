@@ -8,11 +8,11 @@ import (
 
 type IndexAction actions.Action
 
-func (action *IndexAction) RunGet() {
-	action.Show()
+func (this *IndexAction) RunGet() {
+	this.Show()
 }
 
-func (action *IndexAction) RunPost(params struct {
+func (this *IndexAction) RunPost(params struct {
 	Username string
 	Password string
 	Must     *actions.Must
@@ -28,10 +28,10 @@ func (action *IndexAction) RunPost(params struct {
 	for _, user := range config.Users {
 		if user.Username == params.Username && user.Password == params.Password {
 			params.Auth.StoreUsername(user.Username)
-			action.Next("/", nil, "").Success()
+			this.Next("/", nil, "").Success()
 			return
 		}
 	}
 
-	action.FailMessage(400, "登录失败，请检查用户名密码")
+	this.Fail("登录失败，请检查用户名密码")
 }

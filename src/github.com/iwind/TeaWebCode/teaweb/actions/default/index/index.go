@@ -1,4 +1,4 @@
-package proxy
+package index
 
 import (
 	"github.com/iwind/TeaGo/actions"
@@ -7,9 +7,8 @@ import (
 
 type IndexAction actions.Action
 
-func (action *IndexAction) Run(params struct {
+func (this *IndexAction) Run(params struct {
 	Auth *helpers.UserMustAuth
 }) {
-	action.Data["teaMenu"] = "proxy"
-	action.Show()
+	this.RedirectURL("/dashboard")
 }

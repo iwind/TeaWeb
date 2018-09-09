@@ -29,7 +29,7 @@ type AccessLog struct {
 
 	TeaVersion      string              `var:"teaVersion" bson:"teaVersion" json:"teaVersion"`
 	RemoteAddr      string              `var:"remoteAddr" bson:"remoteAddr" json:"remoteAddr"`
-	RemotePort      string              `var:"remotePort" bson:"remotePort" json:"remotePort"`
+	RemotePort      int                 `var:"remotePort" bson:"remotePort" json:"remotePort"`
 	RemoteUser      string              `var:"remoteUser" bson:"remoteUser" json:"remoteUser"` // @TODO 应该为basic authentication的用户名
 	RequestURI      string              `var:"requestURI" bson:"requestURI" json:"requestURI"`
 	RequestPath     string              `var:"requestPath" bson:"requestPath" json:"requestPath"`
@@ -45,7 +45,7 @@ type AccessLog struct {
 	StatusMessage   string              `var:"statusMessage" bson:"statusMessage" json:"statusMessage"` // 响应的信息
 	TimeISO8601     string              `var:"timeISO8601" bson:"timeISO8601" json:"timeISO8601"`       // ISO 8601格式的本地时间，比如 2018-07-16T23:52:24.839+08:00
 	TimeLocal       string              `var:"timeLocal" bson:"timeLocal" json:"timeLocal"`             // 本地时间，比如 17/Jul/2018:09:52:24 +0800
-	Msec            string              `var:"msec" bson:"msec" json:"msec"`                            // 带有毫秒的时间，比如 1531756823.054
+	Msec            float64             `var:"msec" bson:"msec" json:"msec"`                            // 带有毫秒的时间，比如 1531756823.054
 	Host            string              `var:"host" bson:"host" json:"host"`
 	Referer         string              `var:"referer" bson:"referer" json:"referer"`
 	UserAgent       string              `var:"userAgent" bson:"userAgent" json:"userAgent"`
@@ -57,7 +57,7 @@ type AccessLog struct {
 	QueryString     string              `var:"queryString" bson:"queryString" json:"queryString"`          // 同 Args
 	Header          map[string][]string `bson:"header" json:"header"`                                      // 请求的头部信息，支持header_*和http_*，header_content_type, header_expires, http_content_type, http_user_agent
 	ServerName      string              `var:"serverName" bson:"serverName" json:"serverName"`             // @TODO
-	ServerPort      string              `var:"serverPort" bson:"serverPort" json:"serverPort"`             // @TODO
+	ServerPort      int                 `var:"serverPort" bson:"serverPort" json:"serverPort"`             // @TODO
 	ServerProtocol  string              `var:"serverProtocol" bson:"serverProtocol" json:"serverProtocol"` // @TODO
 
 	// 代理相关

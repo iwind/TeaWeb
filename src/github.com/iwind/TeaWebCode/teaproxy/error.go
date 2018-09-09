@@ -3,6 +3,6 @@ package teaproxy
 type RedirectError struct {
 }
 
-func (error *RedirectError) Error() string {
+func (this *RedirectError) Error() string {
 	return ""
 }

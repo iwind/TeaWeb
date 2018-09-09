@@ -1,4 +1,4 @@
-package index
+package settings
 
 import (
 	"github.com/iwind/TeaGo/actions"
@@ -7,8 +7,9 @@ import (
 
 type IndexAction actions.Action
 
-func (action *IndexAction) Run(params struct {
+func (this *IndexAction) Run(params struct {
 	Auth *helpers.UserMustAuth
 }) {
-	action.RedirectURL("/dashboard")
+	this.Data["teaMenu"] = "settings"
+	this.Show()
 }

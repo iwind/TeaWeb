@@ -1,1 +1,22 @@
 {$layout}
+
+<p class="ui message" v-if="servers.length == 0">暂时还没有服务。</p>
+
+<table class="ui table selectable" v-if="servers.length > 0">
+    <thead>
+        <tr>
+            <th>域名</th>
+            <th>访问地址</th>
+            <th>后端地址</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tr v-for="server in servers">
+        <td>{{server.config.name}}</td>
+        <td>{{server.config.listen}}</td>
+        <td>{{server.config.backends}}</td>
+        <td>
+            <a v-bind:href="'/proxy/update?filename=' + server.filename">修改</a> &nbsp; <a href="" data-tea-action=".delete" v-bind:data-filename="server.filename" data-tea-confirm="您确定要删除此服务吗？">删除</a>
+        </td>
+    </tr>
+</table>

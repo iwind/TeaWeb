@@ -7,9 +7,9 @@ import (
 
 // 参考 http://nginx.org/en/docs/http/ngx_http_log_module.html#access_log
 type AccessLogConfig struct {
-	Target string                 `yaml:"target"`
-	Off    bool                   `yaml:"off"`
-	Config map[string]interface{} `yaml:"config"`
+	Target string                 `yaml:"target" json:"target"`
+	Off    bool                   `yaml:"off" json:"off"`
+	Config map[string]interface{} `yaml:"config" json:"config"`
 }
 
 func (config *AccessLogConfig) Validate() {

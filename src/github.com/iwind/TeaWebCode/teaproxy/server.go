@@ -5,7 +5,6 @@ import (
 	"time"
 	"github.com/iwind/TeaWebCode/tealog"
 	"github.com/iwind/TeaWebCode/teaconst"
-	"fmt"
 	"github.com/iwind/TeaGo/utils/string"
 	"path/filepath"
 	"github.com/iwind/TeaGo/Tea"
@@ -15,6 +14,7 @@ import (
 	"context"
 	"net"
 	"net/url"
+	"github.com/iwind/TeaGo/types"
 )
 
 type Server struct {
@@ -29,7 +29,7 @@ func NewServer(config *teaconfigs.ServerConfig) *Server {
 	}
 }
 
-func (server *Server) handle(writer http.ResponseWriter, req *http.Request) {
+func (this *Server) handle(writer http.ResponseWriter, req *http.Request) {
 	// 初始化日志
 	now := time.Now()
 	log := &tealog.AccessLog{
@@ -48,7 +48,7 @@ func (server *Server) handle(writer http.ResponseWriter, req *http.Request) {
 		Header:        req.Header,
 		TimeISO8601:   now.Format("2006-01-02T15:04:05.000Z07:00"),
 		TimeLocal:     now.Format("2/Jan/2006:15:04:05 -0700"),
-		Msec:          fmt.Sprintf("%d.%d", now.Unix(), now.Nanosecond()/1000000),
+		Msec:          float64(now.Unix()) + float64(now.Nanosecond())/1000000000,
 	}
 
 	// 写日志
@@ -58,9 +58,9 @@ func (server *Server) handle(writer http.ResponseWriter, req *http.Request) {
 
 		// 服务器日志
 		if len(writers) == 0 {
-			if len(server.config.AccessLog) > 0 {
-				for _, accessLogConfig := range server.config.AccessLog {
-					writer, found := server.globalWriters[accessLogConfig]
+			if len(this.config.AccessLog) > 0 {
+				for _, accessLogConfig := range this.config.AccessLog {
+					writer, found := this.globalWriters[accessLogConfig]
 					if found {
 						writers = append(writers, writer)
 					} else {
@@ -68,7 +68,7 @@ func (server *Server) handle(writer http.ResponseWriter, req *http.Request) {
 						if err != nil {
 							logs.Error(err)
 						} else {
-							server.globalWriters[accessLogConfig] = writer
+							this.globalWriters[accessLogConfig] = writer
 							writers = append(writers, writer)
 						}
 					}
@@ -87,31 +87,31 @@ func (server *Server) handle(writer http.ResponseWriter, req *http.Request) {
 
 	// 主机名 @TODO 需要分析 *.xxx.com
 	request := NewRequest(req)
-	host := server.config.Name[0]
+	host := this.config.Name[0]
 	request.SetVariable("host", host)
 
 	log.RemoteAddr = request.RemoteAddr()
-	log.RemotePort = request.RemotePort()
+	log.RemotePort = types.Int(request.RemotePort())
 	if req.URL.User != nil {
 		log.RemoteUser = req.URL.User.Username()
 	}
 
 	// 当前Location定制的特性
 	var cacheKey = ""
-	if len(server.config.Locations) > 0 {
+	if len(this.config.Locations) > 0 {
 		// @TODO 提升性能
 		// @TODO locations必须是有顺序的
-		for _, location := range server.config.Locations {
+		for _, location := range this.config.Locations {
 			if location.Match(request.URL().Path) {
 				// @TODO 日志
-				logs.Println("accessLog:", location.AccessLog)
+				//logs.Println("accessLog:", location.AccessLog)
 				if len(location.AccessLog) > 0 {
 
 				}
 
 				// 缓存
 				if location.Cache != nil {
-					cacheKey = stringutil.Md5(server.parseVariables(location.Cache.Key, request.Variables()))
+					cacheKey = stringutil.Md5(this.parseVariables(location.Cache.Key, request.Variables()))
 					cachePath := location.Cache.Path
 					if len(cachePath) == 0 {
 						cachePath = "cache"
@@ -131,14 +131,14 @@ func (server *Server) handle(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	// @TODO 检查是否为代理
-	if len(server.config.Backends) > 0 {
-		server.proxyPass(writer, request, log)
+	if len(this.config.Backends) > 0 {
+		this.proxyPass(writer, request, log)
 	}
 }
 
-func (server *Server) proxyPass(writer http.ResponseWriter, request *Request, log *tealog.AccessLog) {
+func (this *Server) proxyPass(writer http.ResponseWriter, request *Request, log *tealog.AccessLog) {
 	// 检查后端
-	if len(server.config.Backends) == 0 {
+	if len(this.config.Backends) == 0 {
 		http.Error(writer, "no backends available", http.StatusInternalServerError)
 		log.Status = http.StatusInternalServerError
 		log.StatusMessage = "no backends available"
@@ -147,13 +147,13 @@ func (server *Server) proxyPass(writer http.ResponseWriter, request *Request, lo
 
 	//@TODO 根据一定算法选择一个Backend
 	backend := &teaconfigs.ServerBackendConfig{}
-	for _, backendConfig := range server.config.Backends {
+	for _, backendConfig := range this.config.Backends {
 		backend = backendConfig
 		break
 	}
 
 	// 主机名 @TODO 需要分析 *.xxx.com
-	host := server.config.Name[0]
+	host := this.config.Name[0]
 
 	// 设置代理相关的头部
 	request.Header().Set("X-Real-IP", request.RemoteAddr())
@@ -267,7 +267,7 @@ func (server *Server) proxyPass(writer http.ResponseWriter, request *Request, lo
 	defer resp.Body.Close()
 }
 
-func (server *Server) parseVariables(s string, variables map[string]string) string {
+func (this *Server) parseVariables(s string, variables map[string]string) string {
 	return variablesReg.ReplaceAllStringFunc(s, func(match string) string {
 		value, found := variables[match[2:len(match)-1]]
 		if found {

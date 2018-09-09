@@ -54,64 +54,64 @@ func NewRequest(req *http.Request) *Request {
 	return request
 }
 
-func (request *Request) HttpRequest() *http.Request {
-	return request.req
+func (this *Request) HttpRequest() *http.Request {
+	return this.req
 }
 
-func (request *Request) SetVariable(name string, value string) {
-	request.variables[name] = value
+func (this *Request) SetVariable(name string, value string) {
+	this.variables[name] = value
 }
 
-func (request *Request) Variables() map[string]string {
-	return request.variables
+func (this *Request) Variables() map[string]string {
+	return this.variables
 }
 
-func (request *Request) RemoteAddr() string {
-	return request.remoteAddr
+func (this *Request) RemoteAddr() string {
+	return this.remoteAddr
 }
 
-func (request *Request) RemotePort() string {
-	return request.remotePort
+func (this *Request) RemotePort() string {
+	return this.remotePort
 }
 
-func (request *Request) URL() *url.URL {
-	return request.req.URL
+func (this *Request) URL() *url.URL {
+	return this.req.URL
 }
 
-func (request *Request) Header() http.Header {
-	return request.req.Header
+func (this *Request) Header() http.Header {
+	return this.req.Header
 }
 
-func (request *Request) Host() string {
-	return request.req.Host
+func (this *Request) Host() string {
+	return this.req.Host
 }
 
-func (request *Request) SetHost(host string) {
-	request.req.Host = host
+func (this *Request) SetHost(host string) {
+	this.req.Host = host
 }
 
-func (request *Request) Proto() string {
-	return request.req.Proto
+func (this *Request) Proto() string {
+	return this.req.Proto
 }
 
-func (request *Request) SetRequestURI(requestURI string) {
-	request.req.RequestURI = requestURI
+func (this *Request) SetRequestURI(requestURI string) {
+	this.req.RequestURI = requestURI
 }
 
-func (request *Request) SetCacheFile(cacheFile string) {
-	request.cacheFile = cacheFile
+func (this *Request) SetCacheFile(cacheFile string) {
+	this.cacheFile = cacheFile
 }
 
-func (request *Request) CacheFile() string {
-	return request.cacheFile
+func (this *Request) CacheFile() string {
+	return this.cacheFile
 }
 
-func (request *Request) ShouldCache() bool {
-	return len(request.CacheFile()) > 0
+func (this *Request) ShouldCache() bool {
+	return len(this.CacheFile()) > 0
 }
 
-func (request *Request) WriteCache(resp *http.Response) {
-	if len(request.cacheFile) == 0 {
+func (this *Request) WriteCache(resp *http.Response) {
+	if len(this.cacheFile) == 0 {
 		return
 	}
 
@@ -126,10 +126,10 @@ func (request *Request) WriteCache(resp *http.Response) {
 	}
 
 	// 加并发锁
-	request.cacheMutex.Lock()
-	defer request.cacheMutex.Unlock()
+	this.cacheMutex.Lock()
+	defer this.cacheMutex.Unlock()
 
-	cacheDir := filepath.Dir(request.CacheFile())
+	cacheDir := filepath.Dir(this.CacheFile())
 	_, err = os.Stat(cacheDir)
 	if err != nil {
 		err = os.MkdirAll(cacheDir, 0766)
@@ -139,7 +139,7 @@ func (request *Request) WriteCache(resp *http.Response) {
 		}
 	}
 
-	fp, err := os.OpenFile(request.CacheFile(), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+	fp, err := os.OpenFile(this.CacheFile(), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 	if err != nil {
 		logs.Error(err)
 		return
@@ -152,7 +152,7 @@ func (request *Request) WriteCache(resp *http.Response) {
 }
 
 // 从缓存中读取响应数据
-func (request *Request) ReadCache(writer http.ResponseWriter, cacheFile string) bool {
+func (this *Request) ReadCache(writer http.ResponseWriter, cacheFile string) bool {
 	// @TODO 支持ETAG识别304 not modified
 	// @TODO 支持内存缓存
 

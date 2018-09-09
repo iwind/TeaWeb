@@ -14,42 +14,52 @@ type Listener struct {
 	config  *teaconfigs.ListenerConfig
 	servers map[*teaconfigs.ServerConfig]*Server
 	locker  *sync.Mutex
+	server  *http.Server
 }
 
 func NewListener(config *teaconfigs.ListenerConfig) *Listener {
-	return &Listener{
+	listener := &Listener{
 		config:  config,
 		servers: map[*teaconfigs.ServerConfig]*Server{},
 		locker:  &sync.Mutex{},
 	}
+	LISTENERS = append(LISTENERS, listener)
+	return listener
 }
 
-func (listener *Listener) Start() {
+func (this *Listener) Start() {
 	httpHandler := http.NewServeMux()
 	httpHandler.HandleFunc("/", func(writer http.ResponseWriter, req *http.Request) {
 		// @TODO 检查域名，通过域名取得对应的Server
-		config := listener.config.Servers[0]
-		server, found := listener.servers[config]
+		config := this.config.Servers[0]
+		server, found := this.servers[config]
 		if !found {
 			server = NewServer(config)
-			listener.locker.Lock()
-			listener.servers[config] = server
-			listener.locker.Unlock()
+			this.locker.Lock()
+			this.servers[config] = server
+			this.locker.Unlock()
 		}
 
 		server.handle(writer, req)
 	})
 
-	logs.Println("start listener on", listener.config.Address)
+	logs.Println("start listener on", this.config.Address)
 	var err error
-	if listener.config.SSL != nil && listener.config.SSL.On {
-		err = http.ListenAndServeTLS(listener.config.Address, listener.config.SSL.Certificate, listener.config.SSL.CertificateKey, httpHandler)
+
+	this.server = &http.Server{Addr: this.config.Address, Handler: httpHandler}
+
+	if this.config.SSL != nil && this.config.SSL.On {
+		err = this.server.ListenAndServeTLS(this.config.SSL.Certificate, this.config.SSL.CertificateKey)
 	} else {
-		err = http.ListenAndServe(listener.config.Address, httpHandler)
+		err = this.server.ListenAndServe()
 	}
 
 	if err != nil {
 		logs.Error(err)
 		return
 	}
+}
+
+func (this *Listener) Shutdown() error {
+	return this.server.Shutdown(nil)
 }

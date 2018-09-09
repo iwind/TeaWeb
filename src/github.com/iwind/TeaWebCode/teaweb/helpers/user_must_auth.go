@@ -8,16 +8,16 @@ type UserMustAuth struct {
 	Username string
 }
 
-func (auth *UserMustAuth) BeforeAction(actionPtr actions.ActionWrapper, paramName string) (goNext bool) {
+func (this *UserMustAuth) BeforeAction(actionPtr actions.ActionWrapper, paramName string) (goNext bool) {
 	var action = actionPtr.Object()
 	var session = action.Session()
 	var username = session.StringValue("username")
 	if len(username) == 0 {
-		auth.login(action)
+		this.login(action)
 		return false
 	}
 
-	auth.Username = username
+	this.Username = username
 
 	// 初始化内置方法
 	action.ViewFunc("teaTitle", func() string {
@@ -52,6 +52,6 @@ func (auth *UserMustAuth) BeforeAction(actionPtr actions.ActionWrapper, paramNam
 	return true
 }
 
-func (auth *UserMustAuth) login(action *actions.ActionObject) {
+func (this *UserMustAuth) login(action *actions.ActionObject) {
 	action.RedirectURL("/login")
 }

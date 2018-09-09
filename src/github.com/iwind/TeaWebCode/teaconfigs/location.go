@@ -8,16 +8,16 @@ import (
 
 // 路径配置
 type LocationConfig struct {
-	Path    string `yaml:"path"`
-	Pattern string `yaml:"pattern"`
+	Path    string `yaml:"path" json:"path"`
+	Pattern string `yaml:"pattern" json:"pattern"`
 	reg     *regexp.Regexp
 
-	Async   bool         `yaml:"async"`   // @TODO
-	Notify  []string     `yaml:"notify"`  // @TODO
-	LogOnly bool         `yaml:"logOnly"` // @TODO
-	Cache   *CacheConfig `yaml:"cache"`   // @TODO
-	Root    string       `yaml:"root"`    // @TODO
-	Charset string       `yaml:"charset"` // @TODO
+	Async   bool         `yaml:"async" json:"async"`     // @TODO
+	Notify  []string     `yaml:"notify" json:"notify"`   // @TODO
+	LogOnly bool         `yaml:"logOnly" json:"logOnly"` // @TODO
+	Cache   *CacheConfig `yaml:"cache" json:"cache"`     // @TODO
+	Root    string       `yaml:"root" json:"root"`       // @TODO
+	Charset string       `yaml:"charset" json:"charset"` // @TODO
 
 	// 日志
 	AccessLog []*AccessLogConfig // @TODO
@@ -26,8 +26,8 @@ type LocationConfig struct {
 	Headers []HeaderConfig // @TODO
 
 	// 参考：http://nginx.org/en/docs/http/ngx_http_access_module.html
-	Allow []string `yaml:"allow"` //@TODO
-	Deny  []string `yaml:"deny"`  //@TODO
+	Allow []string `yaml:"allow" json:"allow"` //@TODO
+	Deny  []string `yaml:"deny" json:"deny"`   //@TODO
 }
 
 func (config *LocationConfig) Validate() error {
