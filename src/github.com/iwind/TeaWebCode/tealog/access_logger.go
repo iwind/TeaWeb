@@ -16,9 +16,15 @@ var (
 	accessLogger = NewAccessLogger()
 )
 
+// 访问日志记录器
 type AccessLogger struct {
 	queue  chan *AccessLogItem
 	client *mongo.Client
+
+	timestamp       int64
+	qps             int
+	outputBandWidth int64
+	inputBandWidth  int64
 }
 
 type AccessLogItem struct {
@@ -62,9 +68,24 @@ func (this *AccessLogger) wait() {
 	}
 	logs.Println("start log id:", newId)
 
+	timestamp := time.Now().Unix()
+
 	for {
 		item := <-this.queue
 		log := item.log
+
+		// 计算QPS和BandWidth
+		this.timestamp = log.Timestamp
+		if log.Timestamp == timestamp {
+			this.qps ++
+			this.inputBandWidth += log.RequestLength
+			this.outputBandWidth += log.BytesSent
+		} else {
+			this.qps = 1
+			this.inputBandWidth = log.RequestLength
+			this.outputBandWidth = log.BytesSent
+			timestamp = log.Timestamp
+		}
 
 		newId ++
 		log.Id = newId
@@ -172,4 +193,25 @@ func (this *AccessLogger) CountFailLogs(fromTimestamp int64, toTimestamp int64) 
 	}
 
 	return count
+}
+
+func (this *AccessLogger) QPS() int {
+	if time.Now().Unix()-this.timestamp < 2 {
+		return this.qps
+	}
+	return 0
+}
+
+func (this *AccessLogger) InputBandWidth() int64 {
+	if time.Now().Unix()-this.timestamp < 2 {
+		return this.inputBandWidth
+	}
+	return 0
+}
+
+func (this *AccessLogger) OutputBandWidth() int64 {
+	if time.Now().Unix()-this.timestamp < 2 {
+		return this.outputBandWidth
+	}
+	return 0
 }

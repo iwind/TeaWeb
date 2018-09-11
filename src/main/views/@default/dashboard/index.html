@@ -1,5 +1,10 @@
 {$layout}
 
-<div>
-    124
+<div class="ui grid three column widgets-box">
+    <div class="column" v-for="widget in widgets">
+        <div class="title">{{widget.title}}</div>
+        <div class="widget-box">
+            <iframe :src="widget.url" frameborder="0" width="100%" :height="widgetHeight"></iframe>
+        </div>
+    </div>
 </div>

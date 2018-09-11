@@ -102,8 +102,7 @@ func (this *AddAction) RunPost(params struct {
 	// 重启
 	go func() {
 		time.Sleep(1 * time.Second)
-		teaproxy.Shutdown()
-		teaproxy.Start()
+		teaproxy.Restart()
 	}()
 
 	this.Next("/proxy", nil, "").Success("服务保存成功")

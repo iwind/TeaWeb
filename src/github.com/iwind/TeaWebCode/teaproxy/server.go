@@ -49,6 +49,7 @@ func (this *Server) handle(writer http.ResponseWriter, req *http.Request) {
 		TimeISO8601:   now.Format("2006-01-02T15:04:05.000Z07:00"),
 		TimeLocal:     now.Format("2/Jan/2006:15:04:05 -0700"),
 		Msec:          float64(now.Unix()) + float64(now.Nanosecond())/1000000000,
+		Timestamp:     now.Unix(),
 	}
 
 	// 写日志

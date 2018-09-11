@@ -16,6 +16,9 @@ src/github.com/pquerna
 src/github.com/stretchr
 src/github.com/syndtr
 src/github.com/ua-parser
+src/github.com/go-restit
+src/github.com/go-ini
+src/github.com/yookoala
 src/golang.org
 src/gopkg.in
 src/main/tmp/*

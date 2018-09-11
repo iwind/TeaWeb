@@ -1,0 +1,20 @@
+.widgets-box {
+    padding: 10em;
+}
+
+.widgets-box .column {
+
+}
+
+.widgets-box .column .title {
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.widgets-box .column .widget-box  {
+    margin-top: 6px;
+    border: 1px #ccc solid;
+}
+
+.widgets-box .widget-box frame {
+}

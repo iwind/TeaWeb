@@ -48,6 +48,7 @@ func (this *ServerConfig) AddBackend(config *ServerBackendConfig) {
 	this.Backends = append(this.Backends, config)
 }
 
+// 校验配置
 func (this *ServerConfig) Validate() error {
 	// backends
 	for _, backend := range this.Backends {
@@ -68,6 +69,7 @@ func (this *ServerConfig) Validate() error {
 	return nil
 }
 
+// 将配置写入文件
 func (this *ServerConfig) WriteToFile(path string) error {
 	writer, err := files.NewWriter(path)
 	if err != nil {

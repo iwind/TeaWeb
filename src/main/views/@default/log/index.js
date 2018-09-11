@@ -1,13 +1,54 @@
 Tea.context(function () {
+    var that = this;
+
     this.logs = [];
+    this.sourceLogs = [];
     this.fromId = -1;
     this.total = 0;
     this.countSuccess = 0;
     this.countFail = 0;
     this.qps = 0;
 
+    // 搜索相关
+    this.searchBoxVisible = Boolean(teaweb.get("searchBoxVisible"));
+    this.searchIp = teaweb.get("searchIp");
+    this.searchDomain = teaweb.get("searchDomain");
+    this.searchOs = teaweb.get("searchOs");
+    this.searchBrowser = teaweb.get("searchBrowser");
+    this.searchMinCost = teaweb.get("searchMinCost");
+    this.searchKeyword = teaweb.get("searchKeyword");
+
     Tea.delay(function () {
         this.loadLogs();
+
+        var vm = Tea.Vue;
+        vm.$watch("searchIp", function (value) {
+            that.filterLogs()
+        });
+        vm.$watch("searchDomain", function (value) {
+            that.filterLogs()
+        });
+        vm.$watch("searchOs", function (value) {
+            that.filterLogs()
+        });
+        vm.$watch("searchBrowser", function (value) {
+            that.filterLogs()
+        });
+        vm.$watch("searchMinCost", function (value) {
+            that.filterLogs()
+        });
+        vm.$watch("searchKeyword", function (value) {
+            that.filterLogs()
+        });
+    });
+
+    window.addEventListener("unload", function () {
+        teaweb.set("searchIp", that.searchIp);
+        teaweb.set("searchDomain", that.searchDomain);
+        teaweb.set("searchOs", that.searchOs);
+        teaweb.set("searchBrowser", that.searchBrowser);
+        teaweb.set("searchMinCost", that.searchMinCost);
+        teaweb.set("searchKeyword", that.searchKeyword);
     });
 
     this.loadLogs = function () {
@@ -26,20 +67,22 @@ Tea.context(function () {
                 this.countFail = Math.ceil(response.data.countFail * 100 / 10000) / 100;
                 this.qps = response.data.qps;
 
-                this.logs = response.data.logs.concat(this.logs);
-                this.logs.$each(function (_, v) {
+                this.sourceLogs = response.data.logs.concat(this.sourceLogs);
+                this.sourceLogs.$each(function (_, v) {
                     if (typeof(v["isOpen"]) === "undefined") {
                         v.isOpen = false;
                     }
                 });
 
-                if (this.logs.length > 0) {
-                    this.fromId = this.logs.$first().id;
+                if (this.sourceLogs.length > 0) {
+                    this.fromId = this.sourceLogs.$first().id;
 
-                    if (this.logs.length > 100) {
-                        this.logs = this.logs.slice(0, 100);
+                    if (this.sourceLogs.length > 100) {
+                        this.sourceLogs = this.sourceLogs.slice(0, 100);
                     }
                 }
+
+                this.filterLogs();
             })
             .done(function () {
                 // 每1秒刷新一次
@@ -67,5 +110,93 @@ Tea.context(function () {
         }
 
         return pieces[0] + "." + pieces[1].substr(0, 3);
-    }
+    };
+
+    this.showSearchBox = function () {
+        this.searchBoxVisible = true;
+        teaweb.set("searchBoxVisible", true);
+    };
+
+    this.hideSearchBox = function () {
+        this.searchBoxVisible = false;
+        teaweb.set("searchBoxVisible", false);
+    };
+
+    this.hasSearchConditions = function () {
+        var has = false;
+       Tea.element(".search-box form input").each(function (k, v) {
+           if (v.value.trim().length > 0) {
+               has = true;
+           }
+       });
+       return has;
+    };
+
+    this.resetSearchBox = function () {
+        that.searchIp = "";
+        that.searchDomain = "";
+        that.searchOs = "";
+        that.searchBrowser = "";
+        that.searchMinCost = "";
+        that.searchKeyword = "";
+    };
+
+    this.filterLogs = function () {
+        this.logs = this.sourceLogs.$filter(function (_, log) {
+            if (!teaweb.match(log.remoteAddr, that.searchIp)) {
+                return false;
+            }
+
+            if (!teaweb.match(log.host, that.searchDomain)) {
+                return false;
+            }
+
+            if (typeof(log.extend.client.os.family) != "undefined" && !teaweb.match(log.extend.client.os.family, that.searchOs)) {
+                return false;
+            }
+
+            if (typeof(log.extend.client.browser.family) != "undefined" && !teaweb.match(log.extend.client.browser.family, that.searchBrowser)) {
+                return false;
+            }
+
+            if (that.searchMinCost.length > 0) {
+                var cost = parseFloat(that.searchMinCost);
+                if (isNaN(cost) || log.requestTime < cost * 0.001) {
+                    return false;
+                }
+            }
+
+            if (that.searchKeyword != null && that.searchKeyword.length > 0) {
+                var values = [
+                    log.requestPath,
+                    log.requestURI,
+                    log.userAgent,
+                    log.remoteAddr,
+                    log.requestMethod,
+                    log.statusMessage,
+                    log.timeLocal,
+                    log.timeISO9601,
+                    log.host,
+                    log.request,
+                    log.contentType,
+                    JSON.stringify(log.extend)
+                ];
+
+                var found = false;
+                for (var i = 0; i < values.length; i ++) {
+                    if (teaweb.match(values[i], that.searchKeyword)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    };
+
 });

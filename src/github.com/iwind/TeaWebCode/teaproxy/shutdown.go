@@ -7,3 +7,8 @@ func Shutdown() {
 
 	LISTENERS = []*Listener{}
 }
+
+func Restart() {
+	Shutdown()
+	Start()
+}

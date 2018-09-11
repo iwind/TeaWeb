@@ -36,6 +36,7 @@ func Start() {
 
 		Get("/log", new(log.IndexAction)).
 		Get("/log/get", new(log.GetAction)).
+		GetPost("/log/widget", new(log.WidgetAction)).
 		Get("/settings", new(settings.IndexAction)).
 
 		Session(sessions.NewFileSessionManager(86400, "gSeDQJJ67tAVdnguDAQdGmnDVrjFd2I9")).

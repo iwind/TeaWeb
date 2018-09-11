@@ -57,6 +57,41 @@
        </div>
    </div>
 
+    <div class="search-box" v-show="!searchBoxVisible">
+        <button class="ui button" type="button" v-on:click="showSearchBox()">筛选 &nbsp; <i class="ui icon dot circle outline" v-if="hasSearchConditions()"></i> </button>
+    </div>
+
+    <div class="search-box" v-show="searchBoxVisible">
+        <a href="" v-on:click.prevent="hideSearchBox()" class="close-btn" title="收起窗口"><i class="ui icon angle up circular"></i></a>
+        <a href="" v-on:click.prevent="resetSearchBox()" class="clean-btn" v-if="hasSearchConditions()" title="重置条件"><i class="ui icon undo circular"></i></a>
+        <form class="ui form">
+            <div class="ui grid three column">
+               <div class="ui field column">
+                   终端IP：<input type="text" placeholder="x.x.x.x" v-model="searchIp"/>
+               </div>
+                <div class="ui field column">
+                    域名：<input type="text" name="domain" placeholder="比如 xxx.com" v-model="searchDomain"/>
+                </div>
+                <div class="ui field column">
+                    终端OS：<input type="text" name="os" placeholder="比如 windows" v-model="searchOs"/>
+                </div>
+                <div class="ui field column">
+                    终端浏览器：<input type="text" name="browser" placeholder="比如 chrome" v-model="searchBrowser"/>
+                </div>
+                <div class="ui field column">
+                    耗时大于：
+                    <div class="ui right labeled input ">
+                        <input type="text" name="minCost" placeholder="比如 10" v-model="searchMinCost"/>
+                        <div class="ui label">ms</div>
+                    </div>
+                </div>
+                <div class="ui field column">
+                    关键词：<input type="text" name="keyword" placeholder="比如 /user/profile" v-model="searchKeyword"/>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div v-if="logs.length > 0">
         <table class="ui table log-table">
             <tr v-for="(log, index) in logs" class="log-row">

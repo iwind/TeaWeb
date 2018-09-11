@@ -46,6 +46,7 @@ type AccessLog struct {
 	TimeISO8601     string              `var:"timeISO8601" bson:"timeISO8601" json:"timeISO8601"`       // ISO 8601格式的本地时间，比如 2018-07-16T23:52:24.839+08:00
 	TimeLocal       string              `var:"timeLocal" bson:"timeLocal" json:"timeLocal"`             // 本地时间，比如 17/Jul/2018:09:52:24 +0800
 	Msec            float64             `var:"msec" bson:"msec" json:"msec"`                            // 带有毫秒的时间，比如 1531756823.054
+	Timestamp       int64               `var:"timestamp" bson:"timestamp" json:"timestamp"`             // unix时间戳
 	Host            string              `var:"host" bson:"host" json:"host"`
 	Referer         string              `var:"referer" bson:"referer" json:"referer"`
 	UserAgent       string              `var:"userAgent" bson:"userAgent" json:"userAgent"`

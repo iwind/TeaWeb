@@ -28,6 +28,8 @@ type LocationConfig struct {
 	// 参考：http://nginx.org/en/docs/http/ngx_http_access_module.html
 	Allow []string `yaml:"allow" json:"allow"` //@TODO
 	Deny  []string `yaml:"deny" json:"deny"`   //@TODO
+
+	Rewrite []*Rewrite // 重写规则 @TODO
 }
 
 func (config *LocationConfig) Validate() error {
