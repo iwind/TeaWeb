@@ -19,7 +19,6 @@ type UpdateAction struct {
 
 func (this *UpdateAction) Run(params struct {
 	Filename string
-	Auth     *helpers.UserMustAuth
 }) {
 	if len(params.Filename) == 0 {
 		this.Fail("配置文件读取失败")

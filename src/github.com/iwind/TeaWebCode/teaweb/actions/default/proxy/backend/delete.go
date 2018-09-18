@@ -2,7 +2,6 @@ package backend
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaGo/lists"
 	"github.com/iwind/TeaWebCode/teaproxy"
@@ -11,7 +10,6 @@ import (
 type DeleteAction actions.Action
 
 func (this *DeleteAction) Run(params struct {
-	Auth     *helpers.UserMustAuth
 	Filename string
 	Index    int
 }) {

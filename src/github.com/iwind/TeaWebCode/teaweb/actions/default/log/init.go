@@ -3,6 +3,7 @@ package log
 import (
 	"github.com/iwind/TeaWebCode/teaplugin"
 	"github.com/iwind/TeaGo"
+	"github.com/iwind/TeaWebCode/teaweb/helpers"
 )
 
 func init() {
@@ -19,12 +20,12 @@ func init() {
 
 	TeaGo.BeforeStart(func(server *TeaGo.Server) {
 		server.
-			Module("").
+			EndAll().
+			Helper(new(helpers.UserMustAuth)).
 			Prefix("/log").
 			Get("", new(IndexAction)).
 			Get("/get", new(GetAction)).
 			GetPost("/widget", new(WidgetAction)).
-			Prefix("").
-			End()
+			EndAll()
 	})
 }

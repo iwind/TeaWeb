@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaGo/Tea"
@@ -13,13 +12,11 @@ type AddAction struct {
 }
 
 func (this *AddAction) Run(params struct {
-	Auth *helpers.UserMustAuth
 }) {
 	this.Show()
 }
 
 func (this *AddAction) RunPost(params struct {
-	Auth        *helpers.UserMustAuth
 	Description string
 	Must        *actions.Must
 }) {

@@ -2,15 +2,13 @@ package ssl
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
-	"github.com/iwind/TeaWebCode/teaconfigs"
+		"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaWebCode/teaproxy"
 )
 
 type OnAction actions.Action
 
 func (this *OnAction) Run(params struct {
-	Auth     *helpers.UserMustAuth
 	Filename string
 }) {
 	server, err := teaconfigs.NewServerConfigFromFile(params.Filename)

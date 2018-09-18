@@ -2,15 +2,13 @@ package backend
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
-	"github.com/iwind/TeaWebCode/teaconfigs"
+		"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaWebCode/teaproxy"
 )
 
 type AddAction actions.Action
 
 func (this *AddAction) Run(params struct {
-	Auth     *helpers.UserMustAuth
 	Filename string
 	Address  string
 	Must     *actions.Must

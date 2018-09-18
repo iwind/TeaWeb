@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaWebCode/teaproxy"
 )
@@ -13,7 +12,6 @@ func (this *AddNameAction) Run(params struct {
 	Filename string
 	Name     string
 	Must     *actions.Must
-	Auth     *helpers.UserMustAuth
 }) {
 	params.Must.
 		Field("name", params.Name).

@@ -2,12 +2,13 @@ package login
 
 import "github.com/iwind/TeaGo"
 
-func init()  {
+func init() {
 	TeaGo.BeforeStart(func(server *TeaGo.Server) {
-		server.Module("").
+		server.
+			EndAll().
 			Prefix("/login").
 			GetPost("", new(IndexAction)).
 			Prefix("").
-			End()
+			EndAll()
 	})
 }

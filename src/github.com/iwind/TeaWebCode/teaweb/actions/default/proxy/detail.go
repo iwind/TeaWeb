@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
 	"github.com/iwind/TeaWebCode/teaconfigs"
 )
 
@@ -10,7 +9,6 @@ type DetailAction struct {
 }
 
 func (this *DetailAction) Run(params struct {
-	Auth     *helpers.UserMustAuth
 	Filename string
 }) {
 	proxy, err := teaconfigs.NewServerConfigFromFile(params.Filename)

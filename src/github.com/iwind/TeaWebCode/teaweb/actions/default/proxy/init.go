@@ -2,12 +2,15 @@ package proxy
 
 import (
 	"github.com/iwind/TeaGo"
+	"github.com/iwind/TeaWebCode/teaweb/helpers"
 )
 
 func init() {
 	TeaGo.BeforeStart(func(server *TeaGo.Server) {
 		server.Module("").
+			Helper(new(helpers.UserMustAuth)).
 			Prefix("/proxy").
+
 			Get("", new(IndexAction)).
 			GetPost("/add", new(AddAction)).
 			Post("/delete", new(DeleteAction)).
@@ -22,7 +25,6 @@ func init() {
 			Post("/deleteListen", new(DeleteListenAction)).
 			Post("/updateListen", new(UpdateListenAction)).
 
-			Prefix("").
-			End()
+			EndAll()
 	})
 }

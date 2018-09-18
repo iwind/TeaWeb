@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaGo/logs"
 	"github.com/iwind/TeaWebCode/teaconfigs"
@@ -14,7 +13,6 @@ type IndexAction struct {
 }
 
 func (this *IndexAction) Run(params struct {
-	Auth *helpers.UserMustAuth
 }) {
 	servers := []maps.Map{}
 

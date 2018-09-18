@@ -10,10 +10,12 @@ import (
 	"github.com/iwind/TeaWebCode/teaproxy"
 	"github.com/iwind/TeaWebCode/teaweb/actions/default/install"
 	"github.com/iwind/TeaWebCode/teaweb/actions/default/index"
+	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/login"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/proxy"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/ssl"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/backend"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/log"
+	"github.com/iwind/TeaWebCode/teaweb/helpers"
 )
 
 func Start() {
@@ -28,10 +30,16 @@ func Start() {
 		AccessLog(false).
 		Get("/", new(index.IndexAction)).
 		Get("/logout", new(logout.IndexAction)).
+
+		Helper(new(helpers.UserMustAuth)).
 		Get("/dashboard", new(dashboard.IndexAction)).
 		Get("/settings", new(settings.IndexAction)).
 		GetPost("/install/mongo", new(install.MongoAction)).
+		EndAll().
 
-		Session(sessions.NewFileSessionManager(86400, "gSeDQJJ67tAVdnguDAQdGmnDVrjFd2I9")).
+		Session(sessions.NewFileSessionManager(
+			86400,
+			"gSeDQJJ67tAVdnguDAQdGmnDVrjFd2I9",
+		)).
 		Start()
 }

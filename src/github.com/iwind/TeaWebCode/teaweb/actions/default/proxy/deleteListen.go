@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaGo/lists"
 	"github.com/iwind/TeaWebCode/teaproxy"
@@ -14,7 +13,6 @@ type DeleteListenAction actions.Action
 func (this *DeleteListenAction) Run(params struct {
 	Filename string
 	Index    int
-	Auth     *helpers.UserMustAuth
 }) {
 	proxy, err := teaconfigs.NewServerConfigFromFile(params.Filename)
 	if err != nil {

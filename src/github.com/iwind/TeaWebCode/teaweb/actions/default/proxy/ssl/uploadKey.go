@@ -7,13 +7,11 @@ import (
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaWebCode/teaproxy"
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
 )
 
 type UploadKeyAction actions.Action
 
 func (this *UploadKeyAction) Run(params struct {
-	Auth     *helpers.UserMustAuth
 	Filename string
 	KeyFile  *actions.File
 }) {

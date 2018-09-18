@@ -2,8 +2,7 @@ package ssl
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
-	"github.com/iwind/TeaGo/Tea"
+		"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaGo/files"
 	"github.com/iwind/TeaGo/utils/string"
 	"github.com/iwind/TeaWebCode/teaconfigs"
@@ -13,7 +12,6 @@ import (
 type UploadCertAction actions.Action
 
 func (this *UploadCertAction) Run(params struct {
-	Auth     *helpers.UserMustAuth
 	Filename string
 	CertFile *actions.File
 }) {

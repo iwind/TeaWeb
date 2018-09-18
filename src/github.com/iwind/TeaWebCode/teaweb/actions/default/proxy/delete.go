@@ -5,7 +5,6 @@ import (
 	"github.com/iwind/TeaGo/files"
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaGo/logs"
-	"github.com/iwind/TeaWebCode/teaweb/helpers"
 	"time"
 	"github.com/iwind/TeaWebCode/teaproxy"
 )
@@ -14,7 +13,6 @@ type DeleteAction actions.Action
 
 func (this *DeleteAction) Run(params struct {
 	Filename string
-	Auth     *helpers.UserMustAuth
 }) {
 	configFile := files.NewFile(Tea.ConfigFile(params.Filename))
 	if !configFile.Exists() {
