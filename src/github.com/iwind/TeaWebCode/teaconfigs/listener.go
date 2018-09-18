@@ -37,7 +37,7 @@ func ParseConfigs() ([]*ListenerConfig, error) {
 		}
 
 		if len(config.Listen) == 0 {
-			return nil, errors.New("'listen' in config should be empty")
+			return nil, errors.New("'listen' in config should not be empty")
 		}
 
 		err = config.Validate()

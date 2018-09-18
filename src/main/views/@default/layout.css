@@ -30,6 +30,28 @@ a.enabled {
     color: #2ecc40;
 }
 
+tbody {
+    background: transparent;
+}
+
+.table.width30 {
+    width: 30em!important;
+}
+
+.table.width35 {
+    width: 35em!important;
+}
+
+/** 操作按钮容器 **/
+.op.two {
+    width: 6em;
+}
+
+.op a {
+    padding:0 0.2em;
+}
+
+/** 主菜单 **/
 .main-menu .ui.labeled.icon.menu .item {
     font-size: 0.9em;
 }
@@ -69,7 +91,7 @@ body.expanded .main {
     position: absolute;
     left: 20em;
     top: 4em;
-    padding-bottom: 4em;
+    padding-bottom: 5em;
     padding-right: 1em;
     right: 4em;
 }

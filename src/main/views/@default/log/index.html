@@ -3,7 +3,7 @@
 <div>
    <div>
        <div class="ui grid five column">
-           <div class="ui statistic column">
+           <div class="ui small statistic column">
                <div class="label">
                    实时QPS
                </div>
@@ -16,7 +16,7 @@
                </div>
            </div>
 
-           <div class="ui statistic column">
+           <div class="ui small statistic column">
                <div class="label">
                    24小时内共
                </div>
@@ -29,7 +29,7 @@
                </div>
            </div>
 
-           <div class="ui statistic column">
+           <div class="ui small statistic column">
                <div class="label">
                    24小时内共成功
                </div>
@@ -42,7 +42,7 @@
                </div>
            </div>
 
-           <div class="ui statistic column">
+           <div class="ui small statistic column">
                <div class="label">
                    24小时内共失败
                </div>
@@ -58,35 +58,35 @@
    </div>
 
     <div class="search-box" v-show="!searchBoxVisible">
-        <button class="ui button" type="button" v-on:click="showSearchBox()">筛选 &nbsp; <i class="ui icon dot circle outline" v-if="hasSearchConditions()"></i> </button>
+        <button class="ui button tiny" type="button" v-on:click="showSearchBox()" :class="{primary:hasSearchConditions()}">筛选 <i class="ui icon chevron down" :class="{white:hasSearchConditions()}"></i> </button>
     </div>
 
     <div class="search-box" v-show="searchBoxVisible">
-        <a href="" v-on:click.prevent="hideSearchBox()" class="close-btn" title="收起窗口"><i class="ui icon angle up circular"></i></a>
+        <a href="" v-on:click.prevent="hideSearchBox()" class="close-btn" :class="{'clean-btn':!hasSearchConditions()}" title="收起窗口"><i class="ui icon chevron up circular"></i></a>
         <a href="" v-on:click.prevent="resetSearchBox()" class="clean-btn" v-if="hasSearchConditions()" title="重置条件"><i class="ui icon undo circular"></i></a>
         <form class="ui form">
             <div class="ui grid three column">
                <div class="ui field column">
-                   终端IP：<input type="text" placeholder="x.x.x.x" v-model="searchIp"/>
+                   终端IP：<input type="text" placeholder="x.x.x.x" v-model="searchIp" :class="{focus:searchIp.trim().length > 0}"/>
                </div>
                 <div class="ui field column">
-                    域名：<input type="text" name="domain" placeholder="比如 xxx.com" v-model="searchDomain"/>
+                    域名：<input type="text" name="domain" placeholder="比如 xxx.com" v-model="searchDomain" :class="{focus:searchDomain.trim().length > 0}"/>
                 </div>
                 <div class="ui field column">
-                    终端OS：<input type="text" name="os" placeholder="比如 windows" v-model="searchOs"/>
+                    终端OS：<input type="text" name="os" placeholder="比如 windows" v-model="searchOs" :class="{focus:searchOs.trim().length > 0}"/>
                 </div>
                 <div class="ui field column">
-                    终端浏览器：<input type="text" name="browser" placeholder="比如 chrome" v-model="searchBrowser"/>
+                    终端浏览器：<input type="text" name="browser" placeholder="比如 chrome" v-model="searchBrowser" :class="{focus:searchBrowser.trim().length > 0}"/>
                 </div>
                 <div class="ui field column">
                     耗时大于：
-                    <div class="ui right labeled input ">
-                        <input type="text" name="minCost" placeholder="比如 10" v-model="searchMinCost"/>
+                    <div class="ui right labeled input">
+                        <input type="text" name="minCost" placeholder="比如 10" v-model="searchMinCost" :class="{focus:searchMinCost.trim().length > 0}"/>
                         <div class="ui label">ms</div>
                     </div>
                 </div>
                 <div class="ui field column">
-                    关键词：<input type="text" name="keyword" placeholder="比如 /user/profile" v-model="searchKeyword"/>
+                    关键词：<input type="text" name="keyword" placeholder="比如 /user/profile" v-model="searchKeyword" :class="{focus:searchKeyword.trim().length > 0}"/>
                 </div>
             </div>
         </form>

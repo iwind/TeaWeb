@@ -54,7 +54,7 @@ Tea.context(function () {
     this.loadLogs = function () {
         var size = 100;
         if (this.fromId > 0) {
-            size = 1000;
+            size = 200;
         }
         Tea.action(".get")
             .params({
@@ -175,7 +175,7 @@ Tea.context(function () {
                     log.requestMethod,
                     log.statusMessage,
                     log.timeLocal,
-                    log.timeISO9601,
+                    log.timeISO8601,
                     log.host,
                     log.request,
                     log.contentType,

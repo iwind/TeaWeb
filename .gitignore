@@ -23,5 +23,8 @@ src/golang.org
 src/gopkg.in
 src/main/tmp/*
 src/main/logs/*
+src/main/configs/*.proxy.conf
+src/main/configs/*.pem
+src/main/configs/*.key
 dist/
 bin/

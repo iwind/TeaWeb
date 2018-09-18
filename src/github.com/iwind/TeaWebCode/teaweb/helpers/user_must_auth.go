@@ -11,7 +11,7 @@ type UserMustAuth struct {
 func (this *UserMustAuth) BeforeAction(actionPtr actions.ActionWrapper, paramName string) (goNext bool) {
 	var action = actionPtr.Object()
 	var session = action.Session()
-	var username = session.StringValue("username")
+	var username = session.GetString("username")
 	if len(username) == 0 {
 		this.login(action)
 		return false

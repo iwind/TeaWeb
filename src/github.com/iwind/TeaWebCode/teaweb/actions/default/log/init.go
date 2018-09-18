@@ -1,6 +1,9 @@
 package log
 
-import "github.com/iwind/TeaWebCode/teaplugin"
+import (
+	"github.com/iwind/TeaWebCode/teaplugin"
+	"github.com/iwind/TeaGo"
+)
 
 func init() {
 	plugin := teaplugin.NewPlugin()
@@ -13,4 +16,15 @@ func init() {
 	plugin.AddWidget(widget)
 
 	teaplugin.Register(plugin)
+
+	TeaGo.BeforeStart(func(server *TeaGo.Server) {
+		server.
+			Module("").
+			Prefix("/log").
+			Get("", new(IndexAction)).
+			Get("/get", new(GetAction)).
+			GetPost("/widget", new(WidgetAction)).
+			Prefix("").
+			End()
+	})
 }

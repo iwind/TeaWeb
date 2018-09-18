@@ -265,7 +265,7 @@ func (this *Server) proxyPass(writer http.ResponseWriter, request *Request, log 
 		log.BytesSent = written
 		log.BodyBytesSent = written
 	}
-	defer resp.Body.Close()
+	resp.Body.Close()
 }
 
 func (this *Server) parseVariables(s string, variables map[string]string) string {

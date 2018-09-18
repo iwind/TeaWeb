@@ -77,3 +77,7 @@
 .search-box .buttons {
     margin-top: 0.5em;
 }
+
+.search-box .focus {
+    border:1px #85b7d9 solid!important;
+}

@@ -7,9 +7,15 @@ import (
 	"github.com/iwind/TeaGo/logs"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"context"
+	"time"
+	"github.com/mongodb/mongo-go-driver/mongo/findopt"
 )
 
 var sharedClient *mongo.Client
+
+func RestartClient() {
+	sharedClient = nil
+}
 
 func SharedClient() *mongo.Client {
 	if sharedClient == nil {
@@ -23,7 +29,6 @@ func SharedClient() *mongo.Client {
 			logs.Fatal(err)
 			return nil
 		}
-
 
 		config := &Config{}
 		err = reader.ReadYAML(config)
@@ -46,4 +51,40 @@ func SharedClient() *mongo.Client {
 	}
 
 	return sharedClient
+}
+
+func Test() error {
+	configFile := files.NewFile(Tea.ConfigFile("mongo.conf"))
+	if !configFile.Exists() {
+		return errors.New("'mongo.conf' not found")
+	}
+	reader, err := configFile.Reader()
+	if err != nil {
+		return err
+	}
+
+	config := &Config{}
+	err = reader.ReadYAML(config)
+	if err != nil {
+		return err
+	}
+
+	client, err := mongo.NewClient(config.URI)
+	if err != nil {
+		return err
+	}
+
+	err = client.Connect(context.Background())
+	if err != nil {
+		return err
+	}
+
+	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second)
+	_, err = client.Database("teaweb").Collection("logs").Find(ctx, nil, findopt.Limit(1))
+
+	if err == nil {
+		client.Disconnect(context.Background())
+	}
+
+	return err
 }

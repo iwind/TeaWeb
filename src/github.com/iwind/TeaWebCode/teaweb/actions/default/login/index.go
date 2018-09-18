@@ -8,6 +8,8 @@ import (
 
 type IndexAction actions.Action
 
+var countLoginTries = 0
+
 func (this *IndexAction) RunGet() {
 	this.Show()
 }
@@ -24,6 +26,10 @@ func (this *IndexAction) RunPost(params struct {
 		Field("password", params.Password).
 		Require("请输入密码")
 
+	if countLoginTries >= 3 {
+		this.Fail("登录失败已超过3次，系统被锁定，需要重启服务后才能继续")
+	}
+
 	config := configs.SharedAdminConfig()
 	for _, user := range config.Users {
 		if user.Username == params.Username && user.Password == params.Password {
@@ -32,6 +38,8 @@ func (this *IndexAction) RunPost(params struct {
 			return
 		}
 	}
+
+	countLoginTries ++
 
 	this.Fail("登录失败，请检查用户名密码")
 }

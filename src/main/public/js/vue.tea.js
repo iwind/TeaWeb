@@ -65,31 +65,20 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
                 if (typeof(contextFn) != "function") {
                     continue;
                 }
-                var childContext = contextFn.call(context);
-
-
-                for (var key in childContext) {
-                    if (!childContext.hasOwnProperty(key)) {
+                contextFn.call(context);
+                for (var key in context) {
+                    if (!context.hasOwnProperty(key)) {
                         continue;
                     }
-                    var value = childContext[key];
+                    var value = context[key];
                     if (typeof(value) === "function") {
-                        value = function (value) {
+                        context[key] = function (value) {
                             return function () {
                                 return value.apply(window.Tea.Vue, arguments);
                             };
                         }(value);
                     }
-
-                    backup[key] = value;
                 }
-            }
-
-            for (key in backup) {
-                if (!backup.hasOwnProperty(key)) {
-                    continue;
-                }
-                context[key] = backup[key];
             }
 
             window.Tea.Vue = new Vue({
@@ -557,40 +546,7 @@ window.Tea.Action = function (action, params) {
                             _failFn.call(Tea.Vue, response);
                         }
                         else {
-                            //消息提示
-                            var hasMessage = false;
-                            if (response.message != null && response.message.length > 0) {
-                                hasMessage = true;
-                                alert(response.message);
-                            }
-                            if (typeof(response.errors) === "object" && response.errors != null && response.errors.length > 0) {
-                                /**
-                                 * errors: [
-                                 *  [field1, [ error1, error2, ....]
-                                 *  ...
-                                 * ]
-                                 * error: [ rule, message ]
-                                 */
-                                var fieldName = response.errors[0].param;
-                                var error = response.errors[0].messages[0];
-                                if (!hasMessage) {
-                                    alert(error);
-                                }
-                                var element = Tea.element("*[name='" + fieldName + "']");
-                                if (element) {
-                                    element.focus();
-                                }
-                                else {
-                                    var match = fieldName.match(/^(.+)\[(\d+)]$/);
-                                    if (match != null) {
-                                        var index = parseInt(match[2], 10);
-                                        var fields = Tea.element("*[name='" + match[1].trim() + "[]']");
-                                        if (fields.length > 0 && index < fields.length) {
-                                            fields[index].focus();
-                                        }
-                                    }
-                                }
-                            }
+                            Tea.failResponse(response);
                         }
                     }
                 });
@@ -917,6 +873,45 @@ window.Tea.element = function (selector, parent) {
 
 window.Tea.key = function () {
     return Math.random()
+};
+
+// 失败的响应处理
+window.Tea.failResponse = function (response) {
+    //消息提示
+    var hasMessage = false;
+    if (response.message != null && response.message.length > 0) {
+        hasMessage = true;
+        alert(response.message);
+    }
+
+    if (typeof(response.errors) === "object" && response.errors != null && response.errors.length > 0) {
+        /**
+         * errors: [
+         *  [field1, [ error1, error2, ....]
+         *  ...
+         * ]
+         * error: [ rule, message ]
+         */
+        var fieldName = response.errors[0].param;
+        var error = response.errors[0].messages[0];
+        if (!hasMessage) {
+            alert(error);
+        }
+        var element = Tea.element("*[name='" + fieldName + "']");
+        if (element) {
+            element.focus();
+        }
+        else {
+            var match = fieldName.match(/^(.+)\[(\d+)]$/);
+            if (match != null) {
+                var index = parseInt(match[2], 10);
+                var fields = Tea.element("*[name='" + match[1].trim() + "[]']");
+                if (fields.length > 0 && index < fields.length) {
+                    fields[index].focus();
+                }
+            }
+        }
+    }
 };
 
 if (typeof(window.console) === "undefined") {

@@ -18,9 +18,9 @@ var (
 
 // 访问日志记录器
 type AccessLogger struct {
-	queue  chan *AccessLogItem
-	client *mongo.Client
+	queue chan *AccessLogItem
 
+	logs            []*AccessLogItem
 	timestamp       int64
 	qps             int
 	outputBandWidth int64
@@ -34,8 +34,7 @@ type AccessLogItem struct {
 
 func NewAccessLogger() *AccessLogger {
 	logger := &AccessLogger{
-		queue:  make(chan *AccessLogItem, 10240),
-		client: teamongo.SharedClient(),
+		queue: make(chan *AccessLogItem, 10240),
 	}
 
 	go logger.wait()
@@ -53,8 +52,12 @@ func (this *AccessLogger) Push(log *AccessLog, writers []AccessLogWriter) {
 	}
 }
 
+func (this *AccessLogger) client() *mongo.Client {
+	return teamongo.SharedClient()
+}
+
 func (this *AccessLogger) wait() {
-	latestDoc := this.client.Database("teaweb").
+	latestDoc := this.client().Database("teaweb").
 		Collection("accessLogs").
 		FindOne(context.Background(), nil, findopt.Sort(bson.NewDocument(bson.EC.Int32("id", -1))))
 	one := maps.Map{}
@@ -95,8 +98,8 @@ func (this *AccessLogger) wait() {
 
 		// 写入到本地数据库
 		// @TODO 批量写入
-		if this.client != nil {
-			this.client.
+		if this.client() != nil {
+			this.client().
 				Database("teaweb").
 				Collection("accessLogs").
 				InsertOne(context.Background(), log)
@@ -112,14 +115,14 @@ func (this *AccessLogger) wait() {
 }
 
 func (this *AccessLogger) Close() {
-	if this.client != nil {
-		this.client.Disconnect(context.Background())
+	if this.client() != nil {
+		this.client().Disconnect(context.Background())
 	}
 }
 
 // 读取日志
 func (this *AccessLogger) ReadNewLogs(fromId int64, size int64) []AccessLog {
-	if this.client == nil {
+	if this.client() == nil {
 		return []AccessLog{}
 	}
 
@@ -128,7 +131,7 @@ func (this *AccessLogger) ReadNewLogs(fromId int64, size int64) []AccessLog {
 	}
 
 	result := []AccessLog{}
-	coll := this.client.Database("teaweb").Collection("accessLogs")
+	coll := this.client().Database("teaweb").Collection("accessLogs")
 
 	filter := bson.NewDocument(bson.EC.SubDocument("id", bson.NewDocument(bson.EC.Int64("$gt", fromId))))
 
@@ -166,7 +169,7 @@ func (this *AccessLogger) ReadNewLogs(fromId int64, size int64) []AccessLog {
 }
 
 func (this *AccessLogger) CountSuccessLogs(fromTimestamp int64, toTimestamp int64) int64 {
-	coll := this.client.Database("teaweb").Collection("accessLogs")
+	coll := this.client().Database("teaweb").Collection("accessLogs")
 	filter := bson.NewDocument(
 		bson.EC.SubDocument("status", bson.NewDocument(bson.EC.Int64("$lt", 400))),
 		bson.EC.SubDocument("msec", bson.NewDocument(bson.EC.Int64("$lte", toTimestamp), bson.EC.Int64("$gte", fromTimestamp))),
@@ -181,7 +184,7 @@ func (this *AccessLogger) CountSuccessLogs(fromTimestamp int64, toTimestamp int6
 }
 
 func (this *AccessLogger) CountFailLogs(fromTimestamp int64, toTimestamp int64) int64 {
-	coll := this.client.Database("teaweb").Collection("accessLogs")
+	coll := this.client().Database("teaweb").Collection("accessLogs")
 	filter := bson.NewDocument(
 		bson.EC.SubDocument("status", bson.NewDocument(bson.EC.Int64("$gte", 400))),
 		bson.EC.SubDocument("msec", bson.NewDocument(bson.EC.Int64("$lte", toTimestamp), bson.EC.Int64("$gte", fromTimestamp))),
