@@ -1,5 +1,6 @@
 package teaconfigs
 
+// SSL配置
 type SSLConfig struct {
 	On             bool   `yaml:"on" json:"on"`
 	Certificate    string `yaml:"certificate" json:"certificate"`

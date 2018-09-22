@@ -29,27 +29,40 @@ func NewServer(config *teaconfigs.ServerConfig) *Server {
 	}
 }
 
-func (this *Server) handle(writer http.ResponseWriter, req *http.Request) {
+func (this *Server) handle(writer http.ResponseWriter, req *http.Request, listenerConfig *teaconfigs.ListenerConfig) {
+	// scheme
+	scheme := "http"
+	if req.URL != nil {
+		if len(req.URL.Scheme) == 0 {
+			if listenerConfig.SSL != nil && listenerConfig.SSL.On {
+				scheme = "https"
+			}
+		}
+	}
+
 	// 初始化日志
 	now := time.Now()
 	log := &tealog.AccessLog{
-		TeaVersion:    teaconst.TeaVersion,
-		RequestURI:    req.RequestURI,
-		RequestLength: req.ContentLength,
-		RequestMethod: req.Method,
-		Request:       req.Method + " " + req.RequestURI + " " + req.Proto,
-		Referer:       req.Referer(),
-		Scheme:        req.URL.Scheme,
-		Proto:         req.Proto,
-		Host:          req.Host,
-		RequestPath:   req.URL.Path,
-		UserAgent:     req.UserAgent(),
-		Arg:           req.URL.Query(),
-		Header:        req.Header,
-		TimeISO8601:   now.Format("2006-01-02T15:04:05.000Z07:00"),
-		TimeLocal:     now.Format("2/Jan/2006:15:04:05 -0700"),
-		Msec:          float64(now.Unix()) + float64(now.Nanosecond())/1000000000,
-		Timestamp:     now.Unix(),
+		TeaVersion:     teaconst.TeaVersion,
+		RequestURI:     req.RequestURI,
+		RequestLength:  req.ContentLength,
+		RequestMethod:  req.Method,
+		Request:        req.Method + " " + req.RequestURI + " " + req.Proto,
+		Referer:        req.Referer(),
+		Scheme:         scheme,
+		Proto:          req.Proto,
+		Host:           req.Host,
+		ServerName:     req.Host,
+		ServerPort:     listenerConfig.Port(),
+		ServerProtocol: req.Proto,
+		RequestPath:    req.URL.Path,
+		UserAgent:      req.UserAgent(),
+		Arg:            req.URL.Query(),
+		Header:         req.Header,
+		TimeISO8601:    now.Format("2006-01-02T15:04:05.000Z07:00"),
+		TimeLocal:      now.Format("2/Jan/2006:15:04:05 -0700"),
+		Msec:           float64(now.Unix()) + float64(now.Nanosecond())/1000000000,
+		Timestamp:      now.Unix(),
 	}
 
 	// 写日志
@@ -88,7 +101,10 @@ func (this *Server) handle(writer http.ResponseWriter, req *http.Request) {
 
 	// 主机名 @TODO 需要分析 *.xxx.com
 	request := NewRequest(req)
-	host := this.config.Name[0]
+	host := ""
+	if len(this.config.Name) > 0 {
+		host = this.config.Name[0]
+	}
 	request.SetVariable("host", host)
 
 	log.RemoteAddr = request.RemoteAddr()
@@ -153,8 +169,15 @@ func (this *Server) proxyPass(writer http.ResponseWriter, request *Request, log 
 		break
 	}
 
+	log.BackendAddress = backend.Address
+
 	// 主机名 @TODO 需要分析 *.xxx.com
-	host := this.config.Name[0]
+	host := ""
+	if len(this.config.Name) > 0 {
+		host = this.config.Name[0]
+	} else {
+		host = backend.Address
+	}
 
 	// 设置代理相关的头部
 	request.Header().Set("X-Real-IP", request.RemoteAddr())
@@ -170,7 +193,8 @@ func (this *Server) proxyPass(writer http.ResponseWriter, request *Request, log 
 	if len(host) > 0 {
 		request.URL().Host = host
 	}
-	request.URL().Scheme = "http"
+
+	request.URL().Scheme = "http" //@TODO 支持https
 	request.SetRequestURI("")
 
 	// 域名

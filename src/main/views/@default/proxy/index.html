@@ -5,18 +5,23 @@
 <table class="ui table selectable" v-if="servers.length > 0">
     <thead>
         <tr>
-            <th>代理说明</th>
+            <th class="two wide">代理ID</th>
+            <th class="two wide">代理说明</th>
             <th>对外访问域名</th>
             <th>监听地址</th>
-            <th>后端地址</th>
-            <th>操作</th>
+            <th>后端</th>
+            <th class="two wide">操作</th>
         </tr>
     </thead>
     <tr v-for="server in servers">
+        <td>{{server.config.id}}</td>
         <td>{{server.config.description}}</td>
         <td>{{server.config.name}}</td>
         <td>{{server.config.listen}}</td>
-        <td>{{server.config.backends}}</td>
+        <td>
+            <a class="disabled" v-if="server.config.backends.length == 0">{{server.config.backends.length}}个</a>
+            <span v-if="server.config.backends.length > 0">{{server.config.backends.length}}个</span>
+        </td>
         <td>
             <a v-bind:href="'/proxy/detail?filename=' + server.filename">详情</a> &nbsp; <a href="" data-tea-action=".delete" v-bind:data-filename="server.filename" data-tea-confirm="您确定要删除此服务吗？">删除</a>
         </td>

@@ -10,9 +10,9 @@ type CacheConfig struct {
 	Memory  bool   `yaml:"memory"`  // @TODO 是否为内存缓存，默认为文件缓存
 }
 
-func (config *CacheConfig) Validate() error {
-	if len(config.Key) == 0 {
-		config.Key = "${host}${requestURI}"
+func (this *CacheConfig) Validate() error {
+	if len(this.Key) == 0 {
+		this.Key = "${host}${requestURI}"
 	}
 	return nil
 }

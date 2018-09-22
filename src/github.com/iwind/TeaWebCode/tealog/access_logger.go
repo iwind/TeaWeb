@@ -139,7 +139,7 @@ func (this *AccessLogger) ReadNewLogs(fromId int64, size int64) []AccessLog {
 	isReverse := false
 	if fromId <= 0 {
 		opts = append(opts, findopt.Sort(bson.NewDocument(bson.EC.Int32("id", -1))))
-		opts = append(opts, findopt.Limit(100))
+		opts = append(opts, findopt.Limit(size))
 		isReverse = true
 	} else {
 		opts = append(opts, findopt.Sort(bson.NewDocument(bson.EC.Int32("id", 1))))

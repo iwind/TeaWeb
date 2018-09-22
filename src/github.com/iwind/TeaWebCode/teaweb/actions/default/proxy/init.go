@@ -9,6 +9,7 @@ func init() {
 	TeaGo.BeforeStart(func(server *TeaGo.Server) {
 		server.Module("").
 			Helper(new(helpers.UserMustAuth)).
+			Helper(new(Helper)).
 			Prefix("/proxy").
 
 			Get("", new(IndexAction)).
@@ -16,6 +17,9 @@ func init() {
 			Post("/delete", new(DeleteAction)).
 			GetPost("/update", new(UpdateAction)).
 			Get("/detail", new(DetailAction)).
+			Get("/httpOn", new(HttpOnAction)).
+			Get("/httpOff", new(HttpOffAction)).
+			Post("/updateId", new(UpdateIdAction)).
 			Post("/updateDescription", new(UpdateDescriptionAction)).
 			Post("/addName", new(AddNameAction)).
 			Post("/updateName", new(UpdateNameAction)).

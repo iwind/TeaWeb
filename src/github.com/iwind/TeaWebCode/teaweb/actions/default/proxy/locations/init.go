@@ -1,4 +1,4 @@
-package ssl
+package locations
 
 import (
 	"github.com/iwind/TeaGo"
@@ -8,17 +8,10 @@ import (
 
 func init() {
 	TeaGo.BeforeStart(func(server *TeaGo.Server) {
-		server.
+		server.Prefix("/proxy/locations").
 			Helper(new(helpers.UserMustAuth)).
 			Helper(new(proxy.Helper)).
-			Module("").
-			Prefix("/proxy/ssl").
 			Get("", new(IndexAction)).
-			Post("/uploadCert", new(UploadCertAction)).
-			Post("/uploadKey", new(UploadKeyAction)).
-			Post("/on", new(OnAction)).
-			Post("/off", new(OffAction)).
-			Prefix("").
 			EndAll()
 	})
 }

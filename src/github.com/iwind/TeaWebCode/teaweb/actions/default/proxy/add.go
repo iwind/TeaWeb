@@ -5,8 +5,10 @@ import (
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaGo/utils/string"
+	"github.com/iwind/TeaGo/maps"
 )
 
+// 添加新的服务
 type AddAction struct {
 	ParentAction
 }
@@ -17,14 +19,31 @@ func (this *AddAction) Run(params struct {
 }
 
 func (this *AddAction) RunPost(params struct {
+	Id          string
 	Description string
 	Must        *actions.Must
 }) {
-	params.Must.
-		Field("description", params.Description).
-		Require("代理说明不能为空")
+	// ID是否已存在
+	if len(params.Id) > 0 {
+		ids := maps.Map{}
+		for _, config := range teaconfigs.LoadServerConfigsFromDir(Tea.ConfigDir()) {
+			ids[config.Id] = true
+		}
+		if ids.Has(params.Id) {
+			this.FailField("id", "此代理ID已经被使用，请换一个")
+		}
+	} else {
+		params.Id = stringutil.Rand(8)
+	}
+
+	// 描述
+	if len(params.Description) == 0 {
+		params.Description = "新服务"
+	}
 
 	server := teaconfigs.NewServerConfig()
+	server.Http = true
+	server.Id = params.Id
 	server.Description = params.Description
 
 	filename := stringutil.Rand(16) + ".proxy.conf"
@@ -36,5 +55,5 @@ func (this *AddAction) RunPost(params struct {
 
 	this.Next("/proxy/detail", map[string]interface{}{
 		"filename": filename,
-	}, "").Success()
+	}, "").Success("添加成功，现在去配置详细信息")
 }

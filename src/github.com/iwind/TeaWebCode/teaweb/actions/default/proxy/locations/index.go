@@ -1,13 +1,13 @@
-package proxy
+package locations
 
 import (
-	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaGo/actions"
+	"github.com/iwind/TeaWebCode/teaconfigs"
 )
 
-type DetailAction actions.Action
+type IndexAction actions.Action
 
-func (this *DetailAction) Run(params struct {
+func (this *IndexAction) Run(params struct {
 	Filename string
 }) {
 	proxy, err := teaconfigs.NewServerConfigFromFile(params.Filename)

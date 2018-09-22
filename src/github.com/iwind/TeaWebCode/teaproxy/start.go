@@ -17,13 +17,13 @@ func Wait() {
 }
 
 func startProxies() {
-	configs, err := teaconfigs.ParseConfigs()
+	listenerConfigs, err := teaconfigs.ParseConfigs()
 	if err != nil {
 		logs.Error(err)
 		return
 	}
 
-	for _, config := range configs {
+	for _, config := range listenerConfigs {
 		listener := NewListener(config)
 		go listener.Start()
 	}

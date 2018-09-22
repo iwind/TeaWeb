@@ -1,16 +1,53 @@
 {$layout}
 
-<div style="padding-top:1em">
+<div>
+    <h3>{{proxy.description}}（{{proxy.id}}）</h3>
+
+    <div class="ui text menu blue">
+        <a :href="$url('/proxy/detail', { 'filename':filename })" class="item active">基础信息</a>
+        <a :href="$url('/proxy/ssl', { 'filename':filename })" class="item green">HTTPS<i class="ui icon expeditedssl" :class="{green:proxy.ssl && proxy.ssl.on, grey:!proxy.ssl || !proxy.ssl.on}"></i></a>
+        <a :href="$url('/proxy/backend', { 'filename':filename })" class="item">后端服务器({{proxy.backends.length}})</a>
+        <a :href="$url('/proxy/locations', { 'filename':filename })" class="item">路径</a>
+    </div>
+
     <form class="ui form" autocomplete="off" onsubmit="return false">
-    <h3>基础信息</h3>
     <table class="ui table selectable width30 definition">
         <tbody>
+            <tr>
+                <td class="title">是否开启HTTP</td>
+                <td colspan="2">
+                    <div class="ui toggle checkbox">
+                        <input type="checkbox" :checked="proxy.http" v-on:click.prevent="switchHttpOn()"/>
+                        <label></label>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- ID -->
+            <tr>
+                <td>ID</td>
+                <td>{{proxy.id}}</td>
+                <td class="two op"><a href="" v-on:click.prevent="editId()" title="修改"><i class="ui icon edit small"></i> </a></td>
+            </tr>
+            <tr v-if="proxyIdEditing">
+                <td></td>
+                <td>
+                    <input type="text" name="id" v-model="proxy.id"/>
+                </td>
+                <td>
+                    <a href="" v-on:click.prevent="editIdSave()" title="保存"><i class="ui icon check circle"></i></a>
+                    <a href="" v-on:click.prevent="proxyIdEditing = !proxyIdEditing" title="取消"><i class="ui icon arrow left"></i></a>
+                </td>
+            </tr>
+
+            <!-- 描述 -->
             <tr>
                 <td class="title">代理说明</td>
                 <td>{{proxy.description}}</td>
                 <td class="two op"><a href="" v-on:click.prevent="editDescription()" title="修改"><i class="ui icon edit small"></i> </a></td>
             </tr>
         </tbody>
+
         <tr v-if="proxyDescriptionEditing">
             <td></td>
             <td>
@@ -99,111 +136,6 @@
         <tr>
             <td></td>
             <td colspan="2"><a href="" v-on:click.prevent="addListen()"><i class="ui icon plus circle"></i>新监听地址</a></td>
-        </tr>
-    </table>
-
-    <!-- SSL 设置 -->
-    <h3>SSL</h3>
-    <table class="ui table selectable definition width35">
-        <tr>
-            <td class="title">是否开启</td>
-            <td colspan="2">
-                <div class="ui toggle checkbox">
-                    <input type="checkbox" :checked="proxy.ssl != null && proxy.ssl.on" v-on:click="switchSSLOn()"/>
-                    <label></label>
-                </div>
-            </td>
-        </tr>
-        <tr v-if="!sslCertEditing">
-            <td>证书文件</td>
-            <td>
-                <span v-if="proxy.ssl != null && proxy.ssl.certificate.length > 0">{{proxy.ssl.certificate}}</span>
-                <span v-if="proxy.ssl == null || proxy.ssl.certificate.length == 0">[还没有上传密钥文件]</span>
-            </td>
-            <td class="two op">
-                <a href="" v-on:click.prevent="sslCertEditing = !sslCertEditing" title="修改"><i class="ui icon edit small"></i></a>
-            </td>
-        </tr>
-        <tr v-if="sslCertEditing">
-            <td>证书文件</td>
-            <td>
-                <input type="file" name="sslCertFile" v-on:change="changeSSLCertFile" accept="application/x-pem-file, application/pkcs10, application/x-pkcs12, application/x-x509-user-cert, application/x-x509-ca-cert, application/pkix-cert"/>
-            </td>
-            <td class="two op">
-                <a href="" v-on:click.prevent="uploadSSLCertFile()" title="上传"><i class="ui icon check circle"></i></a>
-                <a href="" v-on:click.prevent="sslCertEditing = !sslCertEditing" title="取消"><i class="ui icon arrow left"></i></a>
-            </td>
-        </tr>
-        <tr v-if="!sslKeyEditing">
-            <td>密钥文件</td>
-            <td>
-                <span v-if="proxy.ssl != null && proxy.ssl.certificateKey.length > 0">{{proxy.ssl.certificateKey}}</span>
-                <span v-if="proxy.ssl == null || proxy.ssl.certificateKey.length == 0">[还没有上传密钥文件]</span>
-            </td>
-            <td>
-                <a href="" v-on:click.prevent="sslKeyEditing = !sslKeyEditing" title="修改"><i class="ui icon edit small"></i></a>
-            </td>
-        </tr>
-        <tr v-if="sslKeyEditing">
-            <td>密钥文件</td>
-            <td>
-                <input type="file" name="sslKeyFile" v-on:change="changeSSLKeyFile" accept="application/pkcs8"/>
-            </td>
-            <td class="two op">
-                <a href="" v-on:click.prevent="uploadSSLKeyFile()" title="上传"><i class="ui icon check circle"></i></a>
-                <a href="" v-on:click.prevent="sslKeyEditing = !sslKeyEditing" title="取消"><i class="ui icon arrow left"></i></a>
-            </td>
-        </tr>
-    </table>
-
-    <h3>后端服务器</h3>
-    <table class="ui table selectable width30 definition">
-        <tbody v-if="proxy.backends.length == 0">
-            <tr>
-                <td colspan="3">
-                    <a class="disabled">[暂时还没有后端服务器]</a>
-                </td>
-            </tr>
-        </tbody>
-        <tbody v-if="proxy.backends.length > 0" v-for="(backend, index) in proxy.backends">
-            <tr v-if="!backend.isEditing">
-                <td class="title">后端服务器</td>
-                <td>{{backend.address}}</td>
-                <td class="two op">
-                    <a href="" title="修改" v-on:click.prevent="editBackend(index, backend)"><i class="ui icon edit small"></i> </a>
-                    <a href="" title="删除" v-on:click.prevent="deleteBackend(index)"><i class="ui icon remove small"></i> </a>
-                </td>
-            </tr>
-            <tr v-if="backend.isEditing">
-                <td>后端服务器</td>
-                <td>
-                    <input type="text" v-model="backend.address" />
-                </td>
-                <td class="two op">
-                    <a href="" title="保存" v-on:click.prevent="editBackendSave(index, backend)"><i class="ui icon check circle"></i> </a>
-                    <a href="" v-on:click.prevent="editBackendCancel(index, backend)" title="取消"><i class="ui icon arrow left"></i> </a>
-                </td>
-            </tr>
-        </tbody>
-        <tr v-if="backendAdding">
-            <td></td>
-            <td>
-                    <div class="ui field">
-                        <label>地址</label>
-                        <input type="text" v-model="newBackendAddress" placeholder="比如 x.x.x.x:80"/>
-                    </div>
-                    <div class="ui field">
-
-                    </div>
-            </td>
-            <td>
-                <a href="" v-on:click.prevent="addBackendSave()" title="保存"><i class="ui icon check circle"></i> </a>
-                <a href="" v-on:click.prevent="backendAdding = false" title="取消"><i class="ui icon arrow left"></i> </a>
-            </td>
-        </tr>
-        <tr>
-            <td></td>
-            <td colspan="2"><a href="" v-on:click.prevent="addBackend()"><i class="ui icon plus circle"></i>新后端服务器</a></td>
         </tr>
     </table>
     </form>

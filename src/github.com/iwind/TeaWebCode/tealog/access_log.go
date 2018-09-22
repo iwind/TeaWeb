@@ -34,8 +34,8 @@ type AccessLog struct {
 	RequestURI      string              `var:"requestURI" bson:"requestURI" json:"requestURI"`
 	RequestPath     string              `var:"requestPath" bson:"requestPath" json:"requestPath"`
 	RequestLength   int64               `var:"requestLength" bson:"requestLength" json:"requestLength"`
-	RequestTime     float64             `var:"requestTime" bson:"requestTime" json:"requestTime"` // 从请求到所有响应数据发送到请求端所花时间，单位为带有小数点的秒，精确到纳秒，比如：0.000260081
-	RequestMethod   string              `var:"requestMethod" bson:"requestMethod" json:"requestMethod"`
+	RequestTime     float64             `var:"requestTime" bson:"requestTime" json:"requestTime"`             // 从请求到所有响应数据发送到请求端所花时间，单位为带有小数点的秒，精确到纳秒，比如：0.000260081
+	RequestMethod   string              `var:"requestMethod" bson:"requestMethod" json:"requestMethod"`       // 请求方法
 	RequestFilename string              `var:"requestFilename" bson:"requestFilename" json:"requestFilename"` // @TODO
 	Scheme          string              `var:"requestScheme" bson:"requestScheme" json:"requestScheme"`
 	Proto           string              `var:"proto" bson:"proto" json:"proto"`
@@ -57,9 +57,9 @@ type AccessLog struct {
 	Args            string              `var:"args" bson:"args" json:"args"`                               // name=liu&age=20
 	QueryString     string              `var:"queryString" bson:"queryString" json:"queryString"`          // 同 Args
 	Header          map[string][]string `bson:"header" json:"header"`                                      // 请求的头部信息，支持header_*和http_*，header_content_type, header_expires, http_content_type, http_user_agent
-	ServerName      string              `var:"serverName" bson:"serverName" json:"serverName"`             // @TODO
-	ServerPort      int                 `var:"serverPort" bson:"serverPort" json:"serverPort"`             // @TODO
-	ServerProtocol  string              `var:"serverProtocol" bson:"serverProtocol" json:"serverProtocol"` // @TODO
+	ServerName      string              `var:"serverName" bson:"serverName" json:"serverName"`             // 接收请求的服务器名
+	ServerPort      int                 `var:"serverPort" bson:"serverPort" json:"serverPort"`             // 服务器端口
+	ServerProtocol  string              `var:"serverProtocol" bson:"serverProtocol" json:"serverProtocol"` // 服务器协议，类似于HTTP/1.0”
 
 	// 代理相关
 	BackendAddress string `var:"backendAddress" bson:"backendAddress" json:"backendAddress"` // 代理的后端的地址

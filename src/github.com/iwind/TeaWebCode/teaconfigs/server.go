@@ -4,12 +4,17 @@ import (
 	"github.com/iwind/TeaGo/files"
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/syndtr/goleveldb/leveldb/errors"
+	"github.com/iwind/TeaGo/logs"
 )
 
 // 服务配置
 type ServerConfig struct {
+	On bool `yaml:"on" json:"on"` // 是否开启 @TODO
+
+	Id          string                 `yaml:"id" json:"id"`                   // ID
 	Description string                 `yaml:"description" json:"description"` // 描述
 	Name        []string               `yaml:"name" json:"name"`               // 域名
+	Http        bool                   `yaml:"http" json:"http"`               // 是否支持HTTP
 	Listen      []string               `yaml:"listen" json:"listen"`           // 监听地址
 	Root        string                 `yaml:"root" json:"root"`               // 根目录 @TODO
 	Backends    []*ServerBackendConfig `yaml:"backends" json:"backends"`       // 后端服务器配置
@@ -35,10 +40,41 @@ type ServerConfig struct {
 	// 参考：http://nginx.org/en/docs/http/ngx_http_access_module.html
 	Allow []string `yaml:"allow" json:"allow"` //@TODO
 	Deny  []string `yaml:"deny" json:"deny"`   //@TODO
+
+	Filename string `yaml:"filename" json:"filename"` // 配置文件名
 }
 
+// 从目录中加载配置
+func LoadServerConfigsFromDir(dirPath string) []*ServerConfig {
+	servers := []*ServerConfig{}
+
+	dir := files.NewFile(dirPath)
+	subFiles := dir.Glob("*.proxy.conf")
+	files.Sort(subFiles, files.SortTypeModifiedTimeReverse)
+	for _, configFile := range subFiles {
+		reader, err := configFile.Reader()
+		if err != nil {
+			logs.Error(err)
+			continue
+		}
+
+		config := &ServerConfig{}
+		err = reader.ReadYAML(config)
+		if err != nil {
+			continue
+		}
+		config.Filename = configFile.Name()
+		servers = append(servers, config)
+	}
+
+	return servers
+}
+
+// 取得一个新的服务配置
 func NewServerConfig() *ServerConfig {
-	return &ServerConfig{}
+	return &ServerConfig{
+		On: true,
+	}
 }
 
 // 从配置文件中读取配置信息
@@ -61,14 +97,17 @@ func NewServerConfigFromFile(filename string) (*ServerConfig, error) {
 	return config, nil
 }
 
+// 添加域名
 func (this *ServerConfig) AddName(name ... string) {
 	this.Name = append(this.Name, name ...)
 }
 
+// 添加监听地址
 func (this *ServerConfig) AddListen(address string) {
 	this.Listen = append(this.Listen, address)
 }
 
+// 添加后端服务
 func (this *ServerConfig) AddBackend(config *ServerBackendConfig) {
 	this.Backends = append(this.Backends, config)
 }

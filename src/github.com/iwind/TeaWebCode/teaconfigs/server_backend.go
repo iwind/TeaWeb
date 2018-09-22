@@ -15,11 +15,11 @@ type ServerBackendConfig struct {
 	IsDown      bool     `yaml:"down" json:"isDown"`             //@TODO
 }
 
-func (config *ServerBackendConfig) Validate() error {
+func (this *ServerBackendConfig) Validate() error {
 	// 是否有端口
-	if strings.Index(config.Address, ":") == -1 {
+	if strings.Index(this.Address, ":") == -1 {
 		// @TODO 如果是tls，则为443
-		config.Address += ":80"
+		this.Address += ":80"
 	}
 
 	return nil

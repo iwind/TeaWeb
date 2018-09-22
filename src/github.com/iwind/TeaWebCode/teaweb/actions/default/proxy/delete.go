@@ -25,6 +25,8 @@ func (this *DeleteAction) Run(params struct {
 		this.Fail("配置文件删除失败")
 	}
 
+	// @TODO 删除对应的certificate file和certificate key file
+
 	// 重启
 	go func() {
 		time.Sleep(1 * time.Second)

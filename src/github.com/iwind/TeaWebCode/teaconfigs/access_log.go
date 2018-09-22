@@ -5,6 +5,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/errors"
 )
 
+// 日志配置
 // 参考 http://nginx.org/en/docs/http/ngx_http_log_module.html#access_log
 type AccessLogConfig struct {
 	Target string                 `yaml:"target" json:"target"`

@@ -7,14 +7,18 @@ import (
 	"github.com/go-yaml/yaml"
 	"path/filepath"
 	"strings"
+	"github.com/iwind/TeaGo/types"
 )
 
+// 本地监听服务配置
 type ListenerConfig struct {
 	Address string
+	Http    bool
 	SSL     *SSLConfig
 	Servers []*ServerConfig
 }
 
+// 从配置文件中分析配置
 func ParseConfigs() ([]*ListenerConfig, error) {
 	listenerConfigMap := map[string]*ListenerConfig{}
 
@@ -30,25 +34,29 @@ func ParseConfigs() ([]*ListenerConfig, error) {
 			return nil, err
 		}
 
-		config := &ServerConfig{}
-		err = yaml.Unmarshal(configData, config)
+		serverConfig := &ServerConfig{}
+		err = yaml.Unmarshal(configData, serverConfig)
 		if err != nil {
 			return nil, err
 		}
 
-		if len(config.Listen) == 0 {
+		if len(serverConfig.Listen) == 0 {
 			return nil, errors.New("'listen' in config should not be empty")
 		}
 
-		err = config.Validate()
+		err = serverConfig.Validate()
 		if err != nil {
 			return nil, err
 		}
 
-		for _, address := range config.Listen {
+		if !serverConfig.On {
+			continue
+		}
+
+		for _, address := range serverConfig.Listen {
 			// 是否有端口
 			if strings.Index(address, ":") == -1 {
-				if config.SSL != nil && config.SSL.On {
+				if serverConfig.SSL != nil && serverConfig.SSL.On {
 					address += ":443"
 				} else {
 					address += ":80"
@@ -56,19 +64,21 @@ func ParseConfigs() ([]*ListenerConfig, error) {
 			}
 
 			listenerConfig, found := listenerConfigMap[address]
-
 			if !found {
 				listenerConfig = &ListenerConfig{
 					Address: address,
-					Servers: []*ServerConfig{config},
+					Servers: []*ServerConfig{serverConfig},
 				}
 				listenerConfigMap[address] = listenerConfig
 			} else {
-				listenerConfig.Servers = append(listenerConfig.Servers, config)
+				listenerConfig.Servers = append(listenerConfig.Servers, serverConfig)
 			}
 
-			if config.SSL != nil {
-				listenerConfig.SSL = config.SSL
+			if serverConfig.SSL != nil {
+				listenerConfig.SSL = serverConfig.SSL
+			}
+			if serverConfig.Http {
+				listenerConfig.Http = true
 			}
 		}
 	}
@@ -79,4 +89,13 @@ func ParseConfigs() ([]*ListenerConfig, error) {
 	}
 
 	return listenerConfigArray, nil
+}
+
+// 获取当前监听服务的端口
+func (this *ListenerConfig) Port() int {
+	index := strings.LastIndex(this.Address, ":")
+	if index < 0 {
+		return 0
+	}
+	return types.Int(this.Address[index+1:])
 }

@@ -11,6 +11,7 @@ import (
 
 var variablesReg, _ = stringutil.RegexpCompile("\\$\\{\\w+}")
 
+// 监听服务定义
 type Listener struct {
 	config  *teaconfigs.ListenerConfig
 	servers map[*teaconfigs.ServerConfig]*Server
@@ -41,7 +42,7 @@ func (this *Listener) Start() {
 			this.locker.Unlock()
 		}
 
-		server.handle(writer, req)
+		server.handle(writer, req, this.config)
 	})
 
 	var err error
@@ -50,7 +51,9 @@ func (this *Listener) Start() {
 	if this.config.SSL != nil && this.config.SSL.On {
 		logs.Println("start ssl listener on", this.config.Address)
 		err = this.server.ListenAndServeTLS(Tea.ConfigFile(this.config.SSL.Certificate), Tea.ConfigFile(this.config.SSL.CertificateKey))
-	} else {
+	}
+
+	if this.config.Http {
 		logs.Println("start listener on", this.config.Address)
 		err = this.server.ListenAndServe()
 	}

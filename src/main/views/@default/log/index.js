@@ -68,9 +68,9 @@ Tea.context(function () {
                 this.qps = response.data.qps;
 
                 this.sourceLogs = response.data.logs.concat(this.sourceLogs);
-                this.sourceLogs.$each(function (_, v) {
-                    if (typeof(v["isOpen"]) === "undefined") {
-                        v.isOpen = false;
+                this.sourceLogs.$each(function (_, log) {
+                    if (typeof(log["isOpen"]) === "undefined") {
+                        log.isOpen = false;
                     }
                 });
 

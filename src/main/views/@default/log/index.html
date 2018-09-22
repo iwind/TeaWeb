@@ -3,7 +3,7 @@
 <div>
    <div>
        <div class="ui grid five column">
-           <div class="ui small statistic column">
+           <div class="ui tiny statistic column">
                <div class="label">
                    实时QPS
                </div>
@@ -16,7 +16,7 @@
                </div>
            </div>
 
-           <div class="ui small statistic column">
+           <div class="ui tiny statistic column">
                <div class="label">
                    24小时内共
                </div>
@@ -29,7 +29,7 @@
                </div>
            </div>
 
-           <div class="ui small statistic column">
+           <div class="ui tiny statistic column">
                <div class="label">
                    24小时内共成功
                </div>
@@ -42,7 +42,7 @@
                </div>
            </div>
 
-           <div class="ui small statistic column">
+           <div class="ui tiny statistic column">
                <div class="label">
                    24小时内共失败
                </div>
@@ -95,8 +95,8 @@
     <div v-if="logs.length > 0">
         <table class="ui table log-table">
             <tr v-for="(log, index) in logs" class="log-row">
-                <td><p v-on:click.prevent="showLog(index)" v-bind:class="{ error:log.status>=400 }">
-                        {{log.remoteAddr}} [{{log.timeLocal}}] <em>{{log.request}}</em> - 耗时:{{formatCost(log.requestTime)}} ms
+                <td><p v-on:click="showLog(index)" v-bind:class="{ error:log.status>=400 }">
+                        {{log.remoteAddr}} [{{log.timeLocal}}] <em>&quot;{{log.requestMethod}} {{log.requestScheme}}://{{log.host}}{{log.requestURI}} <a :href="log.requestScheme + '://' + log.host + log.requestURI" target="_blank" title="新窗口打开" class="disabled"><i class="external icon tiny"></i> </a> {{log.proto}}&quot;</em> - 耗时:{{formatCost(log.requestTime)}} ms
                         <i class="ui icon angle" v-bind:class="{ down:!log.isOpen, up:log.isOpen }"></i>
                     </p>
                     <table cellpadding="0" cellspacing="0" class="ui table selectable" v-if="log.isOpen">
@@ -131,6 +131,10 @@
                         <tr>
                             <td>ISO8601时间：{{log.timeISO8601}}</td>
                             <td>本地时间(TimeLocal)：{{log.timeLocal}}</td>
+                        </tr>
+                        <tr>
+                            <td>后端服务（Backend）：{{log.backendAddress}}</td>
+                            <td></td>
                         </tr>
                     </table>
                 </td>

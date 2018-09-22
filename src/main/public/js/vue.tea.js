@@ -52,6 +52,9 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
             var context = {};
             context.Tea = window.Tea;
 
+            // 内置方法
+            context["$delay"] = Tea.delay;
+
             for (key in data) {
                 if (!data.hasOwnProperty(key)) {
                     continue;
@@ -59,7 +62,6 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
                 context[key] = data[key];
             }
             
-            var backup = {};
             for (var i = 0; i < contextFunctions.length; i ++) {
                 var contextFn = contextFunctions[i];
                 if (typeof(contextFn) != "function") {
@@ -70,6 +72,15 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
                     if (!context.hasOwnProperty(key)) {
                         continue;
                     }
+                    if (typeof(key) != "string") {
+                        continue;
+                    }
+
+                    // 跳过自定义方法
+                    if (key.length > 0 && key[0] == "$") {
+                        continue;
+                    }
+
                     var value = context[key];
                     if (typeof(value) === "function") {
                         context[key] = function (value) {
@@ -81,9 +92,26 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
                 }
             }
 
+            // 清除context中的预定义变量
+            delete(context["$delay"]);
+
             window.Tea.Vue = new Vue({
                 el: "#tea-app",
-                data: context
+                data: context,
+
+                // 内置方法
+                methods: {
+                    $delay: Tea.delay,
+                    $get: function (action) {
+                        return Tea.action(action).get();
+                    },
+                    $post: function (action) {
+                        return Tea.action(action).post();
+                    },
+                    $go: Tea.go,
+                    $url: Tea.url,
+                    $find: Tea.element
+                }
             });
         }
         else {
@@ -99,7 +127,21 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
 
             window.Tea.Vue = new Vue({
                 el: "#tea-app",
-                data: context
+                data: context,
+
+                // 内置方法
+                methods: {
+                    $delay: Tea.delay,
+                    $get: function (action) {
+                        return Tea.action(action).get();
+                    },
+                    $post: function (action) {
+                        return Tea.action(action).post();
+                    },
+                    $go: Tea.go,
+                    $url: Tea.url,
+                    $find: Tea.element
+                }
             });
         }
     };
@@ -406,6 +448,7 @@ window.Tea.Action = function (action, params) {
     var _method = "POST";
     var _timeout = 30;
     var _delay = 0;
+    var _progressFn;
 
     this.params = function (params) {
         _params = params;
@@ -447,6 +490,11 @@ window.Tea.Action = function (action, params) {
         return this;
     };
 
+    this.progress = function (progressFn) {
+        _progressFn = progressFn;
+        return this;
+    };
+
     this.post = function () {
         _method = "POST";
         setTimeout(this._post);
@@ -473,6 +521,12 @@ window.Tea.Action = function (action, params) {
                 "X-Requested-With": "XMLHttpRequest"
             }
         };
+
+        if (_progressFn != null && typeof(_progressFn) == "function") {
+            config["onUploadProgress"] = function (event) {
+               _progressFn.call(Tea.Vue, event.loaded, event.total, event);
+            };
+        }
 
         if (_method === "GET") {
             config["params"] = params;
@@ -588,6 +642,7 @@ window.Tea.action = function (action) {
  * - data-tea-success
  * - data-tea-fail
  * - data-tea-error
+ * - data-tea-progress
  */
 window.Tea.activate = function (element) {
     var nodes = Tea.element("*[data-tea-action]", element);
@@ -632,6 +687,7 @@ window.Tea.runActionOn = function (element) {
     var successFn = form.attr("data-tea-success");
     var failFn = form.attr("data-tea-fail");
     var errorFn = form.attr("data-tea-error");
+    var progressFn = form.attr("data-tea-progress");
     if (confirm != null && confirm.length > 0 && !window.confirm(confirm)) {
         return;
     }
@@ -671,6 +727,14 @@ window.Tea.runActionOn = function (element) {
         if (typeof(Tea.Vue[errorFn]) === "function") {
             actionObject.error(function () {
                 Tea.Vue[errorFn].call(Tea.Vue);
+            });
+        }
+    }
+
+    if (progressFn != null && progressFn.length > 0) {
+        if (typeof(Tea.Vue[progressFn]) === "function") {
+            actionObject.progress(function () {
+                Tea.Vue[progressFn].apply(Tea.Vue, arguments);
             });
         }
     }
@@ -849,9 +913,69 @@ function TeaElementObjects(elements) {
         return this;
     };
 
+    this.text = function () {
+        if (arguments.length > 0) {
+            var text = arguments[0];
+            this.each(function (_, element) {
+                if (typeof(element.textContent) != "undefined") {
+                    element.textContent = text;
+                }
+                if (typeof(element.innerText) != "undefined") {
+                    element.innerText = text;
+                }
+            });
+            return this;
+        }
+
+        if (this.length == 0) {
+            return "";
+        }
+        if (typeof(elements[0].textContent) == "string") {
+            return elements[0].textContent;
+        }
+        return elements[0].innerText;
+    };
+
+    this.html = function () {
+        if (arguments.length > 0) {
+            var html = arguments[0];
+            this.each(function (_, element) {
+                element.innerHTML = html;
+            });
+            return this;
+        }
+
+        if (this.length == 0) {
+            return "";
+        }
+        return elements[0].innerHTML;
+    };
+
+    this.val = function () {
+        if (arguments.length > 0) {
+            var value = arguments[0];
+            this.each(function (_, element) {
+                element.value = value;
+            });
+            return this;
+        }
+
+        if (this.length == 0) {
+            return "";
+        }
+        return elements[0].value;
+    };
+
     this.length = elements.length;
 }
 
+/**
+ * 获取元素
+ *
+ * @param selector 选择器
+ * @param parent 父节点
+ * @returns {*}
+ */
 window.Tea.element = function (selector, parent) {
     var elements = [];
     if (typeof(selector) === "object" && /(function|object) \w+Element\b/.test(selector.constructor.toString())) {
@@ -871,6 +995,10 @@ window.Tea.element = function (selector, parent) {
     return new TeaElementObjects(elements);
 };
 
+/**
+ * 生成vue for用的key
+ * @returns {number}
+ */
 window.Tea.key = function () {
     return Math.random()
 };

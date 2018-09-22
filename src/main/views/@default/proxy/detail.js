@@ -1,7 +1,41 @@
 Tea.context(function () {
+    this.switchHttpOn = function () {
+        var message = this.proxy.http ? "确定要关闭HTTP吗？" : "确定要开启HTTP吗？";
+        if (!window.confirm(message)) {
+            return false;
+        }
+
+        this.proxy.http = !this.proxy.http;
+        if (this.proxy.http) {
+            this.$get(".httpOn").params({
+                "filename": this.filename
+            });
+        } else {
+            this.$get(".httpOff").params({
+                "filename": this.filename
+            });
+        }
+    };
+
+    // 代理ID
+    this.proxyIdEditing = false;
+
+    this.editId = function () {
+        this.proxyIdEditing = !this.proxyIdEditing;
+    };
+
+    this.editIdSave = function () {
+        this.$post(".updateId")
+            .params({
+                "filename": this.filename,
+                "id": this.proxy.id
+            });
+    };
+
+    // 代理说明
     this.proxyDescriptionEditing = false;
     this.editDescription = function () {
-        this.proxyDescriptionEditing = true;
+        this.proxyDescriptionEditing = !this.proxyDescriptionEditing;
     };
 
     this.editDescriptionSave = function () {
@@ -104,133 +138,4 @@ Tea.context(function () {
         })
             .post();
     };
-
-    /**
-     * SSL管理
-     */
-    this.showSSLOptions = (this.proxy.ssl != null) ? this.proxy.ssl.on : false;
-    this.sslCertFile = null;
-    this.sslCertEditing = false;
-
-    this.sslKeyFile = null;
-    this.sslKeyEditing = false;
-
-    this.switchSSLOn = function () {
-        this.showSSLOptions = !this.showSSLOptions;
-        if (this.proxy.ssl == null) {
-            this.proxy.ssl = { "on": this.showSSLOptions };
-        } else {
-            this.proxy.ssl.on = !this.proxy.ssl.on;
-        }
-
-        if (this.proxy.ssl.on) {
-            Tea.action("/proxy/ssl/on")
-                .params({
-                    "filename": this.filename
-                })
-                .post();
-        } else {
-            Tea.action("/proxy/ssl/off")
-                .params({
-                    "filename": this.filename
-                })
-                .post();
-        }
-    };
-
-    this.changeSSLCertFile = function (event) {
-        if (event.target.files.length > 0) {
-            this.sslCertFile = event.target.files[0];
-        }
-    };
-
-    this.uploadSSLCertFile = function () {
-        if (this.sslCertFile == null) {
-            alert("请先选择证书文件");
-            return;
-        }
-
-        Tea.action("/proxy/ssl/uploadCert")
-            .params({
-                "filename": this.filename,
-                "certFile": this.sslCertFile
-            })
-            .post();
-    };
-
-    this.changeSSLKeyFile = function (event) {
-        if (event.target.files.length > 0) {
-            this.sslKeyFile = event.target.files[0];
-        }
-    };
-
-    this.uploadSSLKeyFile = function () {
-        if (this.sslKeyFile == null) {
-            alert("请先选择密钥文件");
-            return;
-        }
-
-        Tea.action("/proxy/ssl/uploadKey")
-            .params({
-                "filename": this.filename,
-                "keyFile": this.sslKeyFile
-            })
-            .post();
-    };
-
-    /**
-     * 后端地址
-     */
-    this.backendAdding = false;
-    this.newBackendAddress = "";
-    this.backendEditing = false;
-
-    this.addBackend = function () {
-        this.backendAdding = !this.backendAdding;
-    };
-
-    this.addBackendSave = function () {
-        Tea.action("/proxy/backend/add")
-            .params({
-                "filename": this.filename,
-                "address": this.newBackendAddress
-            })
-            .post();
-    };
-
-    this.editBackendCancel = function (index, backend) {
-        backend.isEditing = !backend.isEditing;
-        Tea.Vue.$set(this.proxy.backends, index, backend);
-    };
-
-    this.editBackend = function (index, backend) {
-        backend.isEditing = true;
-        this.backendEditing = !this.backendEditing;
-
-        Tea.Vue.$set(this.proxy.backends, index, backend);
-    };
-
-    this.editBackendSave = function (index, backend) {
-        console.log(backend);
-        Tea.action("/proxy/backend/update")
-            .params({
-                "filename": this.filename,
-                "index": index,
-                "address": backend.address
-            })
-            .post();
-    };
-
-    this.deleteBackend = function (index) {
-        if (!window.confirm("确定要删除此服务器吗？")) {
-            return;
-        }
-        Tea.action("/proxy/backend/delete")
-            .params({
-                "filename": this.filename,
-                "index": index
-            })
-            .post();
-    };
-
 });
