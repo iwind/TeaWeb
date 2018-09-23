@@ -97,21 +97,6 @@ func NewServerConfigFromFile(filename string) (*ServerConfig, error) {
 	return config, nil
 }
 
-// 添加域名
-func (this *ServerConfig) AddName(name ... string) {
-	this.Name = append(this.Name, name ...)
-}
-
-// 添加监听地址
-func (this *ServerConfig) AddListen(address string) {
-	this.Listen = append(this.Listen, address)
-}
-
-// 添加后端服务
-func (this *ServerConfig) AddBackend(config *ServerBackendConfig) {
-	this.Backends = append(this.Backends, config)
-}
-
 // 校验配置
 func (this *ServerConfig) Validate() error {
 	// backends
@@ -131,6 +116,34 @@ func (this *ServerConfig) Validate() error {
 	}
 
 	return nil
+}
+
+// 添加域名
+func (this *ServerConfig) AddName(name ... string) {
+	this.Name = append(this.Name, name ...)
+}
+
+// 添加监听地址
+func (this *ServerConfig) AddListen(address string) {
+	this.Listen = append(this.Listen, address)
+}
+
+// 添加后端服务
+func (this *ServerConfig) AddBackend(config *ServerBackendConfig) {
+	this.Backends = append(this.Backends, config)
+}
+
+// 获取某个位置上的配置
+func (this *ServerConfig) LocationAtIndex(index int) *LocationConfig {
+	if index < 0 {
+		return nil
+	}
+	if index >= len(this.Locations) {
+		return nil
+	}
+	location := this.Locations[index]
+	location.Validate()
+	return location
 }
 
 // 将配置写入文件

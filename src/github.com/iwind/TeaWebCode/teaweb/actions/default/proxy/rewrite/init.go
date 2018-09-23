@@ -1,4 +1,4 @@
-package locations
+package rewrite
 
 import (
 	"github.com/iwind/TeaGo"
@@ -8,17 +8,13 @@ import (
 
 func init() {
 	TeaGo.BeforeStart(func(server *TeaGo.Server) {
-		server.Prefix("/proxy/locations").
+		server.
+			Prefix("/proxy/rewrite").
 			Helper(new(helpers.UserMustAuth)).
 			Helper(new(proxy.Helper)).
-			Get("", new(IndexAction)).
 			Post("/add", new(AddAction)).
 			Post("/delete", new(DeleteAction)).
-			Get("/detail", new(DetailAction)).
-			Post("/on", new(OnAction)).
-			Post("/off", new(OffAction)).
-			Post("/updateReverse", new(UpdateReverseAction)).
-			Post("/updateCaseInsensitive", new(UpdateCaseInsensitiveAction)).
+			Post("/update", new(UpdateAction)).
 			EndAll()
 	})
 }

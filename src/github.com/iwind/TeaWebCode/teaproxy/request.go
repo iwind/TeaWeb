@@ -205,6 +205,10 @@ func (this *Request) filterLocations(writer http.ResponseWriter, locations []*te
 	var cacheKey = ""
 	// @TODO 提升性能
 	for _, location := range locations {
+		if !location.On {
+			continue
+		}
+
 		if location.Match(requestPath) {
 			// @TODO 日志
 			//logs.Println("accessLog:", location.AccessLog)

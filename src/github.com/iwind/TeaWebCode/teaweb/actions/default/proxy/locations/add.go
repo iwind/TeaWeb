@@ -41,6 +41,6 @@ func (this *AddAction) Run(params struct {
 	this.Next("/proxy/locations/detail", map[string]interface{}{
 		"filename": params.Filename,
 		"index":    len(proxy.Locations) - 1,
-	}, "")
+	})
 	this.Success()
 }

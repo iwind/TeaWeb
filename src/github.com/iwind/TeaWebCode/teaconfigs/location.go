@@ -128,6 +128,7 @@ func (this *LocationConfig) Validate() error {
 				}
 				this.reg = reg
 				this.reverse = true
+				this.caseInsensitive = true
 				this.path = pattern
 			} else {
 				this.patternType = LocationPatternTypePrefix

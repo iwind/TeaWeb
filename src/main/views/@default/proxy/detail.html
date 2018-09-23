@@ -4,10 +4,10 @@
     <h3>{{proxy.description}}（{{proxy.id}}）</h3>
 
     <div class="ui text menu blue">
-        <a :href="$url('/proxy/detail', { 'filename':filename })" class="item active">基础信息</a>
+        <a :href="$url('/proxy/detail', { 'filename':filename })" class="item active">基本信息</a>
         <a :href="$url('/proxy/ssl', { 'filename':filename })" class="item green">HTTPS<i class="ui icon expeditedssl" :class="{green:proxy.ssl && proxy.ssl.on, grey:!proxy.ssl || !proxy.ssl.on}"></i></a>
         <a :href="$url('/proxy/backend', { 'filename':filename })" class="item">后端服务器({{proxy.backends.length}})</a>
-        <a :href="$url('/proxy/locations', { 'filename':filename })" class="item">路径</a>
+        <a :href="$url('/proxy/locations', { 'filename':filename })" class="item">路径规则({{proxy.locations.length}})</a>
     </div>
 
     <form class="ui form" autocomplete="off" onsubmit="return false">
@@ -36,7 +36,7 @@
                 </td>
                 <td>
                     <a href="" v-on:click.prevent="editIdSave()" title="保存"><i class="ui icon check circle"></i></a>
-                    <a href="" v-on:click.prevent="proxyIdEditing = !proxyIdEditing" title="取消"><i class="ui icon arrow left"></i></a>
+                    <a href="" v-on:click.prevent="proxyIdEditing = !proxyIdEditing" title="取消"><i class="ui icon arrow left circle"></i></a>
                 </td>
             </tr>
 
@@ -55,7 +55,7 @@
             </td>
             <td>
                 <a href="" v-on:click.prevent="editDescriptionSave()" title="保存"><i class="ui icon check circle"></i></a>
-                <a href="" v-on:click.prevent="proxyDescriptionEditing = !proxyDescriptionEditing" title="取消"><i class="ui icon arrow left"></i></a>
+                <a href="" v-on:click.prevent="proxyDescriptionEditing = !proxyDescriptionEditing" title="取消"><i class="ui icon arrow left circle"></i></a>
             </td>
         </tr>
         <tr v-if="proxy.name.length == 0">
@@ -81,7 +81,7 @@
                 </td>
                 <td>
                     <a href="" v-on:click.prevent="editNameSave(index,name)" title="保存"><i class="ui icon check circle"></i></a>
-                    <a href="" v-on:click.prevent="editNameCancel()" title="取消"><i class="ui icon arrow left"></i> </a>
+                    <a href="" v-on:click.prevent="editNameCancel()" title="取消"><i class="ui icon arrow left circle"></i> </a>
                 </td>
             </tr>
         </tbody>
@@ -92,7 +92,7 @@
             </td>
             <td>
                 <a href="" v-on:click.prevent="addNameSave()" title="保存"><i class="ui icon check circle"></i></a>
-                <a href="" v-on:click.prevent="nameAdding = false" title="取消"><i class="ui icon arrow left"></i> </a>
+                <a href="" v-on:click.prevent="nameAdding = false" title="取消"><i class="ui icon arrow left circle"></i> </a>
             </td>
         </tr>
         <tr>
@@ -119,7 +119,7 @@
                 </td>
                 <td>
                     <a href="" v-on:click.prevent="editListenSave(index,listen)" title="保存"><i class="ui icon check circle"></i></a>
-                    <a href="" v-on:click.prevent="editListenIndex = -1" title="取消"><i class="ui icon arrow left"></i> </a>
+                    <a href="" v-on:click.prevent="editListenIndex = -1" title="取消"><i class="ui icon arrow left circle"></i> </a>
                 </td>
             </tr>
         </tbody>
@@ -130,7 +130,7 @@
             </td>
             <td>
                 <a href="" v-on:click.prevent="addListenSave()" title="保存"><i class="ui icon check circle"></i></a>
-                <a href="" v-on:click.prevent="listenAdding = false" title="取消"><i class="ui icon arrow left"></i> </a>
+                <a href="" v-on:click.prevent="listenAdding = false" title="取消"><i class="ui icon arrow left circle"></i> </a>
             </td>
         </tr>
         <tr>

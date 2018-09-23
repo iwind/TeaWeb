@@ -15,6 +15,7 @@ import (
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/ssl"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/backend"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/locations"
+	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/rewrite"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/log"
 	"github.com/iwind/TeaWebCode/teaweb/helpers"
 )

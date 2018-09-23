@@ -38,6 +38,7 @@ func (this *IndexAction) Run(params struct {
 	for _, location := range proxy.Locations {
 		location.Validate()
 		locations = append(locations, maps.Map{
+			"on":              location.On,
 			"type":            location.PatternType(),
 			"pattern":         location.PatternString(),
 			"caseInsensitive": location.IsCaseInsensitive(),

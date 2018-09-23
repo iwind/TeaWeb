@@ -25,6 +25,7 @@ type RewriteRule struct {
 	// - cond ${status} 200
 	// - cond ${arg.name} lily
 	// - cond ${requestPath} *.png
+	// @TODO 需要实现
 	Cond []RewriteCond `yaml:"cond" json:"cond"`
 
 	// 规则
@@ -35,12 +36,16 @@ type RewriteRule struct {
 
 	// 要替换成的URL
 	// 支持反向引用：${0}, ${1}, ...
-	// 如果以 proxy: 开头，表示为目标为代理，首先会尝试作为代理ID请求，如果找不到，会尝试作为代理Host请求
+	// - 如果以 proxy:// 开头，表示目标为代理，首先会尝试作为代理ID请求，如果找不到，会尝试作为代理Host请求
 	Replace string `yaml:"replace" json:"replace"`
 
 	targetType  int // RewriteTarget*
 	targetURL   string
 	targetProxy string
+}
+
+func NewRewriteRule() *RewriteRule {
+	return &RewriteRule{}
 }
 
 func (this *RewriteRule) Validate() error {
@@ -51,9 +56,9 @@ func (this *RewriteRule) Validate() error {
 	this.reg = reg
 
 	// 替换replace中的反向引用
-	if strings.HasPrefix(this.Replace, "proxy:") {
+	if strings.HasPrefix(this.Replace, "proxy://") {
 		this.targetType = RewriteTargetProxy
-		url := this.Replace[len("proxy:"):]
+		url := this.Replace[len("proxy://"):]
 		index := strings.Index(url, "/")
 		if index >= 0 {
 			this.targetProxy = url[:index]

@@ -36,12 +36,12 @@ func TestRewriteRuleProxy(t *testing.T) {
 
 	rule := RewriteRule{
 		Pattern: "/(hello)/(world)",
-		Replace: "proxy:lb001/${1}/${2}",
+		Replace: "proxy://lb001/${1}/${2}",
 	}
 	a.IsNil(rule.Validate())
 	a.IsTrue(rule.Apply("/hello/world", func(source string) string {
 		return source
 	}))
-	a.Log("proxy:", rule.TargetProxy())
-	a.Log("url:", rule.TargetURL())
+	a.IsTrue(rule.TargetProxy() == "lb001")
+	a.IsTrue(rule.TargetURL() == "/hello/world")
 }
