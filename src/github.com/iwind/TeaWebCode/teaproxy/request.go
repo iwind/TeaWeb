@@ -13,6 +13,9 @@ import (
 	"sync"
 	"io"
 	"bufio"
+	"github.com/iwind/TeaWebCode/teaconfigs"
+	"github.com/iwind/TeaGo/utils/string"
+	"github.com/iwind/TeaGo/Tea"
 )
 
 type Request struct {
@@ -183,5 +186,65 @@ func (this *Request) ReadCache(writer http.ResponseWriter, cacheFile string) boo
 
 	io.Copy(writer, resp.Body)
 	resp.Body.Close()
+	return true
+}
+
+// @TODO 利用当前请求的方法格式化字符串
+// 变量使用：${varName} 来表示
+func (this *Request) Format(format string) string {
+	return format
+}
+
+func (this *Request) filterLocations(writer http.ResponseWriter, locations []*teaconfigs.LocationConfig) (goNext bool) {
+	if len(locations) == 0 {
+		return true
+	}
+
+	requestPath := this.URL().Path
+
+	var cacheKey = ""
+	// @TODO 提升性能
+	for _, location := range locations {
+		if location.Match(requestPath) {
+			// @TODO 日志
+			//logs.Println("accessLog:", location.AccessLog)
+			if len(location.AccessLog) > 0 {
+
+			}
+
+			// 缓存
+			if location.Cache != nil {
+				cacheKey = stringutil.Md5(this.Format(location.Cache.Key))
+				cachePath := location.Cache.Path
+				if len(cachePath) == 0 {
+					cachePath = "cache"
+				}
+				if !filepath.IsAbs(cachePath) {
+					cachePath = Tea.Root + Tea.DS + cachePath
+				}
+
+				cacheFile := cachePath + Tea.DS + cacheKey + ".cache"
+				if this.ReadCache(writer, cacheFile) {
+					return true
+				}
+				this.SetCacheFile(cacheFile)
+			}
+
+			// @TODO 重写规则
+			if len(location.Rewrite) > 0 {
+				for _, rewriteRule := range location.Rewrite {
+					if rewriteRule.Apply(requestPath, func(source string) string {
+						return this.Format(source)
+					}) {
+						logs.Println("find rewrite")
+						return false;
+					}
+				}
+			}
+
+			// @TODO fastcgi
+		}
+	}
+
 	return true
 }

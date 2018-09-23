@@ -4,11 +4,10 @@ import (
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaGo/maps"
+	"github.com/iwind/TeaGo/actions"
 )
 
-type IndexAction struct {
-	ParentAction
-}
+type IndexAction actions.Action
 
 func (this *IndexAction) Run(params struct {
 }) {

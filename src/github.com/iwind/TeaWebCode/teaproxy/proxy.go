@@ -5,9 +5,6 @@ import (
 	"time"
 	"github.com/iwind/TeaWebCode/tealog"
 	"github.com/iwind/TeaWebCode/teaconst"
-	"github.com/iwind/TeaGo/utils/string"
-	"path/filepath"
-	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaGo/logs"
 	"net/http"
 	"io"
@@ -17,19 +14,22 @@ import (
 	"github.com/iwind/TeaGo/types"
 )
 
-type Server struct {
+// 代理服务
+type ProxyServer struct {
 	config        *teaconfigs.ServerConfig
 	globalWriters map[*teaconfigs.AccessLogConfig]tealog.AccessLogWriter
 }
 
-func NewServer(config *teaconfigs.ServerConfig) *Server {
-	return &Server{
+// 获取新代理服务
+func NewServer(config *teaconfigs.ServerConfig) *ProxyServer {
+	return &ProxyServer{
 		config:        config,
 		globalWriters: map[*teaconfigs.AccessLogConfig]tealog.AccessLogWriter{},
 	}
 }
 
-func (this *Server) handle(writer http.ResponseWriter, req *http.Request, listenerConfig *teaconfigs.ListenerConfig) {
+// 处理请求
+func (this *ProxyServer) handle(writer http.ResponseWriter, req *http.Request, listenerConfig *teaconfigs.ListenerConfig) {
 	// scheme
 	scheme := "http"
 	if req.URL != nil {
@@ -114,37 +114,9 @@ func (this *Server) handle(writer http.ResponseWriter, req *http.Request, listen
 	}
 
 	// 当前Location定制的特性
-	var cacheKey = ""
-	if len(this.config.Locations) > 0 {
-		// @TODO 提升性能
-		// @TODO locations必须是有顺序的
-		for _, location := range this.config.Locations {
-			if location.Match(request.URL().Path) {
-				// @TODO 日志
-				//logs.Println("accessLog:", location.AccessLog)
-				if len(location.AccessLog) > 0 {
-
-				}
-
-				// 缓存
-				if location.Cache != nil {
-					cacheKey = stringutil.Md5(this.parseVariables(location.Cache.Key, request.Variables()))
-					cachePath := location.Cache.Path
-					if len(cachePath) == 0 {
-						cachePath = "cache"
-					}
-					if !filepath.IsAbs(cachePath) {
-						cachePath = Tea.Root + Tea.DS + cachePath
-					}
-
-					cacheFile := cachePath + Tea.DS + cacheKey + ".cache"
-					if request.ReadCache(writer, cacheFile) {
-						return
-					}
-					request.SetCacheFile(cacheFile)
-				}
-			}
-		}
+	goNext := request.filterLocations(writer, this.config.Locations)
+	if !goNext {
+		return
 	}
 
 	// @TODO 检查是否为代理
@@ -153,7 +125,7 @@ func (this *Server) handle(writer http.ResponseWriter, req *http.Request, listen
 	}
 }
 
-func (this *Server) proxyPass(writer http.ResponseWriter, request *Request, log *tealog.AccessLog) {
+func (this *ProxyServer) proxyPass(writer http.ResponseWriter, request *Request, log *tealog.AccessLog) {
 	// 检查后端
 	if len(this.config.Backends) == 0 {
 		http.Error(writer, "no backends available", http.StatusInternalServerError)
@@ -290,14 +262,4 @@ func (this *Server) proxyPass(writer http.ResponseWriter, request *Request, log 
 		log.BodyBytesSent = written
 	}
 	resp.Body.Close()
-}
-
-func (this *Server) parseVariables(s string, variables map[string]string) string {
-	return variablesReg.ReplaceAllStringFunc(s, func(match string) string {
-		value, found := variables[match[2:len(match)-1]]
-		if found {
-			return value
-		}
-		return ""
-	})
 }

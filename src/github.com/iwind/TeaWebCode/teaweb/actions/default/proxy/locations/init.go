@@ -12,6 +12,9 @@ func init() {
 			Helper(new(helpers.UserMustAuth)).
 			Helper(new(proxy.Helper)).
 			Get("", new(IndexAction)).
+			Post("/add", new(AddAction)).
+			Post("/delete", new(DeleteAction)).
+			Get("/detail", new(DetailAction)).
 			EndAll()
 	})
 }

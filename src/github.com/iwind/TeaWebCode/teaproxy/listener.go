@@ -4,17 +4,14 @@ import (
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"net/http"
 	"github.com/iwind/TeaGo/logs"
-	"github.com/iwind/TeaGo/utils/string"
 	"sync"
 	"github.com/iwind/TeaGo/Tea"
 )
 
-var variablesReg, _ = stringutil.RegexpCompile("\\$\\{\\w+}")
-
 // 监听服务定义
 type Listener struct {
 	config  *teaconfigs.ListenerConfig
-	servers map[*teaconfigs.ServerConfig]*Server
+	servers map[*teaconfigs.ServerConfig]*ProxyServer
 	locker  *sync.Mutex
 	server  *http.Server
 }
@@ -22,7 +19,7 @@ type Listener struct {
 func NewListener(config *teaconfigs.ListenerConfig) *Listener {
 	listener := &Listener{
 		config:  config,
-		servers: map[*teaconfigs.ServerConfig]*Server{},
+		servers: map[*teaconfigs.ServerConfig]*ProxyServer{},
 		locker:  &sync.Mutex{},
 	}
 	LISTENERS = append(LISTENERS, listener)

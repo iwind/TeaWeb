@@ -7,22 +7,22 @@ import (
 
 const (
 	LocationPatternTypePrefix = 1
-	LocationPatternTypePath   = 2
+	LocationPatternTypeExact  = 2
 	LocationPatternTypeRegexp = 3
 )
 
 // 路径配置
+// @TODO 匹配的时候去除路径中多于的斜杠（/）
 type LocationConfig struct {
 	On      bool   `yaml:"on" json:"on"`           // 是否开启 @TODO
-	Pattern string `yaml:"pattern" json:"pattern"` //  @TODO
+	Pattern string `yaml:"pattern" json:"pattern"` // 匹配规则  @TODO
 
-	patternType int // LocationPattern*
+	patternType int // 规则类型：LocationPattern*
 
 	prefix string // 前缀
 	path   string // 精确的路径
 
-	regexp  *regexp.Regexp    // 匹配规则
-	matches map[string]string // 匹配的内容，以便在rewrite中使用
+	reg *regexp.Regexp // 匹配规则
 
 	caseInsensitive bool // 大小写不敏感
 	reverse         bool // 是否翻转规则，比如非前缀，非路径
@@ -65,47 +65,73 @@ func (this *LocationConfig) Validate() error {
 		} else {
 			cmd := this.Pattern[:spaceIndex]
 			pattern := strings.TrimSpace(this.Pattern[spaceIndex+1:])
-			if cmd == "=" {
-				this.patternType = LocationPatternTypePath
+			if cmd == "*" { // 大小写非敏感
+				this.patternType = LocationPatternTypePrefix
+				this.prefix = pattern
+				this.caseInsensitive = true
+			} else if cmd == "!*" { // 大小写非敏感，翻转
+				this.patternType = LocationPatternTypePrefix
+				this.prefix = pattern
+				this.caseInsensitive = true
+				this.reverse = true
+			} else if cmd == "!" {
+				this.patternType = LocationPatternTypePrefix
+				this.prefix = pattern
+				this.reverse = true
+			} else if cmd == "=" {
+				this.patternType = LocationPatternTypeExact
 				this.path = pattern
+			} else if cmd == "=*" {
+				this.patternType = LocationPatternTypeExact
+				this.path = pattern
+				this.caseInsensitive = true
 			} else if cmd == "!=" {
-				this.patternType = LocationPatternTypePath
+				this.patternType = LocationPatternTypeExact
 				this.path = pattern
 				this.reverse = true
+			} else if cmd == "!=*" {
+				this.patternType = LocationPatternTypeExact
+				this.path = pattern
+				this.reverse = true
+				this.caseInsensitive = true
 			} else if cmd == "~" { // 正则
 				this.patternType = LocationPatternTypeRegexp
 				reg, err := regexp.Compile(pattern)
 				if err != nil {
 					return err
 				}
-				this.regexp = reg
+				this.reg = reg
+				this.path = pattern
 			} else if cmd == "!~" {
 				this.patternType = LocationPatternTypeRegexp
 				reg, err := regexp.Compile(pattern)
 				if err != nil {
 					return err
 				}
-				this.regexp = reg
+				this.reg = reg
 				this.reverse = true
+				this.path = pattern
 			} else if cmd == "~*" { // 大小写非敏感小写
 				this.patternType = LocationPatternTypeRegexp
 				reg, err := regexp.Compile("(?i)" + pattern)
 				if err != nil {
 					return err
 				}
-				this.regexp = reg
+				this.reg = reg
 				this.caseInsensitive = true
+				this.path = pattern
 			} else if cmd == "!~*" {
 				this.patternType = LocationPatternTypeRegexp
 				reg, err := regexp.Compile("(?i)" + pattern)
 				if err != nil {
 					return err
 				}
-				this.regexp = reg
+				this.reg = reg
 				this.reverse = true
+				this.path = pattern
 			} else {
 				this.patternType = LocationPatternTypePrefix
-				this.prefix = this.Pattern
+				this.prefix = pattern
 			}
 		}
 	} else {
@@ -140,29 +166,70 @@ func (this *LocationConfig) Validate() error {
 	return nil
 }
 
+// 模式类型
+func (this *LocationConfig) PatternType() int {
+	return this.patternType
+}
+
+// 模式字符串
+// 去掉了模式字符
+func (this *LocationConfig) PatternString() string {
+	if this.patternType == LocationPatternTypePrefix {
+		return this.prefix
+	}
+	return this.path
+}
+
+// 是否翻转
+func (this *LocationConfig) IsReverse() bool {
+	return this.reverse
+}
+
+// 是否大小写非敏感
+func (this *LocationConfig) IsCaseInsensitive() bool {
+	return this.caseInsensitive
+}
+
+// 判断是否匹配路径
 func (this *LocationConfig) Match(path string) bool {
 	if this.patternType == LocationPatternTypePrefix {
 		if this.reverse {
-			return !strings.HasPrefix(path, this.prefix)
+			if this.caseInsensitive {
+				return !strings.HasPrefix(strings.ToLower(path), strings.ToLower(this.prefix))
+			} else {
+				return !strings.HasPrefix(path, this.prefix)
+			}
 		} else {
-			return strings.HasPrefix(path, this.prefix)
+			if this.caseInsensitive {
+				return strings.HasPrefix(strings.ToLower(path), strings.ToLower(this.prefix))
+			} else {
+				return strings.HasPrefix(path, this.prefix)
+			}
 		}
 	}
 
-	if this.patternType == LocationPatternTypePath {
+	if this.patternType == LocationPatternTypeExact {
 		if this.reverse {
-			return path != this.path
+			if this.caseInsensitive {
+				return strings.ToLower(path) != strings.ToLower(this.path)
+			} else {
+				return path != this.path
+			}
 		} else {
-			return path == this.path
+			if this.caseInsensitive {
+				return strings.ToLower(path) == strings.ToLower(this.path)
+			} else {
+				return path == this.path
+			}
 		}
 	}
 
 	if this.patternType == LocationPatternTypeRegexp {
-		if this.regexp != nil {
+		if this.reg != nil {
 			if this.reverse {
-				return !this.regexp.MatchString(path)
+				return !this.reg.MatchString(path)
 			} else {
-				return this.regexp.MatchString(path)
+				return this.reg.MatchString(path)
 			}
 		}
 
@@ -170,4 +237,41 @@ func (this *LocationConfig) Match(path string) bool {
 	}
 
 	return false
+}
+
+// 组合参数为一个字符串
+func (this *LocationConfig) SetPattern(pattern string, patternType int, caseInsensitive bool, reverse bool) {
+	op := ""
+	if patternType == LocationPatternTypePrefix {
+		if caseInsensitive {
+			op = "*"
+			if reverse {
+				op = "!*"
+			}
+		} else {
+			if reverse {
+				op = "!"
+			}
+		}
+	} else if patternType == LocationPatternTypeExact {
+		op = "="
+		if caseInsensitive {
+			op += "*"
+		}
+		if reverse {
+			op = "!" + op
+		}
+	} else if patternType == LocationPatternTypeRegexp {
+		op = "~"
+		if caseInsensitive {
+			op += "*"
+		}
+		if reverse {
+			op = "!" + op
+		}
+	}
+	if len(op) > 0 {
+		pattern = op + " " + pattern
+	}
+	this.Pattern = pattern
 }

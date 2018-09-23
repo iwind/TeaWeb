@@ -9,9 +9,7 @@ import (
 )
 
 // 添加新的服务
-type AddAction struct {
-	ParentAction
-}
+type AddAction actions.Action
 
 func (this *AddAction) Run(params struct {
 }) {

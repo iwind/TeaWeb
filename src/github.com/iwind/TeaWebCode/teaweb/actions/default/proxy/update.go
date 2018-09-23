@@ -13,9 +13,7 @@ import (
 	"github.com/iwind/TeaWebCode/teaproxy"
 )
 
-type UpdateAction struct {
-	ParentAction
-}
+type UpdateAction actions.Action
 
 func (this *UpdateAction) Run(params struct {
 	Filename string
