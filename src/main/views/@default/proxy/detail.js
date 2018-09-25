@@ -39,12 +39,11 @@ Tea.context(function () {
     };
 
     this.editDescriptionSave = function () {
-        Tea.action(".updateDescription")
+        this.$post(".updateDescription")
             .params({
                 "filename": this.filename,
                 "description": this.proxy.description
-            })
-            .post();
+            });
     };
 
     /**
@@ -57,12 +56,11 @@ Tea.context(function () {
     };
 
     this.addNameSave = function () {
-        Tea.action(".addName")
+        this.$post(".addName")
             .params({
                 "filename": this.filename,
                 "name": this.newName
-            })
-            .post();
+            });
     };
 
     this.editNameIndex = -1;
@@ -71,12 +69,11 @@ Tea.context(function () {
     };
 
     this.editNameSave = function (index, name) {
-        Tea.action(".updateName").params({
+        this.$post(".updateName").params({
                 "filename": this.filename,
                 "index": index,
                 "name": name
-            })
-            .post();
+            });
     };
 
     this.editNameCancel = function () {
@@ -88,11 +85,10 @@ Tea.context(function () {
             return;
         }
 
-        Tea.action(".deleteName").params({
+        this.$post(".deleteName").params({
             "filename": this.filename,
             "index": index
-        })
-            .post();
+        });
     };
 
     /**
@@ -105,12 +101,11 @@ Tea.context(function () {
     };
 
     this.addListenSave = function () {
-        Tea.action(".addListen")
+        this.$post(".addListen")
             .params({
                 "filename": this.filename,
                 "listen": this.newListen
-            })
-            .post();
+            });
     };
 
     this.editListenIndex = -1;
@@ -119,12 +114,11 @@ Tea.context(function () {
     };
 
     this.editListenSave = function (index, listen) {
-        Tea.action(".updateListen").params({
+        this.$post(".updateListen").params({
             "filename": this.filename,
             "index": index,
             "listen": listen
-        })
-            .post();
+        });
     };
 
     this.deleteListen = function (index) {
@@ -132,10 +126,9 @@ Tea.context(function () {
             return;
         }
 
-        Tea.action(".deleteListen").params({
+        this.$post(".deleteListen").params({
             "filename": this.filename,
             "index": index
-        })
-            .post();
+        });
     };
 });

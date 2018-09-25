@@ -6,8 +6,7 @@ Tea.context(function () {
     this.outputBandwidth = "-";
 
    this.refresh = function () {
-       Tea.action(".widget")
-           .post()
+       this.$post(".widget")
            .success(function (response) {
                 this.qps = response.data.qps;
 

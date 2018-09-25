@@ -23,17 +23,15 @@ Tea.context(function () {
         }
 
         if (this.proxy.ssl.on) {
-            Tea.action("/proxy/ssl/on")
+            this.$post("/proxy/ssl/on")
                 .params({
                     "filename": this.filename
-                })
-                .post();
+                });
         } else {
-            Tea.action("/proxy/ssl/off")
+            this.$post("/proxy/ssl/off")
                 .params({
                     "filename": this.filename
-                })
-                .post();
+                });
         }
     };
 
@@ -49,12 +47,11 @@ Tea.context(function () {
             return;
         }
 
-        Tea.action("/proxy/ssl/uploadCert")
+        this.$post("/proxy/ssl/uploadCert")
             .params({
                 "filename": this.filename,
                 "certFile": this.sslCertFile
-            })
-            .post();
+            });
     };
 
     this.changeSSLKeyFile = function (event) {
@@ -69,11 +66,10 @@ Tea.context(function () {
             return;
         }
 
-        Tea.action("/proxy/ssl/uploadKey")
+        this.$post("/proxy/ssl/uploadKey")
             .params({
                 "filename": this.filename,
                 "keyFile": this.sslKeyFile
-            })
-            .post();
+            });
     };
 });

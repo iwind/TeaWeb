@@ -56,7 +56,7 @@ Tea.context(function () {
         if (this.fromId > 0) {
             size = 200;
         }
-        Tea.action(".get")
+        this.$get(".get")
             .params({
                 "fromId": this.fromId,
                 "size": size
@@ -89,8 +89,7 @@ Tea.context(function () {
                 Tea.delay(function () {
                     this.loadLogs();
                 }, 1000)
-            })
-            .get();
+            });
     };
 
     this.showLog = function (index) {

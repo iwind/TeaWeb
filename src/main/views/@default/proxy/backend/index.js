@@ -12,12 +12,11 @@ Tea.context(function () {
     };
 
     this.addBackendSave = function () {
-        Tea.action("/proxy/backend/add")
+        this.$post("/proxy/backend/add")
             .params({
                 "filename": this.filename,
                 "address": this.newBackendAddress
-            })
-            .post();
+            });
     };
 
     this.editBackendCancel = function (index, backend) {
@@ -34,25 +33,23 @@ Tea.context(function () {
 
     this.editBackendSave = function (index, backend) {
         console.log(backend);
-        Tea.action("/proxy/backend/update")
+        this.$post("/proxy/backend/update")
             .params({
                 "filename": this.filename,
                 "index": index,
                 "address": backend.address
-            })
-            .post();
+            });
     };
 
     this.deleteBackend = function (index) {
         if (!window.confirm("确定要删除此服务器吗？")) {
             return;
         }
-        Tea.action("/proxy/backend/delete")
+        this.$post("/proxy/backend/delete")
             .params({
                 "filename": this.filename,
                 "index": index
-            })
-            .post();
+            });
     };
 
 });
