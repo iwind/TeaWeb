@@ -19,10 +19,7 @@ func (this *DeleteAction) Run(params struct {
 	}
 
 	if params.Index >= 0 && params.Index < len(server.Backends) {
-		backends := lists.NewList(server.Backends)
-		backends.Remove(params.Index)
-
-		server.Backends = backends.Slice.([]*teaconfigs.ServerBackendConfig)
+		server.Backends = lists.Remove(server.Backends, params.Index).([]*teaconfigs.ServerBackendConfig)
 	}
 
 	server.WriteToFilename(params.Filename)

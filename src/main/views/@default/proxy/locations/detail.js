@@ -89,8 +89,12 @@ Tea.context(function () {
             var index = rewrite.replace.indexOf("/", "proxy://".length);
             rewrite.proxy = rewrite.replace.substring(0, index);
             rewrite.replace = rewrite.replace.substring(index);
+            rewrite.type = "proxy";
+            rewrite.proxyId = rewrite.proxy.substr("proxy://".length);
         } else {
             rewrite.proxy = "";
+            rewrite.type = "url";
+            rewrite.proxyId = "";
         }
         return rewrite;
     });
@@ -124,6 +128,69 @@ Tea.context(function () {
                 "filename": this.filename,
                 "index": this.locationIndex,
                 "rewriteIndex": index
+            });
+    };
+
+    /**
+     * 修改重写规则
+     */
+    this.editRewrite = function (rewrite, index) {
+        var that = this;
+        this.location.rewrite.$each(function (k, v) {
+            if (k == index) {
+                if (typeof(rewrite.isEditing) == "undefined") {
+                    rewrite.isEditing = true;
+                } else {
+                    rewrite.isEditing = !rewrite.isEditing;
+                }
+                Tea.Vue.$set(that.location.rewrite, index, rewrite);
+            } else {
+                v.isEditing = false;
+                Tea.Vue.$set(that.location.rewrite, k, v);
+            }
+        });
+    };
+
+    this.switchRewriteIndex = function (rewrite, index) {
+        rewrite.on = !rewrite.on;
+        if (rewrite.on) {
+            this.$post("/proxy/rewrite/on")
+                .params({
+                    "filename": this.filename,
+                    "index": this.locationIndex,
+                    "rewriteIndex": index
+                })
+                .fail(function () {
+                    window.location.reload();
+                });
+        } else {
+            this.$post("/proxy/rewrite/off")
+                .params({
+                    "filename": this.filename,
+                    "index": this.locationIndex,
+                    "rewriteIndex": index
+                })
+                .fail(function () {
+                    window.location.reload();
+                });
+        }
+    };
+
+    this.cancelEditRewrite = function (rewrite, index) {
+        rewrite.isEditing = false;
+        Tea.Vue.$set(this.location.rewrite, index, rewrite);
+    };
+
+    this.updateRewrite = function (rewrite, index) {
+        this.$post("/proxy/rewrite/update")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex,
+                "rewriteIndex": index,
+                "pattern": rewrite.pattern,
+                "replace": rewrite.replace,
+                "targetType": rewrite.type,
+                "proxyId": rewrite.proxyId
             });
     };
 });

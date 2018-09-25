@@ -20,9 +20,7 @@ func (this *DeleteListenAction) Run(params struct {
 	}
 
 	if params.Index >= 0 && params.Index < len(proxy.Listen) {
-		list := lists.NewList(proxy.Listen)
-		list.Remove(params.Index)
-		proxy.Listen = list.Slice.([]string)
+		proxy.Listen = lists.Remove(proxy.Listen, params.Index).([]string)
 	}
 
 	logs.Println(proxy.Listen)

@@ -15,6 +15,8 @@ func init() {
 			Post("/add", new(AddAction)).
 			Post("/delete", new(DeleteAction)).
 			Post("/update", new(UpdateAction)).
+			Post("/on", new(OnAction)).
+			Post("/off", new(OffAction)).
 			EndAll()
 	})
 }
