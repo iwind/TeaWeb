@@ -221,4 +221,195 @@ Tea.context(function () {
                 "proxyId": rewrite.proxyId
             });
     };
+
+    /**
+     * fastcgi设置
+     */
+    this.fastcgiAdding = false;
+    this.newFastcgiOn = true;
+    this.newFastcgiPass = "";
+    this.newFastcgiTimeout = "";
+    this.newFastcgiParams = [
+        {
+            "name": "SCRIPT_FILENAME",
+            "value": "",
+            "nameZh": "脚本文件"
+        },
+        {
+            "name": "DOCUMENT_ROOT",
+            "value": "",
+            "nameZh": "文档目录"
+        }
+    ];
+
+    this.addFastcgi = function () {
+        this.fastcgiAdding = !this.fastcgiAdding;
+    };
+
+    this.switchNewFastcgiOn = function () {
+        this.newFastcgiOn = !this.newFastcgiOn;
+    };
+
+    this.addNewFastcgiParam = function () {
+        this.newFastcgiParams.push({
+            "name": "",
+            "value": "",
+            "nameZh": ""
+        });
+    };
+
+    this.removeNewFastcgiParam = function (index) {
+        this.newFastcgiParams.$remove(index);
+    };
+
+    this.addFastcgiSave = function () {
+        var m = {};
+        for (var i = 0; i < this.newFastcgiParams.length; i ++) {
+            m[this.newFastcgiParams[i]["name"]] = this.newFastcgiParams[i]["value"];
+        }
+
+        this.$post("/proxy/fastcgi/add")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex,
+                "on": this.newFastcgiOn ? 1 : 0,
+                "pass": this.newFastcgiPass,
+                "readTimeout": this.newFastcgiTimeout,
+                "params": JSON.stringify(m)
+            });
+    };
+
+    this.switchFastcgiOn = function () {
+        this.location.fastcgi.on = !this.location.fastcgi.on;
+        if (this.location.fastcgi.on) {
+            this.$post("/proxy/fastcgi/on")
+                .params({
+                    "filename": this.filename,
+                    "index": this.locationIndex
+                });
+        }
+        else {
+            this.$post("/proxy/fastcgi/off")
+                .params({
+                    "filename": this.filename,
+                    "index": this.locationIndex
+                });
+        }
+    };
+
+    this.deleteFastcgi = function () {
+        if (!window.confirm("确定要删除Fastcgi配置吗？")) {
+            return;
+        }
+        this.$post("/proxy/fastcgi/delete")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex
+            });
+    };
+
+    this.fastcgiPassEditing = false;
+
+    this.editFastcgiPass = function () {
+        this.fastcgiPassEditing = !this.fastcgiPassEditing;
+    };
+
+    this.editFastcgiPassSave = function () {
+        this.$post("/proxy/fastcgi/updatePass")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex,
+                "pass": this.location.fastcgi.pass
+            });
+    };
+
+    this.deleteFastcgiParam = function (name) {
+        if (!window.confirm("确定要删除此参数吗？")) {
+            return;
+        }
+        this.$post("/proxy/fastcgi/deleteParam")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex,
+                "name": name
+            })
+            .success(function () {
+                this.$delete(this.location.fastcgi.params, name);
+            });
+    };
+
+    this.fastcgiParamAdding = false;
+    this.fastcgiNewParamName = "";
+    this.fastcgiNewParamValue = "";
+
+    this.addFastcgiParam = function () {
+        this.fastcgiParamAdding = !this.fastcgiParamAdding;
+    };
+
+    this.addFastcgiParamSave = function () {
+        this.$post("/proxy/fastcgi/addParam")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex,
+                "name": this.fastcgiNewParamName,
+                "value": this.fastcgiNewParamValue
+            })
+            .success(function () {
+                this.$set(this.location.fastcgi.params, this.fastcgiNewParamName, this.fastcgiNewParamValue);
+                this.fastcgiParamAdding = false;
+                this.fastcgiNewParamName = "";
+                this.fastcgiNewParamValue = "";
+            });
+    };
+
+    this.fastcgiParamEditingName = "";
+
+    this.editFastcgiParam = function (name, value) {
+        this.fastcgiParamEditingName = name;
+        this.fastcgiNewParamName = name;
+        this.fastcgiNewParamValue = value;
+    };
+
+    this.cancelFastcgiParamEdit = function () {
+        this.fastcgiParamEditingName = "";
+    };
+
+    this.editFastcgiParamSave = function (name) {
+        this.$post("/proxy/fastcgi/updateParam")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex,
+                "oldName": name,
+                "name": this.fastcgiNewParamName,
+                "value": this.fastcgiNewParamValue
+            })
+            .success(function () {
+                this.$delete(this.location.fastcgi.params, name);
+                this.$set(this.location.fastcgi.params, this.fastcgiNewParamName, this.fastcgiNewParamValue);
+                this.fastcgiParamEditingName = "";
+            });
+    };
+
+    /**
+     * 修改超时时间
+     */
+    this.fastcgiTimeoutEditing = false;
+
+    this.editFastcgiTimeout = function () {
+        this.newFastcgiTimeout = parseInt(this.location.fastcgi.readTimeout.replace("s", ""));
+        this.fastcgiTimeoutEditing = !this.fastcgiTimeoutEditing;
+    };
+
+    this.editFastcgiTimeoutSave = function () {
+        this.$post("/proxy/fastcgi/updateTimeout")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex,
+                "timeout": this.newFastcgiTimeout
+            })
+            .success(function () {
+                this.location.fastcgi.readTimeout = this.newFastcgiTimeout + "s";
+                this.fastcgiTimeoutEditing = false;
+            });
+    };
 });

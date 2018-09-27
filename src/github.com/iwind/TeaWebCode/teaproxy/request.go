@@ -218,6 +218,7 @@ func (this *Request) callFastcgi(writer http.ResponseWriter) error {
 	}
 
 	// @TODO 使用连接池
+	// @TODO 支持unix://...
 	fcgi, err := fcgiclient.Dial("tcp", this.fastcgi.Pass)
 	if err != nil {
 		this.serverError(writer)

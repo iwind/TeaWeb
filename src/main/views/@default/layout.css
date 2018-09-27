@@ -42,6 +42,10 @@ tbody {
     width: 35em!important;
 }
 
+.table.width40 {
+    width: 40em!important;
+}
+
 form p.comment {
     color: rgba(0, 0, 0, 0.3);
     padding-top: 0.4em;

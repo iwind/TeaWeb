@@ -82,6 +82,9 @@ func (this *ProxyServer) filterRequest(server *teaconfigs.ServerConfig, req *Req
 	// location的相关配置
 	for _, location := range server.Locations {
 		if location.Match(path) {
+			if !location.On {
+				continue
+			}
 			if len(location.Root) > 0 {
 				req.root = location.Root
 			}
@@ -89,6 +92,9 @@ func (this *ProxyServer) filterRequest(server *teaconfigs.ServerConfig, req *Req
 			// rewrite相关配置
 			if len(location.Rewrite) > 0 {
 				for _, rule := range location.Rewrite {
+					if !rule.On {
+						continue
+					}
 					if rule.Apply(path, func(source string) string {
 						return source
 					}) {
@@ -119,6 +125,9 @@ func (this *ProxyServer) filterRequest(server *teaconfigs.ServerConfig, req *Req
 							if !found {
 								return errors.New("server with '" + proxyId + "' not found")
 							}
+							if !server.On {
+								return errors.New("server with '" + proxyId + "' not available now")
+							}
 							return this.filterRequest(server, req, redirects)
 						}
 						return nil
@@ -127,7 +136,7 @@ func (this *ProxyServer) filterRequest(server *teaconfigs.ServerConfig, req *Req
 			}
 
 			// fastcgi
-			if location.Fastcgi != nil {
+			if location.Fastcgi != nil && location.Fastcgi.On {
 				req.fastcgi = location.Fastcgi
 				return nil
 			}
@@ -137,6 +146,9 @@ func (this *ProxyServer) filterRequest(server *teaconfigs.ServerConfig, req *Req
 				server, found := FindServer(location.Proxy)
 				if !found {
 					return errors.New("server with '" + location.Proxy + "' not found")
+				}
+				if !server.On {
+					return errors.New("server with '" + location.Proxy + "' not available now")
 				}
 				return this.filterRequest(server, req, redirects)
 			}
@@ -162,6 +174,9 @@ func (this *ProxyServer) filterRequest(server *teaconfigs.ServerConfig, req *Req
 	// server的相关配置
 	if len(server.Rewrite) > 0 {
 		for _, rule := range server.Rewrite {
+			if !rule.On {
+				continue
+			}
 			if rule.Apply(path, func(source string) string {
 				return source
 			}) {
@@ -191,6 +206,9 @@ func (this *ProxyServer) filterRequest(server *teaconfigs.ServerConfig, req *Req
 					if !found {
 						return errors.New("server with '" + proxyId + "' not found")
 					}
+					if !server.On {
+						return errors.New("server with '" + proxyId + "' not available now")
+					}
 					return this.filterRequest(server, req, redirects)
 				}
 				return nil
@@ -199,7 +217,7 @@ func (this *ProxyServer) filterRequest(server *teaconfigs.ServerConfig, req *Req
 	}
 
 	// fastcgi
-	if server.Fastcgi != nil {
+	if server.Fastcgi != nil && server.Fastcgi.On {
 		req.fastcgi = server.Fastcgi
 		return nil
 	}
@@ -209,6 +227,9 @@ func (this *ProxyServer) filterRequest(server *teaconfigs.ServerConfig, req *Req
 		server, found := FindServer(server.Proxy)
 		if !found {
 			return errors.New("server with '" + server.Proxy + "' not found")
+		}
+		if !server.On {
+			return errors.New("server with '" + server.Proxy + "' not available now")
 		}
 		return this.filterRequest(server, req, redirects)
 	}

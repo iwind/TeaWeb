@@ -10,6 +10,7 @@ import (
 // Fastcgi配置
 // 参考：http://nginx.org/en/docs/http/ngx_http_fastcgi_module.html
 type FastcgiConfig struct {
+	On          bool              `yaml:"on" json:"on"`                   // @TODO
 	Pass        string            `yaml:"pass" json:"pass"`               //@TODO
 	Index       string            `yaml:"index" json:"index"`             //@TODO
 	Params      map[string]string `yaml:"params" json:"params"`           //@TODO
