@@ -1,5 +1,13 @@
 {$layout}
 
+<!-- 检测配置是否有更新 begins -->
+<p class="ui message warning" v-if="statusChanged">代理服务已被修改，<a href="" v-on:click.prevent="restart()">点此重启后生效</a></p>
+
+{$var "header"}
+<script type="text/javascript" src="/_/@default/proxy/@global.js"></script>
+{$end}
+<!--  检测配置是否有更新 end -->
+
 <div>
     <h3>{{proxy.description}}（{{proxy.id}}）</h3>
 
@@ -11,7 +19,7 @@
     </div>
 
     <form class="ui form">
-        <table class="ui table selectable width30 definition">
+        <table class="ui table selectable width35 definition">
             <tbody v-if="proxy.locations.length == 0">
                 <tr>
                     <td colspan="3" class="normal">
@@ -28,9 +36,11 @@
                         <span v-if="location.on">{{location.pattern}}</span>
                         <a class="disabled" v-if="!location.on">{{location.pattern}}</a>
                     </td>
-                    <td class="two op">
+                    <td class="four op">
                         <a :href="$url('/proxy/locations/detail', { 'filename':filename,'index':index })"><i class="ui icon info circle"></i> </a>
                         <a href="" v-on:click.prevent="deleteLocation(index)"><i class="ui icon remove circle"></i> </a>
+                        <a href="" v-if="index > 0" title="上移" v-on:click.prevent="moveUp(index)"><i class="ui icon up arrow circle"></i></a>
+                        <a href="" v-if="locations.length > 1 && index < locations.length - 1" title="下移" v-on:click.prevent="moveDown(index)"><i class="ui icon down arrow circle"></i></a>
                     </td>
                 </tr>
             </tbody>
@@ -84,5 +94,6 @@
                 </td>
             </tr>
         </table>
+        <p class="comment">所有规则匹配顺序为从上到下。</p>
     </form>
 </div>

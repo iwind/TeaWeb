@@ -4,6 +4,7 @@ import (
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaGo/Tea"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type UpdateIdAction actions.Action
@@ -34,6 +35,8 @@ func (this *UpdateIdAction) Run(params struct {
 
 	proxy.Id = params.Id
 	proxy.WriteToFile(Tea.ConfigFile(params.Filename))
+
+	global.NotifyChange()
 
 	this.Refresh().Success("保存成功")
 }

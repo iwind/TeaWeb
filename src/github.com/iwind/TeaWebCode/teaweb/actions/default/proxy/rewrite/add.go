@@ -3,6 +3,7 @@ package rewrite
 import (
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type AddAction actions.Action
@@ -58,6 +59,8 @@ func (this *AddAction) Run(params struct {
 	}
 
 	proxy.WriteToFilename(params.Filename)
+
+	global.NotifyChange()
 
 	this.Refresh().Success("添加成功")
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaGo/utils/string"
 	"github.com/iwind/TeaGo/maps"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 // 添加新的服务
@@ -50,6 +51,8 @@ func (this *AddAction) RunPost(params struct {
 	if err != nil {
 		this.Fail(err.Error())
 	}
+
+	global.NotifyChange()
 
 	this.Next("/proxy/detail", map[string]interface{}{
 		"filename": filename,

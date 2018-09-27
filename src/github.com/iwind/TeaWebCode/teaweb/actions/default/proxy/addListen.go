@@ -3,7 +3,7 @@ package proxy
 import (
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
-	"github.com/iwind/TeaWebCode/teaproxy"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type AddListenAction actions.Action
@@ -25,8 +25,7 @@ func (this *AddListenAction) Run(params struct {
 	proxy.AddListen(params.Listen)
 	proxy.WriteToFilename(params.Filename)
 
-	// 重启服务
-	teaproxy.Restart()
+	global.NotifyChange()
 
 	this.Refresh().Success("保存成功")
 }

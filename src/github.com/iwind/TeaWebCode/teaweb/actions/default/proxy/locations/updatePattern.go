@@ -6,11 +6,12 @@ import (
 	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
-type OffAction actions.Action
+type UpdatePatternAction actions.Action
 
-func (this *OffAction) Run(params struct {
+func (this *UpdatePatternAction) Run(params struct {
 	Filename string
 	Index    int
+	Pattern  string
 }) {
 	proxy, err := teaconfigs.NewServerConfigFromFile(params.Filename)
 	if err != nil {
@@ -19,12 +20,11 @@ func (this *OffAction) Run(params struct {
 
 	location := proxy.LocationAtIndex(params.Index)
 	if location != nil {
-		location.On = false
+		location.SetPattern(params.Pattern, location.PatternType(), location.IsCaseInsensitive(), location.IsReverse())
+		proxy.WriteToFilename(params.Filename)
 	}
-
-	proxy.WriteToFilename(params.Filename)
 
 	global.NotifyChange()
 
-	this.Success()
+	this.Refresh().Success()
 }

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"fmt"
 	"time"
-	"github.com/iwind/TeaWebCode/teaproxy"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type UpdateAction actions.Action
@@ -129,7 +129,7 @@ func (this *UpdateAction) RunPost(params struct {
 	// 重启
 	go func() {
 		time.Sleep(1 * time.Second)
-		teaproxy.Restart()
+		global.NotifyChange()
 	}()
 
 	this.Next("/proxy", nil, "").Success("服务保存成功")

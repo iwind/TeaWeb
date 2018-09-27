@@ -23,6 +23,34 @@ Tea.context(function () {
         }
     };
 
+    this.patternEditing = false;
+    this.editPattern = function () {
+        this.patternEditing = !this.patternEditing;
+    };
+
+    this.editPatternSave = function () {
+        this.$post(".updatePattern")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex,
+                "pattern": this.location.pattern
+            });
+    };
+
+    this.typeEditing = false;
+    this.editType = function () {
+        this.typeEditing = !this.typeEditing;
+    };
+
+    this.editTypeSave = function () {
+        this.$post(".updateType")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex,
+                "typeId": this.location.type
+            });
+    };
+
     this.reverse = function () {
         this.location.reverse = !this.location.reverse;
 
@@ -143,10 +171,10 @@ Tea.context(function () {
                 } else {
                     rewrite.isEditing = !rewrite.isEditing;
                 }
-                Tea.Vue.$set(that.location.rewrite, index, rewrite);
+                that.$set(that.location.rewrite, index, rewrite);
             } else {
                 v.isEditing = false;
-                Tea.Vue.$set(that.location.rewrite, k, v);
+                that.$set(that.location.rewrite, k, v);
             }
         });
     };
@@ -178,7 +206,7 @@ Tea.context(function () {
 
     this.cancelEditRewrite = function (rewrite, index) {
         rewrite.isEditing = false;
-        Tea.Vue.$set(this.location.rewrite, index, rewrite);
+        this.$set(this.location.rewrite, index, rewrite);
     };
 
     this.updateRewrite = function (rewrite, index) {

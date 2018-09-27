@@ -48,12 +48,42 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
             data = window.TEA.ACTION.data;
         }
 
+        var innerMethods = {
+            $delay: Tea.delay,
+            $get: function (action) {
+                return Tea.action(action).get();
+            },
+            $post: function (action) {
+                return Tea.action(action).post();
+            },
+            $go: Tea.go,
+            $url: Tea.url,
+            $find: Tea.element
+        };
+
+        var vueElement = document.getElementById("tea-app");
+        if (vueElement == null && document.body) {
+            var rootNodes = document.body.childNodes;
+            for (var i = 0; i < rootNodes.length; i ++) {
+                var rootNode = rootNodes[i];
+                if (rootNode.nodeType == 1) {
+                    vueElement = rootNode;
+                    vueElement.setAttribute("tea-root", "generated");
+                    break;
+                }
+            }
+        }
+
         if (contextFunctions.length > 0) {
             var context = {};
             context.Tea = window.Tea;
 
             // 内置方法
-            context["$delay"] = Tea.delay;
+            for (var methodName in innerMethods) {
+                if (innerMethods.hasOwnProperty(methodName)) {
+                    context[methodName] = innerMethods[methodName];
+                }
+            }
 
             for (key in data) {
                 if (!data.hasOwnProperty(key)) {
@@ -85,7 +115,12 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
                     if (typeof(value) === "function") {
                         context[key] = function (value) {
                             return function () {
-                                return value.apply(window.Tea.Vue, arguments);
+                                if (window.Tea.Vue == null) {
+                                    return value.apply(innerMethods, arguments);
+                                }
+                                else {
+                                    return value.apply(window.Tea.Vue, arguments);
+                                }
                             };
                         }(value);
                     }
@@ -93,25 +128,18 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
             }
 
             // 清除context中的预定义变量
-            delete(context["$delay"]);
+            for (var methodName in innerMethods) {
+                if (innerMethods.hasOwnProperty(methodName)) {
+                    delete(context[methodName]);
+                }
+            }
 
             window.Tea.Vue = new Vue({
-                el: "#tea-app",
+                el: vueElement,
                 data: context,
 
                 // 内置方法
-                methods: {
-                    $delay: Tea.delay,
-                    $get: function (action) {
-                        return Tea.action(action).get();
-                    },
-                    $post: function (action) {
-                        return Tea.action(action).post();
-                    },
-                    $go: Tea.go,
-                    $url: Tea.url,
-                    $find: Tea.element
-                }
+                methods: innerMethods
             });
         }
         else {
@@ -126,7 +154,7 @@ Array.$nil={};Array.prototype.$contains=function(a){var c=this;if(c==null){retur
             }
 
             window.Tea.Vue = new Vue({
-                el: "#tea-app",
+                el: vueElement,
                 data: context,
 
                 // 内置方法

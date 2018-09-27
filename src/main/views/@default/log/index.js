@@ -10,34 +10,33 @@ Tea.context(function () {
     this.qps = 0;
 
     // 搜索相关
-    this.searchBoxVisible = Boolean(teaweb.get("searchBoxVisible"));
-    this.searchIp = teaweb.get("searchIp");
-    this.searchDomain = teaweb.get("searchDomain");
-    this.searchOs = teaweb.get("searchOs");
-    this.searchBrowser = teaweb.get("searchBrowser");
-    this.searchMinCost = teaweb.get("searchMinCost");
-    this.searchKeyword = teaweb.get("searchKeyword");
+    this.searchBoxVisible = teaweb.getBool("searchBoxVisible");
+    this.searchIp = teaweb.getString("searchIp");
+    this.searchDomain = teaweb.getString("searchDomain");
+    this.searchOs = teaweb.getString("searchOs");
+    this.searchBrowser = teaweb.getString("searchBrowser");
+    this.searchMinCost = teaweb.getString("searchMinCost");
+    this.searchKeyword = teaweb.getString("searchKeyword");
 
-    Tea.delay(function () {
+    this.$delay(function () {
         this.loadLogs();
 
-        var vm = Tea.Vue;
-        vm.$watch("searchIp", function (value) {
+        this.$watch("searchIp", function (value) {
             that.filterLogs()
         });
-        vm.$watch("searchDomain", function (value) {
+        this.$watch("searchDomain", function (value) {
             that.filterLogs()
         });
-        vm.$watch("searchOs", function (value) {
+        this.$watch("searchOs", function (value) {
             that.filterLogs()
         });
-        vm.$watch("searchBrowser", function (value) {
+        this.$watch("searchBrowser", function (value) {
             that.filterLogs()
         });
-        vm.$watch("searchMinCost", function (value) {
+        this.$watch("searchMinCost", function (value) {
             that.filterLogs()
         });
-        vm.$watch("searchKeyword", function (value) {
+        this.$watch("searchKeyword", function (value) {
             that.filterLogs()
         });
     });
@@ -97,8 +96,7 @@ Tea.context(function () {
         log.isOpen = !log.isOpen;
 
         // 由于Vue的限制直接设置 log.isOpen 并不起作用
-        Tea.Vue.$set(Tea.Vue.logs, index, log);
-        //Tea.Vue.$forceUpdate();
+        this.$set(this.logs, index, log);
     };
 
     this.formatCost = function (seconds) {
@@ -123,12 +121,12 @@ Tea.context(function () {
 
     this.hasSearchConditions = function () {
         var has = false;
-       Tea.element(".search-box form input").each(function (k, v) {
-           if (v.value.trim().length > 0) {
+        this.$find(".search-box form input").each(function (k, v) {
+           if (typeof(v.value) == "string" && v.value.trim().length > 0) {
                has = true;
            }
-       });
-       return has;
+        });
+        return has;
     };
 
     this.resetSearchBox = function () {

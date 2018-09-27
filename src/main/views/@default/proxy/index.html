@@ -2,6 +2,8 @@
 
 <p class="ui message" v-if="servers.length == 0">暂时还没有服务，<a href="/proxy/add">现在就去添加</a>。</p>
 
+<p class="ui message warning" v-if="statusChanged">代理服务已被修改，<a href="" v-on:click.prevent="restart()">点此重启后生效</a></p>
+
 <table class="ui table selectable" v-if="servers.length > 0">
     <thead>
         <tr>

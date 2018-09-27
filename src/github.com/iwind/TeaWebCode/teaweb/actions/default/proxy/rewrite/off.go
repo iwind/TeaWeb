@@ -3,6 +3,7 @@ package rewrite
 import (
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type OffAction actions.Action
@@ -25,6 +26,8 @@ func (this *OffAction) Run(params struct {
 	if params.RewriteIndex >= 0 && params.RewriteIndex < len(location.Rewrite) {
 		location.Rewrite[params.RewriteIndex].On = false
 	}
+
+	global.NotifyChange()
 
 	proxy.WriteToFilename(params.Filename)
 }

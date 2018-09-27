@@ -38,4 +38,20 @@ Tea.context(function () {
                "index": index
            });
    };
+
+   this.moveUp = function (index) {
+       this.$post("/proxy/locations/moveUp")
+           .params({
+               "filename": this.filename,
+               "index": index
+           });
+   };
+
+    this.moveDown = function (index) {
+        this.$post("/proxy/locations/moveDown")
+            .params({
+                "filename": this.filename,
+                "index": index
+            });
+    };
 });

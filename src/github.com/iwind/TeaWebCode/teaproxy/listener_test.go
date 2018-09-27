@@ -7,17 +7,7 @@ import (
 	"bufio"
 )
 
-func TestListener_Start(t *testing.T) {
-	listener := &Listener{}
-	variables := map[string]string{
-		"name": "Hello",
-		"host": "baidu.com",
-		"var": "Hello",
-	}
-	t.Log(listener.parseVariables("abc${var}Host:${host}", variables))
-}
-
-func TestNetClient(t *testing.T)  {
+func TestNetClient(t *testing.T) {
 	client := &http.Client{}
 	request, err := http.NewRequest("GET", "http://shop.balefm.cn/files/songs/20180608/8f600c49fc24edb7.mp3", nil)
 	if err != nil {
@@ -28,7 +18,6 @@ func TestNetClient(t *testing.T)  {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 
 	t.Log(resp.ContentLength)
 }

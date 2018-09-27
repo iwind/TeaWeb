@@ -3,11 +3,12 @@ package rewrite
 import (
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type OnAction actions.Action
 
-func (this *OnAction) Run(params struct{
+func (this *OnAction) Run(params struct {
 	Filename     string
 	Index        int
 	RewriteIndex int
@@ -27,6 +28,8 @@ func (this *OnAction) Run(params struct{
 	}
 
 	proxy.WriteToFilename(params.Filename)
+
+	global.NotifyChange()
 
 	this.Success()
 }

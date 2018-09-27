@@ -3,6 +3,8 @@ package teaconfigs
 import (
 	"strings"
 	"regexp"
+	"math/rand"
+	"time"
 )
 
 const (
@@ -27,12 +29,12 @@ type LocationConfig struct {
 	caseInsensitive bool // 大小写不敏感
 	reverse         bool // 是否翻转规则，比如非前缀，非路径
 
-	Async   bool         `yaml:"async" json:"async"`     // @TODO
-	Notify  []string     `yaml:"notify" json:"notify"`   // @TODO
-	LogOnly bool         `yaml:"logOnly" json:"logOnly"` // @TODO
-	Cache   *CacheConfig `yaml:"cache" json:"cache"`     // @TODO
-	Root    string       `yaml:"root" json:"root"`       // @TODO
-	Charset string       `yaml:"charset" json:"charset"` // @TODO
+	Async   bool         `yaml:"async" json:"async"`     // 是否异步请求 @TODO
+	Notify  []string     `yaml:"notify" json:"notify"`   // 转发请求 @TODO
+	LogOnly bool         `yaml:"logOnly" json:"logOnly"` // 是否只记录日志 @TODO
+	Cache   *CacheConfig `yaml:"cache" json:"cache"`     // 缓存设置 @TODO
+	Root    string       `yaml:"root" json:"root"`       // 资源根目录 @TODO
+	Charset string       `yaml:"charset" json:"charset"` // 字符集设置 @TODO
 
 	// 日志
 	AccessLog []*AccessLogConfig `yaml:"accessLog" json:"accessLog"` // @TODO
@@ -44,9 +46,10 @@ type LocationConfig struct {
 	Allow []string `yaml:"allow" json:"allow"` // 允许的终端地址 @TODO
 	Deny  []string `yaml:"deny" json:"deny"`   // 禁止的终端地址 @TODO
 
-	Rewrite []*RewriteRule `yaml:"rewrite" json:"rewrite"` // 重写规则 @TODO
-	Fastcgi *FastcgiConfig `yaml:"fastcgi" json:"fastcgi"` // Fastcgi配置 @TODO
-	Proxy   string         `yaml:proxy" json:"proxy"`      //  代理配置 @TODO
+	Rewrite  []*RewriteRule         `yaml:"rewrite" json:"rewrite"`   // 重写规则 @TODO
+	Fastcgi  *FastcgiConfig         `yaml:"fastcgi" json:"fastcgi"`   // Fastcgi配置 @TODO
+	Proxy    string                 `yaml:proxy" json:"proxy"`        //  代理配置 @TODO
+	Backends []*ServerBackendConfig `yaml:"backends" json:"backends"` // 后端服务器配置 @TODO
 }
 
 func NewLocationConfig() *LocationConfig {
@@ -275,4 +278,16 @@ func (this *LocationConfig) SetPattern(pattern string, patternType int, caseInse
 		pattern = op + " " + pattern
 	}
 	this.Pattern = pattern
+}
+
+// 取得下一个可用的后端服务
+// @TODO 实现backend中的各种参数
+func (this *LocationConfig) NextBackend() *ServerBackendConfig {
+	countBackends := len(this.Backends)
+	if countBackends == 0 {
+		return nil
+	}
+	rand.Seed(time.Now().UnixNano())
+	index := rand.Int() % countBackends
+	return this.Backends[index]
 }

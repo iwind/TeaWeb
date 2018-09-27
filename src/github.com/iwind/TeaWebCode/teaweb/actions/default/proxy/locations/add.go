@@ -3,6 +3,7 @@ package locations
 import (
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type AddAction actions.Action
@@ -38,9 +39,12 @@ func (this *AddAction) Run(params struct {
 	proxy.Locations = append(proxy.Locations, location)
 	proxy.WriteToFilename(params.Filename)
 
+	global.NotifyChange()
+
 	this.Next("/proxy/locations/detail", map[string]interface{}{
 		"filename": params.Filename,
 		"index":    len(proxy.Locations) - 1,
 	})
+
 	this.Success()
 }

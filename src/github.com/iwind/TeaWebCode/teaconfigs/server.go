@@ -5,6 +5,9 @@ import (
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/iwind/TeaGo/logs"
+	"strings"
+	"math/rand"
+	"time"
 )
 
 // 服务配置
@@ -16,7 +19,7 @@ type ServerConfig struct {
 	Name        []string               `yaml:"name" json:"name"`               // 域名
 	Http        bool                   `yaml:"http" json:"http"`               // 是否支持HTTP
 	Listen      []string               `yaml:"listen" json:"listen"`           // 监听地址
-	Root        string                 `yaml:"root" json:"root"`               // 根目录 @TODO
+	Root        string                 `yaml:"root" json:"root"`               // 资源根目录
 	Backends    []*ServerBackendConfig `yaml:"backends" json:"backends"`       // 后端服务器配置
 	Locations   []*LocationConfig      `yaml:"locations" json:"locations"`     // 地址配置
 	Charset     string                 `yaml:"charset" json:"charset"`         // 字符集 @TODO
@@ -42,6 +45,10 @@ type ServerConfig struct {
 	Deny  []string `yaml:"deny" json:"deny"`   //@TODO
 
 	Filename string `yaml:"filename" json:"filename"` // 配置文件名
+
+	Rewrite []*RewriteRule `yaml:"rewrite" json:"rewrite"` // 重写规则 @TODO
+	Fastcgi *FastcgiConfig `yaml:"fastcgi" json:"fastcgi"` // Fastcgi配置 @TODO
+	Proxy   string         `yaml:proxy" json:"proxy"`      //  代理配置 @TODO
 }
 
 // 从目录中加载配置
@@ -99,6 +106,14 @@ func NewServerConfigFromFile(filename string) (*ServerConfig, error) {
 
 // 校验配置
 func (this *ServerConfig) Validate() error {
+	// ssl
+	if this.SSL != nil {
+		err := this.SSL.Validate()
+		if err != nil {
+			return err
+		}
+	}
+
 	// backends
 	for _, backend := range this.Backends {
 		err := backend.Validate()
@@ -131,6 +146,18 @@ func (this *ServerConfig) AddListen(address string) {
 // 添加后端服务
 func (this *ServerConfig) AddBackend(config *ServerBackendConfig) {
 	this.Backends = append(this.Backends, config)
+}
+
+// 取得下一个可用的后端服务
+// @TODO 实现backend中的各种参数
+func (this *ServerConfig) NextBackend() *ServerBackendConfig {
+	countBackends := len(this.Backends)
+	if countBackends == 0 {
+		return nil
+	}
+	rand.Seed(time.Now().UnixNano())
+	index := rand.Int() % countBackends
+	return this.Backends[index]
 }
 
 // 获取某个位置上的配置
@@ -166,4 +193,36 @@ func (this *ServerConfig) WriteToFilename(filename string) error {
 	_, err = writer.WriteYAML(this)
 	writer.Close()
 	return err
+}
+
+// 判断是否和域名匹配
+func (this *ServerConfig) MatchName(name string) bool {
+	if len(name) == 0 {
+		return false
+	}
+	pieces1 := strings.Split(name, ".")
+	countPieces1 := len(pieces1)
+	for _, testName := range this.Name {
+		if len(testName) == 0 {
+			continue
+		}
+		if name == testName {
+			return true
+		}
+		pieces2 := strings.Split(testName, ".")
+		if countPieces1 != len(pieces2) {
+			continue
+		}
+		matched := true
+		for index, piece := range pieces2 {
+			if pieces1[index] != piece && piece != "*" && piece != "" {
+				matched = false
+				break
+			}
+		}
+		if matched {
+			return true
+		}
+	}
+	return false
 }

@@ -55,5 +55,20 @@ func (this *DetailAction) Run(params struct {
 	}
 	this.Data["proxies"] = proxies
 
+	this.Data["typeOptions"] = []maps.Map{
+		{
+			"name":  "匹配前缀",
+			"value": teaconfigs.LocationPatternTypePrefix,
+		},
+		{
+			"name":  "精准匹配",
+			"value": teaconfigs.LocationPatternTypeExact,
+		},
+		{
+			"name":  "正则表达式匹配",
+			"value": teaconfigs.LocationPatternTypeRegexp,
+		},
+	}
+
 	this.Show()
 }

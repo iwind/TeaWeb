@@ -6,7 +6,7 @@ import (
 	"github.com/iwind/TeaGo/files"
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaWebCode/teaconfigs"
-	"github.com/iwind/TeaWebCode/teaproxy"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type UploadKeyAction actions.Action
@@ -47,7 +47,7 @@ func (this *UploadKeyAction) Run(params struct {
 	server.WriteToFilename(params.Filename)
 
 	if server.SSL.On && len(server.SSL.Certificate) > 0 {
-		teaproxy.Restart()
+		global.NotifyChange()
 	}
 
 	this.Refresh().Success("保存成功")

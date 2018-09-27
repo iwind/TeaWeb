@@ -2,11 +2,11 @@ package ssl
 
 import (
 	"github.com/iwind/TeaGo/actions"
-		"github.com/iwind/TeaGo/Tea"
+	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaGo/files"
 	"github.com/iwind/TeaGo/utils/string"
 	"github.com/iwind/TeaWebCode/teaconfigs"
-	"github.com/iwind/TeaWebCode/teaproxy"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type UploadCertAction actions.Action
@@ -47,7 +47,7 @@ func (this *UploadCertAction) Run(params struct {
 	server.WriteToFilename(params.Filename)
 
 	if server.SSL.On && len(server.SSL.CertificateKey) > 0 {
-		teaproxy.Restart()
+		global.NotifyChange()
 	}
 
 	this.Refresh().Success("保存成功")

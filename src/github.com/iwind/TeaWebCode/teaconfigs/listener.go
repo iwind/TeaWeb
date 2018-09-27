@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"github.com/iwind/TeaGo/types"
+	"github.com/iwind/TeaGo/lists"
 )
 
 // 本地监听服务配置
@@ -98,4 +99,40 @@ func (this *ListenerConfig) Port() int {
 		return 0
 	}
 	return types.Int(this.Address[index+1:])
+}
+
+// 添加服务
+func (this *ListenerConfig) AddServer(serverConfig *ServerConfig) {
+	this.Servers = append(this.Servers, serverConfig)
+}
+
+// 根据域名来查找匹配的域名
+// @TODO 把查找的结果加入缓存
+func (this *ListenerConfig) FindNamedServer(name string) *ServerConfig {
+	countServers := len(this.Servers)
+	if countServers == 0 {
+		return nil
+	}
+
+	// 如果只有一个server，则默认为这个
+	if countServers == 1 {
+		return this.Servers[0]
+	}
+
+	// 精确查找
+	for _, server := range this.Servers {
+		if lists.Contains(server.Name, name) {
+			return server
+		}
+	}
+
+	// 模糊查找
+	for _, server := range this.Servers {
+		if server.MatchName(name) {
+			return server
+		}
+	}
+
+	// 如果没有找到，则匹配到第一个
+	return this.Servers[0]
 }

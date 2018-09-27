@@ -14,11 +14,15 @@ func init() {
 			Get("", new(IndexAction)).
 			Post("/add", new(AddAction)).
 			Post("/delete", new(DeleteAction)).
+			Post("/moveUp", new(MoveUpAction)).
+			Post("/moveDown", new(MoveDownAction)).
 			Get("/detail", new(DetailAction)).
 			Post("/on", new(OnAction)).
 			Post("/off", new(OffAction)).
 			Post("/updateReverse", new(UpdateReverseAction)).
 			Post("/updateCaseInsensitive", new(UpdateCaseInsensitiveAction)).
+			Post("/updatePattern", new(UpdatePatternAction)).
+			Post("/updateType", new(UpdateTypeAction)).
 			EndAll()
 	})
 }

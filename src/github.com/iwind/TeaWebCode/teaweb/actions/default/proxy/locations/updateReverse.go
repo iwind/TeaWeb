@@ -3,6 +3,7 @@ package locations
 import (
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type UpdateReverseAction actions.Action
@@ -22,6 +23,8 @@ func (this *UpdateReverseAction) Run(params struct {
 		location.SetPattern(location.PatternString(), location.PatternType(), location.IsCaseInsensitive(), params.Reverse)
 		proxy.WriteToFilename(params.Filename)
 	}
+
+	global.NotifyChange()
 
 	this.Success()
 }

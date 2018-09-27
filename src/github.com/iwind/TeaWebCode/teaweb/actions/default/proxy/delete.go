@@ -6,7 +6,7 @@ import (
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaGo/logs"
 	"time"
-	"github.com/iwind/TeaWebCode/teaproxy"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type DeleteAction actions.Action
@@ -30,7 +30,7 @@ func (this *DeleteAction) Run(params struct {
 	// 重启
 	go func() {
 		time.Sleep(1 * time.Second)
-		teaproxy.Restart()
+		global.NotifyChange()
 	}()
 
 	this.Refresh().Success()

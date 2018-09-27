@@ -10,6 +10,16 @@ window.teaweb = {
 
         return JSON.parse(item);
     },
+    getString: function (key) {
+        var value = this.get(key);
+        if (typeof(value) == "string") {
+            return value;
+        }
+        return "";
+    },
+    getBool: function (key) {
+        return Boolean(this.get(key));
+    },
     remove: function (key) {
         localStorage.removeItem(key)
     },

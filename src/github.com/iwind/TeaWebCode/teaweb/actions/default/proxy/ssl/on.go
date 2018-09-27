@@ -2,8 +2,8 @@ package ssl
 
 import (
 	"github.com/iwind/TeaGo/actions"
-		"github.com/iwind/TeaWebCode/teaconfigs"
-	"github.com/iwind/TeaWebCode/teaproxy"
+	"github.com/iwind/TeaWebCode/teaconfigs"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type OnAction actions.Action
@@ -26,7 +26,7 @@ func (this *OnAction) Run(params struct {
 
 	server.WriteToFilename(params.Filename)
 
-	teaproxy.Restart()
+	global.NotifyChange()
 
 	this.Success()
 }

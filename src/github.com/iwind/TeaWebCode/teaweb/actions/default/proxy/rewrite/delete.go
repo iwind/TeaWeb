@@ -4,6 +4,7 @@ import (
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaGo/lists"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type DeleteAction actions.Action
@@ -28,6 +29,8 @@ func (this *DeleteAction) Run(params struct {
 	}
 
 	proxy.WriteToFilename(params.Filename)
+
+	global.NotifyChange()
 
 	this.Refresh().Success()
 }

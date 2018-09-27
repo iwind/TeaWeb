@@ -21,18 +21,17 @@ Tea.context(function () {
 
     this.editBackendCancel = function (index, backend) {
         backend.isEditing = !backend.isEditing;
-        Tea.Vue.$set(this.proxy.backends, index, backend);
+        this.$set(this.proxy.backends, index, backend);
     };
 
     this.editBackend = function (index, backend) {
         backend.isEditing = true;
         this.backendEditing = !this.backendEditing;
 
-        Tea.Vue.$set(this.proxy.backends, index, backend);
+        this.$set(this.proxy.backends, index, backend);
     };
 
     this.editBackendSave = function (index, backend) {
-        console.log(backend);
         this.$post("/proxy/backend/update")
             .params({
                 "filename": this.filename,

@@ -3,7 +3,7 @@ package proxy
 import (
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
-	"github.com/iwind/TeaWebCode/teaproxy"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type HttpOnAction actions.Action
@@ -19,7 +19,7 @@ func (this *HttpOnAction) Run(params struct {
 	proxy.Http = true
 	proxy.WriteToFilename(params.Filename)
 
-	teaproxy.Restart()
+	global.NotifyChange()
 
 	this.Success()
 }

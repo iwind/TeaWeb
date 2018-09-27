@@ -2,8 +2,8 @@ package backend
 
 import (
 	"github.com/iwind/TeaGo/actions"
-		"github.com/iwind/TeaWebCode/teaconfigs"
-	"github.com/iwind/TeaWebCode/teaproxy"
+	"github.com/iwind/TeaWebCode/teaconfigs"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type AddAction actions.Action
@@ -28,7 +28,7 @@ func (this *AddAction) Run(params struct {
 	server.Backends = append(server.Backends, backend)
 	server.WriteToFilename(params.Filename)
 
-	teaproxy.Restart()
+	global.NotifyChange()
 
 	this.Refresh().Success("保存成功")
 }

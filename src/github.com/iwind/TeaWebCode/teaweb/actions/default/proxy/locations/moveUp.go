@@ -6,9 +6,9 @@ import (
 	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
-type OffAction actions.Action
+type MoveUpAction actions.Action
 
-func (this *OffAction) Run(params struct {
+func (this *MoveUpAction) Run(params struct {
 	Filename string
 	Index    int
 }) {
@@ -17,14 +17,16 @@ func (this *OffAction) Run(params struct {
 		this.Fail(err.Error())
 	}
 
-	location := proxy.LocationAtIndex(params.Index)
-	if location != nil {
-		location.On = false
+	if params.Index >= 1 && params.Index < len(proxy.Locations) {
+		prev := proxy.Locations[params.Index-1]
+		current := proxy.Locations[params.Index]
+		proxy.Locations[params.Index-1] = current
+		proxy.Locations[params.Index] = prev
 	}
 
 	proxy.WriteToFilename(params.Filename)
 
 	global.NotifyChange()
 
-	this.Success()
+	this.Refresh().Success()
 }

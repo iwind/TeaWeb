@@ -13,6 +13,7 @@ func init() {
 			Prefix("/proxy").
 
 			Get("", new(IndexAction)).
+			Get("/status", new(StatusAction)).
 			GetPost("/add", new(AddAction)).
 			Post("/delete", new(DeleteAction)).
 			GetPost("/update", new(UpdateAction)).
@@ -28,6 +29,8 @@ func init() {
 			Post("/addListen", new(AddListenAction)).
 			Post("/deleteListen", new(DeleteListenAction)).
 			Post("/updateListen", new(UpdateListenAction)).
+
+			Get("/restart", new(RestartAction)).
 
 			EndAll()
 	})

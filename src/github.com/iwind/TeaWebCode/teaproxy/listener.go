@@ -10,17 +10,17 @@ import (
 
 // 监听服务定义
 type Listener struct {
-	config  *teaconfigs.ListenerConfig
-	servers map[*teaconfigs.ServerConfig]*ProxyServer
-	locker  *sync.Mutex
-	server  *http.Server
+	listenerConfig *teaconfigs.ListenerConfig
+	servers        map[*teaconfigs.ServerConfig]*ProxyServer
+	locker         *sync.Mutex
+	server         *http.Server
 }
 
 func NewListener(config *teaconfigs.ListenerConfig) *Listener {
 	listener := &Listener{
-		config:  config,
-		servers: map[*teaconfigs.ServerConfig]*ProxyServer{},
-		locker:  &sync.Mutex{},
+		listenerConfig: config,
+		servers:        map[*teaconfigs.ServerConfig]*ProxyServer{},
+		locker:         &sync.Mutex{},
 	}
 	LISTENERS = append(LISTENERS, listener)
 	return listener
@@ -30,7 +30,7 @@ func (this *Listener) Start() {
 	httpHandler := http.NewServeMux()
 	httpHandler.HandleFunc("/", func(writer http.ResponseWriter, req *http.Request) {
 		// @TODO 检查域名，通过域名取得对应的Server
-		config := this.config.Servers[0]
+		config := this.listenerConfig.Servers[0]
 		server, found := this.servers[config]
 		if !found {
 			server = NewServer(config)
@@ -39,19 +39,19 @@ func (this *Listener) Start() {
 			this.locker.Unlock()
 		}
 
-		server.handle(writer, req, this.config)
+		server.handle(writer, req, this.listenerConfig)
 	})
 
 	var err error
 
-	this.server = &http.Server{Addr: this.config.Address, Handler: httpHandler}
-	if this.config.SSL != nil && this.config.SSL.On {
-		logs.Println("start ssl listener on", this.config.Address)
-		err = this.server.ListenAndServeTLS(Tea.ConfigFile(this.config.SSL.Certificate), Tea.ConfigFile(this.config.SSL.CertificateKey))
+	this.server = &http.Server{Addr: this.listenerConfig.Address, Handler: httpHandler}
+	if this.listenerConfig.SSL != nil && this.listenerConfig.SSL.On {
+		logs.Println("start ssl listener on", this.listenerConfig.Address)
+		err = this.server.ListenAndServeTLS(Tea.ConfigFile(this.listenerConfig.SSL.Certificate), Tea.ConfigFile(this.listenerConfig.SSL.CertificateKey))
 	}
 
-	if this.config.Http {
-		logs.Println("start listener on", this.config.Address)
+	if this.listenerConfig.Http {
+		logs.Println("start listener on", this.listenerConfig.Address)
 		err = this.server.ListenAndServe()
 	}
 
