@@ -22,6 +22,7 @@
     </div>
 
     <form class="ui form">
+        <!-- 基本信息 -->
         <h4>基本信息</h4>
         <table class="ui table width30 selectable definition ">
             <tr>
@@ -93,6 +94,26 @@
                         <label></label>
                     </div>
                     <p class="comment">选中表示匹配规则中的路径中的英文字母不区分大小写</p>
+                </td>
+            </tr>
+            <tr>
+                <td>文档根目录</td>
+                <td>
+                    <span style="word-break: break-all;" v-if="location.root.length > 0">{{location.root}}</span>
+                    <a class="disabled" v-if="location.root.length == 0">还没有设置。</a>
+                </td>
+                <td>
+                    <a href="" title="修改" v-on:click.prevent="editRoot()"><i class="ui icon edit small"></i> </a>
+                </td>
+            </tr>
+            <tr v-if="rootEditing">
+                <td></td>
+                <td>
+                    <input type="text" name="root" v-model="location.root"/>
+                </td>
+                <td class="two op">
+                    <a href="" v-on:click.prevent="editRootSave()" title="保存"><i class="ui icon check circle"></i></a>
+                    <a href="" v-on:click.prevent="editRoot" title="取消"><i class="ui icon arrow left circle"></i> </a>
                 </td>
             </tr>
         </table>

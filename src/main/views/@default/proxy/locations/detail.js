@@ -412,4 +412,30 @@ Tea.context(function () {
                 this.fastcgiTimeoutEditing = false;
             });
     };
+
+    /**
+     * 根目录
+     */
+    this.rootEditing = false;
+    var root = "";
+    this.editRoot = function () {
+        this.rootEditing = !this.rootEditing;
+        if (this.rootEditing) {
+            root = this.location.root;
+        } else {
+            this.location.root = root;
+        }
+    };
+
+    this.editRootSave = function () {
+        this.$post("/proxy/locations/updateRoot")
+            .params({
+                "filename": this.filename,
+                "index": this.locationIndex,
+                "root": this.location.root
+            })
+            .success(function () {
+                this.rootEditing = false;
+            });
+    };
 });

@@ -131,4 +131,29 @@ Tea.context(function () {
             "index": index
         });
     };
+
+    /**
+     * 根目录
+     */
+    this.rootEditing = false;
+    var root = "";
+    this.editRoot = function () {
+        this.rootEditing = !this.rootEditing;
+        if (this.rootEditing) {
+            root = this.proxy.root;
+        } else {
+            this.proxy.root = root;
+        }
+    };
+
+    this.editRootSave = function () {
+        this.$post("/proxy/updateRoot")
+            .params({
+                "filename": this.filename,
+                "root": this.proxy.root
+            })
+            .success(function () {
+                this.rootEditing = false;
+            });
+    };
 });

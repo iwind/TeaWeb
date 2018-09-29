@@ -58,6 +58,9 @@ func TestRequest_CallRoot(t *testing.T) {
 	err := request.Call(writer)
 	a.IsNil(err)
 	writer.Close()
+
+	a.Log("requestTime:", request.requestTime)
+	a.Log("bytes send:", request.responseBytesSent, request.responseBodyBytesSent)
 }
 
 func TestRequest_CallBackend(t *testing.T) {
@@ -79,6 +82,10 @@ func TestRequest_CallBackend(t *testing.T) {
 	err = request.Call(writer)
 	a.IsNil(err)
 	writer.Close()
+
+	a.Log("status:", request.responseStatus, request.responseStatusMessage)
+	a.Log("requestTime:", request.requestTime)
+	a.Log("bytes send:", request.responseBytesSent, request.responseBodyBytesSent)
 }
 
 func TestRequest_CallProxy(t *testing.T) {
@@ -98,21 +105,26 @@ func TestRequest_CallProxy(t *testing.T) {
 	proxy.AddBackend(&teaconfigs.ServerBackendConfig{
 		Address: "127.0.0.1:80",
 	})
-	proxy.AddBackend(&teaconfigs.ServerBackendConfig{
+	/**proxy.AddBackend(&teaconfigs.ServerBackendConfig{
 		Address: "127.0.0.1:81",
-	})
+	})**/
 	request.proxy = proxy
 
 	err = request.Call(writer)
 	a.IsNil(err)
 	writer.Close()
+
+	a.Log("status:", request.responseStatus, request.responseStatusMessage)
+	a.Log("requestTime:", request.requestTime)
+	a.Log("bytes send:", request.responseBytesSent, request.responseBodyBytesSent)
 }
 
 func TestRequest_CallFastcgi(t *testing.T) {
 	a := assert.NewAssertion(t).Quiet()
 	writer := testNewResponseWriter(a)
 
-	req, err := http.NewRequest("POST", "/index.php?__ACTION__=/@wx/box/version", bytes.NewBuffer([]byte("hello=world")))
+	req, err := http.NewRequest("GET", "/index.php?__ACTION__=/@wx/box/version", bytes.NewBuffer([]byte("hello=world")))
+	//req, err := http.NewRequest("GET", "/index.php", bytes.NewBuffer([]byte("hello=world")))
 	if err != nil {
 		a.Fatal(err)
 	}
@@ -135,4 +147,38 @@ func TestRequest_CallFastcgi(t *testing.T) {
 	err = request.Call(writer)
 	a.IsNil(err)
 	writer.Close()
+
+	a.Log("status:", request.responseStatus, request.responseStatusMessage)
+	a.Log("requestTime:", request.requestTime)
+	a.Log("bytes send:", request.responseBytesSent, request.responseBodyBytesSent)
+}
+
+func TestRequest_Format(t *testing.T) {
+	a := assert.NewAssertion(t).Quiet()
+
+	rawReq, err := http.NewRequest("GET", "http://www.example.com/hello/world?name=Lu&age=20", bytes.NewBuffer([]byte("hello=world")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rawReq.RemoteAddr = "127.0.0.1:1234"
+	rawReq.Header.Add("Content-Type", "text/plain")
+
+	req := NewRequest(rawReq)
+	req.uri = "/hello/world?name=Lu&age=20"
+	req.method = "GET"
+	req.filePath = "hello.go"
+	req.scheme = "http"
+
+	a.IsTrue(req.requestRemoteAddr() == "127.0.0.1:1234")
+	a.IsTrue(req.requestRemotePort() == "1234")
+	a.IsTrue(req.requestURI() == req.uri)
+	a.IsTrue(req.requestPath() == "/hello/world")
+	a.IsTrue(req.requestMethod() == "GET")
+	a.IsTrue(req.requestLength() > 0)
+	a.IsTrue(req.requestFilename() == req.filePath)
+	a.IsTrue(req.requestProto() == "HTTP/1.1")
+	a.IsTrue(req.requestQueryString() == "name=Lu&age=20")
+	a.IsTrue(req.requestQueryParam("name") == "Lu")
+
+	t.Log(req.format("hello ${teaVersion} remoteAddr:${remoteAddr} name:${arg.name} header:${header.Content-Type} test:${test}"))
 }

@@ -31,6 +31,7 @@ func (this *DetailAction) Run(params struct {
 		"pattern":         location.PatternString(),
 		"caseInsensitive": location.IsCaseInsensitive(),
 		"reverse":         location.IsReverse(),
+		"root":            location.Root,
 		"rewrite":         location.Rewrite,
 		"fastcgi":         location.Fastcgi,
 	}

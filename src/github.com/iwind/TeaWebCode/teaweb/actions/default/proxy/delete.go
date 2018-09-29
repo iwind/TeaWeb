@@ -5,7 +5,6 @@ import (
 	"github.com/iwind/TeaGo/files"
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaGo/logs"
-	"time"
 	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
@@ -28,10 +27,7 @@ func (this *DeleteAction) Run(params struct {
 	// @TODO 删除对应的certificate file和certificate key file
 
 	// 重启
-	go func() {
-		time.Sleep(1 * time.Second)
-		global.NotifyChange()
-	}()
+	global.NotifyChange()
 
 	this.Refresh().Success()
 }

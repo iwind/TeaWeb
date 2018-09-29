@@ -106,7 +106,7 @@
         <tr>
             <td></td>
             <td>
-                <a href="" v-on:click.prevent="addName()"><i class="ui icon plus circle"></i>新域名</a>
+                <a href="" v-on:click.prevent="addName()" title="添加新域名"><i class="ui icon plus circle"></i>新域名</a>
             </td>
             <td></td>
         </tr>
@@ -143,7 +143,27 @@
         </tr>
         <tr>
             <td></td>
-            <td colspan="2"><a href="" v-on:click.prevent="addListen()"><i class="ui icon plus circle"></i>新监听地址</a></td>
+            <td colspan="2"><a href="" v-on:click.prevent="addListen()" title="添加新监听地址"><i class="ui icon plus circle"></i>新监听地址</a></td>
+        </tr>
+        <tr>
+            <td>文档根目录</td>
+            <td>
+                <span style="word-break: break-all;" v-if="proxy.root.length > 0">{{proxy.root}}</span>
+                <a class="disabled" v-if="proxy.root.length == 0">还没有设置。</a>
+            </td>
+            <td class="two op">
+                <a href="" title="修改" v-on:click.prevent="editRoot()"><i class="ui icon edit small"></i> </a>
+            </td>
+        </tr>
+        <tr v-if="rootEditing">
+            <td></td>
+            <td>
+                <input type="text" name="root" v-model="proxy.root"/>
+            </td>
+            <td class="two op">
+                <a href="" v-on:click.prevent="editRootSave()" title="保存"><i class="ui icon check circle"></i></a>
+                <a href="" v-on:click.prevent="editRoot" title="取消"><i class="ui icon arrow left circle"></i> </a>
+            </td>
         </tr>
     </table>
     </form>

@@ -30,6 +30,8 @@ func init() {
 			Post("/deleteListen", new(DeleteListenAction)).
 			Post("/updateListen", new(UpdateListenAction)).
 
+			Post("/updateRoot", new(UpdateRootAction)).
+
 			Get("/restart", new(RestartAction)).
 
 			EndAll()

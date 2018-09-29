@@ -27,31 +27,31 @@ var accessLogVars = map[string]string{}
 type AccessLog struct {
 	Id int64 `var:"id" bson:"id" json:"id"`
 
-	TeaVersion      string              `var:"teaVersion" bson:"teaVersion" json:"teaVersion"`
-	RemoteAddr      string              `var:"remoteAddr" bson:"remoteAddr" json:"remoteAddr"`
-	RemotePort      int                 `var:"remotePort" bson:"remotePort" json:"remotePort"`
-	RemoteUser      string              `var:"remoteUser" bson:"remoteUser" json:"remoteUser"` // @TODO 应该为basic authentication的用户名
+	TeaVersion      string              `var:"teaVersion" bson:"teaVersion" json:"teaVersion"` // TeaWeb版本
+	RemoteAddr      string              `var:"remoteAddr" bson:"remoteAddr" json:"remoteAddr"` // 终端地址，通常是：ip:port
+	RemotePort      int                 `var:"remotePort" bson:"remotePort" json:"remotePort"` // 终端端口
+	RemoteUser      string              `var:"remoteUser" bson:"remoteUser" json:"remoteUser"` // 终端用户，基于BasicAuth认证
 	RequestURI      string              `var:"requestURI" bson:"requestURI" json:"requestURI"`
 	RequestPath     string              `var:"requestPath" bson:"requestPath" json:"requestPath"`
-	RequestLength   int64               `var:"requestLength" bson:"requestLength" json:"requestLength"`
+	RequestLength   int64               `var:"requestLength" bson:"requestLength" json:"requestLength"`       // 请求内容长度
 	RequestTime     float64             `var:"requestTime" bson:"requestTime" json:"requestTime"`             // 从请求到所有响应数据发送到请求端所花时间，单位为带有小数点的秒，精确到纳秒，比如：0.000260081
 	RequestMethod   string              `var:"requestMethod" bson:"requestMethod" json:"requestMethod"`       // 请求方法
-	RequestFilename string              `var:"requestFilename" bson:"requestFilename" json:"requestFilename"` // @TODO
-	Scheme          string              `var:"requestScheme" bson:"requestScheme" json:"requestScheme"`
-	Proto           string              `var:"proto" bson:"proto" json:"proto"`
-	BytesSent       int64               `var:"bytesSent" bson:"bytesSent" json:"bytesSent"`             // 响应的字节数
-	BodyBytesSent   int64               `var:"bodyBytesSent" bson:"bodyBytesSent" json:"bodyBytesSent"` // 响应的字节数（目前同BytesSent）
-	Status          int                 `var:"status" bson:"status" json:"status"`                      // 响应的状态码
-	StatusMessage   string              `var:"statusMessage" bson:"statusMessage" json:"statusMessage"` // 响应的信息
-	TimeISO8601     string              `var:"timeISO8601" bson:"timeISO8601" json:"timeISO8601"`       // ISO 8601格式的本地时间，比如 2018-07-16T23:52:24.839+08:00
-	TimeLocal       string              `var:"timeLocal" bson:"timeLocal" json:"timeLocal"`             // 本地时间，比如 17/Jul/2018:09:52:24 +0800
-	Msec            float64             `var:"msec" bson:"msec" json:"msec"`                            // 带有毫秒的时间，比如 1531756823.054
-	Timestamp       int64               `var:"timestamp" bson:"timestamp" json:"timestamp"`             // unix时间戳
+	RequestFilename string              `var:"requestFilename" bson:"requestFilename" json:"requestFilename"` // 请求的文件名，包含完整的路径
+	Scheme          string              `var:"scheme" bson:"scheme" json:"scheme"`                            // 请求协议，http或者https
+	Proto           string              `var:"proto" bson:"proto" json:"proto"`                               // 请求协议，比如HTTP/1.0, HTTP/1.1
+	BytesSent       int64               `var:"bytesSent" bson:"bytesSent" json:"bytesSent"`                   // 响应的字节数，目前同 bodyBytesSent
+	BodyBytesSent   int64               `var:"bodyBytesSent" bson:"bodyBytesSent" json:"bodyBytesSent"`       // 响应的字节数
+	Status          int                 `var:"status" bson:"status" json:"status"`                            // 响应的状态码
+	StatusMessage   string              `var:"statusMessage" bson:"statusMessage" json:"statusMessage"`       // 响应的信息
+	TimeISO8601     string              `var:"timeISO8601" bson:"timeISO8601" json:"timeISO8601"`             // ISO 8601格式的本地时间，比如 2018-07-16T23:52:24.839+08:00
+	TimeLocal       string              `var:"timeLocal" bson:"timeLocal" json:"timeLocal"`                   // 本地时间，比如 17/Jul/2018:09:52:24 +0800
+	Msec            float64             `var:"msec" bson:"msec" json:"msec"`                                  // 带有毫秒的时间，比如 1531756823.054
+	Timestamp       int64               `var:"timestamp" bson:"timestamp" json:"timestamp"`                   // unix时间戳，单位为秒
 	Host            string              `var:"host" bson:"host" json:"host"`
 	Referer         string              `var:"referer" bson:"referer" json:"referer"`
 	UserAgent       string              `var:"userAgent" bson:"userAgent" json:"userAgent"`
-	Request         string              `var:"request" bson:"request" json:"request"`
-	ContentType     string              `var:"contentType" bson:"contentType" json:"contentType"`
+	Request         string              `var:"request" bson:"request" json:"request"`                      // 请求的简要说明，格式类似于 GET /hello/world HTTP/1.1
+	ContentType     string              `var:"contentType" bson:"contentType" json:"contentType"`          // 请求头部的Content-Type
 	Cookie          map[string]string   `bson:"cookie" json:"cookie"`                                      // Cookie cookie.name, cookie.sid
 	Arg             map[string][]string `bson:"arg" json:"arg"`                                            // arg_name, arg_id
 	Args            string              `var:"args" bson:"args" json:"args"`                               // name=liu&age=20

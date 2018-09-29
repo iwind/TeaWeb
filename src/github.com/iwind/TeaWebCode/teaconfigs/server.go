@@ -19,7 +19,7 @@ type ServerConfig struct {
 	Name        []string               `yaml:"name" json:"name"`               // 域名
 	Http        bool                   `yaml:"http" json:"http"`               // 是否支持HTTP
 	Listen      []string               `yaml:"listen" json:"listen"`           // 监听地址
-	Root        string                 `yaml:"root" json:"root"`               // 资源根目录
+	Root        string                 `yaml:"root" json:"root"`               // 资源根目录 @TODO
 	Backends    []*ServerBackendConfig `yaml:"backends" json:"backends"`       // 后端服务器配置
 	Locations   []*LocationConfig      `yaml:"locations" json:"locations"`     // 地址配置
 	Charset     string                 `yaml:"charset" json:"charset"`         // 字符集 @TODO

@@ -23,6 +23,7 @@ func init() {
 			Post("/updateCaseInsensitive", new(UpdateCaseInsensitiveAction)).
 			Post("/updatePattern", new(UpdatePatternAction)).
 			Post("/updateType", new(UpdateTypeAction)).
+			Post("/updateRoot", new(UpdateRootAction)).
 			EndAll()
 	})
 }

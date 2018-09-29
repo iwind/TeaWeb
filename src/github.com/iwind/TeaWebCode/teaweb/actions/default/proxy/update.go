@@ -9,7 +9,6 @@ import (
 	"github.com/iwind/TeaGo/actions"
 	"strings"
 	"fmt"
-	"time"
 	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
@@ -127,10 +126,7 @@ func (this *UpdateAction) RunPost(params struct {
 	}
 
 	// 重启
-	go func() {
-		time.Sleep(1 * time.Second)
-		global.NotifyChange()
-	}()
+	global.NotifyChange()
 
 	this.Next("/proxy", nil, "").Success("服务保存成功")
 }

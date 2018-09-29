@@ -3,15 +3,16 @@ TeaWeb集静态资源、缓存、代理、统计、监控于一体的可视化�
 
 # 架构 
 ~~~
-            |---------|       |---------------------------| 
-Client  ->  | TeaWeb  |  <->  | Nginx, Apache, Tomcat ... |
-            |---------|       |---------------------------|
-               Web
+             |---------|       |----------------------------| 
+Client  <->  | TeaWeb  |  <->  | Nginx, Apache, Tomcat,     |
+             |---------|       | Fastcgi, Static Files, ... |
+               Web             |----------------------------|
                Proxy
-               Statistics
-               Monitor
-               Security
                Log
+               Monitor
+               Statistics
+               Security
+               ...
 ~~~
 
 # 故事 
