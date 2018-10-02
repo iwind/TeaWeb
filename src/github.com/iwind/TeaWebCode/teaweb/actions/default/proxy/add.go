@@ -44,6 +44,7 @@ func (this *AddAction) RunPost(params struct {
 	server.Http = true
 	server.Id = params.Id
 	server.Description = params.Description
+	server.Charset = "utf-8"
 
 	filename := stringutil.Rand(16) + ".proxy.conf"
 	configPath := Tea.ConfigFile(filename)

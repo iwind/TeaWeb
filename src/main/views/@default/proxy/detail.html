@@ -74,7 +74,8 @@
         </tr>
         <tbody v-if="proxy.name.length > 0" v-for="(name, index) in proxy.name">
             <tr v-if="index != editNameIndex">
-                <td>域名</td>
+                <td v-if="index == 0">域名</td>
+                <td v-if="index > 0"></td>
                 <td>
                     {{name}}
                 </td>
@@ -164,6 +165,11 @@
                 <a href="" v-on:click.prevent="editRootSave()" title="保存"><i class="ui icon check circle"></i></a>
                 <a href="" v-on:click.prevent="editRoot" title="取消"><i class="ui icon arrow left circle"></i> </a>
             </td>
+        </tr>
+        <tr>
+            <td>字符编码</td>
+            <td>{{proxy.charset}}</td>
+            <td></td>
         </tr>
     </table>
     </form>

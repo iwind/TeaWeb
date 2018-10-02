@@ -41,12 +41,12 @@ func (this *AddAction) Run(params struct {
 		this.Fail("找不到要修改的路径规则")
 	}
 
-	location.Fastcgi = &teaconfigs.FastcgiConfig{
+	location.AddFastcgi(&teaconfigs.FastcgiConfig{
 		On:          params.On,
 		Pass:        params.Pass,
 		ReadTimeout: fmt.Sprintf("%ds", params.ReadTimeout),
 		Params:      paramsMap,
-	}
+	})
 	proxy.WriteToFilename(params.Filename)
 
 	global.NotifyChange()

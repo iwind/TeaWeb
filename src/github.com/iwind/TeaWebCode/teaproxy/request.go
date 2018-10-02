@@ -18,22 +18,29 @@ import (
 	"regexp"
 	"github.com/iwind/TeaWebCode/teaconst"
 	"github.com/iwind/TeaWebCode/teaproxy/fcgiclient"
+	"github.com/iwind/TeaWebCode/tealog"
+	"path/filepath"
+	"mime"
 )
 
 var requestVarReg = regexp.MustCompile("\\${[\\w.-]+}")
 
 // 请求定义
 type Request struct {
-	raw *http.Request
+	raw    *http.Request
+	server *teaconfigs.ServerConfig
 
 	scheme     string
 	uri        string
+	rawURI     string // 跳转之前的uri
 	host       string
 	method     string
 	serverName string // @TODO
 	serverAddr string
+	charset    string
 
-	root    string
+	root    string   // 资源根目录
+	index   []string // 目录下默认访问的文件
 	backend *teaconfigs.ServerBackendConfig
 	fastcgi *teaconfigs.FastcgiConfig
 	proxy   *teaconfigs.ServerConfig
@@ -51,6 +58,8 @@ type Request struct {
 	requestTimeLocal      string
 	requestMsec           float64
 	requestTimestamp      int64
+
+	shouldLog bool
 }
 
 // 获取新的请求
@@ -58,15 +67,210 @@ func NewRequest(rawRequest *http.Request) *Request {
 	now := time.Now()
 	return &Request{
 		raw:                rawRequest,
+		rawURI:             rawRequest.URL.RequestURI(),
 		requestFromTime:    now,
 		requestTimestamp:   now.Unix(),
 		requestTimeISO8601: now.Format("2006-01-02T15:04:05.000Z07:00"),
 		requestTimeLocal:   now.Format("2/Jan/2006:15:04:05 -0700"),
 		requestMsec:        float64(now.Unix()) + float64(now.Nanosecond())/1000000000,
+		shouldLog:          true,
 	}
 }
 
+func (this *Request) configure(server *teaconfigs.ServerConfig, redirects int) error {
+	this.server = server
+
+	if redirects > 8 {
+		return errors.New("too many redirects")
+	}
+	redirects ++
+
+	uri, err := url.ParseRequestURI(this.uri)
+	if err != nil {
+		return err
+	}
+	path := uri.Path
+
+	this.root = server.Root
+
+	// location的相关配置
+	for _, location := range server.Locations {
+		if location.Match(path) {
+			if !location.On {
+				continue
+			}
+			if len(location.Root) > 0 {
+				this.root = location.Root
+			}
+			if len(location.Charset) > 0 {
+				this.charset = location.Charset
+			}
+			if len(location.Index) > 0 {
+				this.index = location.Index
+			}
+
+			// rewrite相关配置
+			if len(location.Rewrite) > 0 {
+				for _, rule := range location.Rewrite {
+					if !rule.On {
+						continue
+					}
+					if rule.Apply(path, func(source string) string {
+						return source
+					}) {
+						// @TODO 支持带host前缀的URL，比如：http://google.com/hello/world
+						newURI, err := url.ParseRequestURI(rule.TargetURL())
+						if err != nil {
+							this.uri = rule.TargetURL()
+							return nil
+						}
+						if len(newURI.RawQuery) > 0 {
+							this.uri = newURI.Path + "?" + newURI.RawQuery
+							if len(uri.RawQuery) > 0 {
+								this.uri += "&" + uri.RawQuery
+							}
+						} else {
+							this.uri = newURI.Path
+							if len(uri.RawQuery) > 0 {
+								this.uri += "?" + uri.RawQuery
+							}
+						}
+
+						switch rule.TargetType() {
+						case teaconfigs.RewriteTargetURL:
+							return this.configure(server, redirects)
+						case teaconfigs.RewriteTargetProxy:
+							proxyId := rule.TargetProxy()
+							server, found := FindServer(proxyId)
+							if !found {
+								return errors.New("server with '" + proxyId + "' not found")
+							}
+							if !server.On {
+								return errors.New("server with '" + proxyId + "' not available now")
+							}
+							return this.configure(server, redirects)
+						}
+						return nil
+					}
+				}
+			}
+
+			// fastcgi
+			fastcgi := location.NextFastcgi()
+			if fastcgi != nil {
+				this.fastcgi = fastcgi
+				return nil
+			}
+
+			// proxy
+			if len(location.Proxy) > 0 {
+				server, found := FindServer(location.Proxy)
+				if !found {
+					return errors.New("server with '" + location.Proxy + "' not found")
+				}
+				if !server.On {
+					return errors.New("server with '" + location.Proxy + "' not available now")
+				}
+				return this.configure(server, redirects)
+			}
+
+			// backends
+			if len(location.Backends) > 0 {
+				backend := location.NextBackend()
+				if backend == nil {
+					return errors.New("no backends available")
+				}
+				this.backend = backend
+				return nil
+			}
+
+			// root
+			if len(location.Root) > 0 {
+				this.root = location.Root
+				return nil
+			}
+		}
+	}
+
+	// server的相关配置
+	if len(server.Rewrite) > 0 {
+		for _, rule := range server.Rewrite {
+			if !rule.On {
+				continue
+			}
+			if rule.Apply(path, func(source string) string {
+				return source
+			}) {
+				// @TODO 支持带host前缀的URL，比如：http://google.com/hello/world
+				newURI, err := url.ParseRequestURI(rule.TargetURL())
+				if err != nil {
+					this.uri = rule.TargetURL()
+					return nil
+				}
+				if len(newURI.RawQuery) > 0 {
+					this.uri = newURI.Path + "?" + newURI.RawQuery
+					if len(uri.RawQuery) > 0 {
+						this.uri += "&" + uri.RawQuery
+					}
+				} else {
+					if len(uri.RawQuery) > 0 {
+						this.uri = newURI.Path + "?" + uri.RawQuery
+					}
+				}
+
+				switch rule.TargetType() {
+				case teaconfigs.RewriteTargetURL:
+					return this.configure(server, redirects)
+				case teaconfigs.RewriteTargetProxy:
+					proxyId := rule.TargetProxy()
+					server, found := FindServer(proxyId)
+					if !found {
+						return errors.New("server with '" + proxyId + "' not found")
+					}
+					if !server.On {
+						return errors.New("server with '" + proxyId + "' not available now")
+					}
+					return this.configure(server, redirects)
+				}
+				return nil
+			}
+		}
+	}
+
+	// fastcgi
+	fastcgi := server.NextFastcgi()
+	if fastcgi != nil {
+		this.fastcgi = fastcgi
+		return nil
+	}
+
+	// proxy
+	if len(server.Proxy) > 0 {
+		server, found := FindServer(server.Proxy)
+		if !found {
+			return errors.New("server with '" + server.Proxy + "' not found")
+		}
+		if !server.On {
+			return errors.New("server with '" + server.Proxy + "' not available now")
+		}
+		return this.configure(server, redirects)
+	}
+
+	// 转发到后端
+	backend := server.NextBackend()
+	if backend == nil {
+		if len(this.root) == 0 {
+			return errors.New("no backends available")
+		}
+	}
+	this.backend = backend
+
+	return nil
+}
+
 func (this *Request) Call(writer http.ResponseWriter) error {
+	defer this.log()
+
 	if this.backend != nil {
 		return this.callBackend(writer)
 	}
@@ -89,7 +293,34 @@ func (this *Request) callRoot(writer http.ResponseWriter) error {
 		return nil
 	}
 
-	filename := strings.Replace(this.uri, "/", Tea.DS, -1)
+	requestPath := this.uri
+	uri, err := url.ParseRequestURI(this.uri)
+	query := ""
+	if err == nil {
+		requestPath = uri.Path
+		query = uri.RawQuery
+	}
+	if requestPath == "/" {
+		// 根目录
+		indexFile := this.findIndexFile(this.root)
+		if len(indexFile) > 0 {
+			this.uri = requestPath + indexFile
+			if len(query) > 0 {
+				this.uri += "?" + query
+			}
+			err := this.configure(this.server, 0)
+			if err != nil {
+				logs.Error(err)
+				this.serverError(writer)
+				return nil
+			}
+			return this.Call(writer)
+		} else {
+			this.notFoundError(writer)
+			return nil
+		}
+	}
+	filename := strings.Replace(requestPath, "/", Tea.DS, -1)
 	filePath := ""
 	if filename[0:1] == Tea.DS {
 		filePath = this.root + filename
@@ -99,7 +330,7 @@ func (this *Request) callRoot(writer http.ResponseWriter) error {
 
 	this.filePath = filePath
 
-	_, err := os.Stat(filePath)
+	stat, err := os.Stat(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			this.notFoundError(writer)
@@ -107,6 +338,25 @@ func (this *Request) callRoot(writer http.ResponseWriter) error {
 		} else {
 			this.serverError(writer)
 			logs.Error(err)
+			return nil
+		}
+	}
+	if stat.IsDir() {
+		indexFile := this.findIndexFile(filePath)
+		if len(indexFile) > 0 {
+			this.uri = requestPath + indexFile
+			if len(query) > 0 {
+				this.uri += "?" + query
+			}
+			err := this.configure(this.server, 0)
+			if err != nil {
+				logs.Error(err)
+				this.serverError(writer)
+				return nil
+			}
+			return this.Call(writer)
+		} else {
+			this.notFoundError(writer)
 			return nil
 		}
 	}
@@ -119,10 +369,22 @@ func (this *Request) callRoot(writer http.ResponseWriter) error {
 	}
 	defer fp.Close()
 
+	// mime type
+	ext := filepath.Ext(requestPath)
+	if len(ext) > 0 {
+		mimeType := mime.TypeByExtension(ext)
+		if len(mimeType) > 0 {
+			if len(this.charset) > 0 {
+				writer.Header().Set("Content-Type", mimeType+"; charset="+this.charset)
+			} else {
+				writer.Header().Set("Content-Type", mimeType)
+			}
+		}
+	}
+
 	n, err := io.Copy(writer, fp)
 
 	if err != nil {
-		this.serverError(writer)
 		logs.Error(err)
 		return nil
 	}
@@ -218,7 +480,6 @@ func (this *Request) callBackend(writer http.ResponseWriter) error {
 
 	n, err := io.Copy(writer, resp.Body)
 	if err != nil {
-		this.serverError(writer)
 		logs.Error(err)
 		return nil
 	}
@@ -287,6 +548,7 @@ func (this *Request) callFastcgi(writer http.ResponseWriter) error {
 		logs.Error(err)
 		return nil
 	}
+	defer fcgi.Close()
 
 	// 请求相关
 	if !env.Has("REQUEST_METHOD") {
@@ -299,9 +561,24 @@ func (this *Request) callFastcgi(writer http.ResponseWriter) error {
 		env["CONTENT_TYPE"] = this.raw.Header.Get("Content-Type")
 	}
 
+	// 处理SCRIPT_FILENAME
+	scriptFilename := env.GetString("SCRIPT_FILENAME")
+	if len(scriptFilename) > 0 && (strings.Index(scriptFilename, "/") < 0 && strings.Index(scriptFilename, "\\") < 0) {
+		env["SCRIPT_FILENAME"] = env.GetString("DOCUMENT_ROOT") + Tea.DS + scriptFilename
+	}
+
 	params := map[string]string{}
 	for key, value := range env {
 		params[key] = types.String(value)
+	}
+
+	for k, v := range this.raw.Header {
+		if k == "Connection" {
+			continue
+		}
+		for _, subV := range v {
+			params["HTTP_"+strings.ToUpper(k)] = subV
+		}
 	}
 	resp, err := fcgi.Request(params, this.raw.Body)
 	if err != nil {
@@ -310,8 +587,7 @@ func (this *Request) callFastcgi(writer http.ResponseWriter) error {
 		return nil
 	}
 
-	// 设置响应码
-	writer.WriteHeader(resp.StatusCode)
+	defer resp.Body.Close()
 
 	// 设置Header
 	for k, v := range resp.Header {
@@ -323,6 +599,10 @@ func (this *Request) callFastcgi(writer http.ResponseWriter) error {
 		}
 	}
 
+	// 设置响应码
+	writer.WriteHeader(resp.StatusCode)
+
+	// 输出内容
 	n, err := io.Copy(writer, resp.Body)
 	if err != nil {
 		logs.Error(err)
@@ -364,16 +644,22 @@ func (this *Request) serverError(writer http.ResponseWriter) {
 }
 
 func (this *Request) requestRemoteAddr() string {
-	return this.raw.RemoteAddr
-}
-
-func (this *Request) requestRemotePort() string {
-	remoteAddr := this.requestRemoteAddr()
+	remoteAddr := this.raw.RemoteAddr
 	index := strings.LastIndex(remoteAddr, ":")
 	if index < 0 {
-		return ""
+		return remoteAddr
 	} else {
-		return remoteAddr[index+1:]
+		return remoteAddr[:index]
+	}
+}
+
+func (this *Request) requestRemotePort() int {
+	remoteAddr := this.raw.RemoteAddr
+	index := strings.LastIndex(remoteAddr, ":")
+	if index < 0 {
+		return 0
+	} else {
+		return types.Int(remoteAddr[index+1:])
 	}
 }
 
@@ -386,7 +672,7 @@ func (this *Request) requestRemoteUser() string {
 }
 
 func (this *Request) requestURI() string {
-	return this.uri
+	return this.rawURI
 }
 
 func (this *Request) requestPath() string {
@@ -466,12 +752,12 @@ func (this *Request) requestQueryParam(name string) string {
 	return strings.Join(v, "&")
 }
 
-func (this *Request) requestServerPort() string {
+func (this *Request) requestServerPort() int {
 	index := strings.LastIndex(this.serverAddr, ":")
 	if index < 0 {
-		return ""
+		return 0
 	}
-	return this.serverAddr[index+1:]
+	return types.Int(this.serverAddr[index+1:])
 }
 
 func (this *Request) requestHeadersString() string {
@@ -504,7 +790,7 @@ func (this *Request) format(source string) string {
 		case "remoteAddr":
 			return this.requestRemoteAddr()
 		case "remotePort":
-			return this.requestRemotePort()
+			return fmt.Sprintf("%d", this.requestRemotePort())
 		case "remoteUser":
 			return this.requestRemoteUser()
 		case "requestURI", "requestUri":
@@ -558,7 +844,7 @@ func (this *Request) format(source string) string {
 		case "serverName":
 			return this.serverName
 		case "serverPort":
-			return this.requestServerPort()
+			return fmt.Sprintf("%d", this.requestServerPort())
 		}
 
 		dotIndex := strings.Index(varName, ".")
@@ -585,4 +871,94 @@ func (this *Request) format(source string) string {
 
 		return s
 	})
+}
+
+// 记录日志
+func (this *Request) log() {
+	if !this.shouldLog {
+		return
+	}
+
+	cookies := map[string]string{}
+	for _, cookie := range this.raw.Cookies() {
+		cookies[cookie.Name] = cookie.Value
+	}
+
+	accessLog := &tealog.AccessLog{
+		TeaVersion:      teaconst.TeaVersion,
+		RemoteAddr:      this.requestRemoteAddr(),
+		RemotePort:      this.requestRemotePort(),
+		RemoteUser:      this.requestRemoteUser(),
+		RequestURI:      this.requestURI(),
+		RequestPath:     this.requestPath(),
+		RequestLength:   this.requestLength(),
+		RequestTime:     this.requestTime,
+		RequestMethod:   this.requestMethod(),
+		RequestFilename: this.requestFilename(),
+		Scheme:          this.scheme,
+		Proto:           this.requestProto(),
+		BytesSent:       this.responseBytesSent,
+		BodyBytesSent:   this.responseBodyBytesSent,
+		Status:          this.responseStatus,
+		StatusMessage:   this.responseStatusMessage,
+		TimeISO8601:     this.requestTimeISO8601,
+		TimeLocal:       this.requestTimeLocal,
+		Msec:            this.requestMsec,
+		Timestamp:       this.requestTimestamp,
+		Host:            this.host,
+		Referer:         this.requestReferer(),
+		UserAgent:       this.requestUserAgent(),
+		Request:         this.requestString(),
+		ContentType:     this.requestContentType(),
+		Cookie:          cookies,
+		Args:            this.requestQueryString(),
+		QueryString:     this.requestQueryString(),
+		Header:          this.raw.Header,
+		ServerName:      this.serverName,
+		ServerPort:      this.requestServerPort(),
+		ServerProtocol:  this.requestProto(),
+	}
+
+	if this.backend != nil {
+		accessLog.BackendAddress = this.backend.Address
+	}
+
+	if this.fastcgi != nil {
+		accessLog.FastcgiAddress = this.fastcgi.Pass
+	}
+
+	tealog.SharedLogger().Push(accessLog)
+}
+
+func (this *Request) findIndexFile(dir string) string {
+	if len(this.index) == 0 {
+		return ""
+	}
+	for _, index := range this.index {
+		if len(index) == 0 {
+			continue
+		}
+
+		// 模糊查找
+		if strings.Contains(index, "*") {
+			files, err := filepath.Glob(dir + Tea.DS + index)
+			if err != nil {
+				logs.Error(err)
+				continue
+			}
+			if len(files) > 0 {
+				return filepath.Base(files[0])
+			}
+			continue
+		}
+
+		// 精确查找
+		filePath := dir + Tea.DS + index
+		stat, err := os.Stat(filePath)
+		if err != nil || !stat.Mode().IsRegular() {
+			continue
+		}
+		return index
+	}
+	return ""
 }

@@ -48,7 +48,7 @@ func TestListenerConfig_FindNamedServer(t *testing.T) {
 	}
 
 	{
-		result := listener.FindNamedServer("hello.com")
+		result, _ := listener.FindNamedServer("hello.com")
 		if result != nil {
 			a.Log(result.Name)
 		} else {
@@ -57,7 +57,7 @@ func TestListenerConfig_FindNamedServer(t *testing.T) {
 	}
 
 	{
-		result := listener.FindNamedServer("a.hello.com")
+		result, _ := listener.FindNamedServer("a.hello.com")
 		if result != nil {
 			a.Log(result.Name)
 		} else {

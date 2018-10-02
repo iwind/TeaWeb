@@ -4,6 +4,7 @@ import "strings"
 
 // 服务后端配置
 type ServerBackendConfig struct {
+	On          bool     `yaml:"on" json:"on"`                   // 是否启用 @TODO
 	Name        []string `yaml:"name" json:"name"`               // 名称
 	Address     string   `yaml:"address" json:"address"`         // 地址
 	Weight      uint     `yaml:"weight" json:"weight"`           //@TODO

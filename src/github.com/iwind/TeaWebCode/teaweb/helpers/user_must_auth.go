@@ -30,22 +30,25 @@ func (this *UserMustAuth) BeforeAction(actionPtr actions.ActionWrapper, paramNam
 	action.Data["teaMenu"] = ""
 	action.Data["teaModules"] = []map[string]interface{}{
 		{
-			"code":     "log",
-			"menuName": "访问日志",
-		},
-		{
 			"code":     "proxy",
 			"menuName": "代理设置",
+			"icon":     "compass outline",
 		},
-
-		/**{
+		{
+			"code":     "log",
+			"menuName": "访问日志",
+			"icon":     "clock outline",
+		},
+		{
 			"code":     "stat",
 			"menuName": "统计",
+			"icon":     "chart line",
 		},
 		{
 			"code":     "monitor",
 			"menuName": "监控",
-		},**/
+			"icon":     "bell outline",
+		},
 	}
 	action.Data["teaSubMenus"] = []map[string]interface{}{}
 	action.Data["teaTabbar"] = []map[string]interface{}{}

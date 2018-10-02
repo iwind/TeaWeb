@@ -170,7 +170,7 @@ func TestRequest_Format(t *testing.T) {
 	req.scheme = "http"
 
 	a.IsTrue(req.requestRemoteAddr() == "127.0.0.1:1234")
-	a.IsTrue(req.requestRemotePort() == "1234")
+	a.IsTrue(req.requestRemotePort() == 1234)
 	a.IsTrue(req.requestURI() == req.uri)
 	a.IsTrue(req.requestPath() == "/hello/world")
 	a.IsTrue(req.requestMethod() == "GET")
@@ -181,4 +181,23 @@ func TestRequest_Format(t *testing.T) {
 	a.IsTrue(req.requestQueryParam("name") == "Lu")
 
 	t.Log(req.format("hello ${teaVersion} remoteAddr:${remoteAddr} name:${arg.name} header:${header.Content-Type} test:${test}"))
+}
+
+func TestRequest_Index(t *testing.T) {
+	a := assert.NewAssertion(t).Quiet()
+
+	rawReq, err := http.NewRequest("GET", "http://www.example.com/hello/world?name=Lu&age=20", bytes.NewBuffer([]byte("hello=world")))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req := NewRequest(rawReq)
+	req.index = []string{}
+	t.Log(req.findIndexFile(Tea.Root))
+
+	req.index = []string{"main.go", "main2.go", "run.sh"}
+	a.Equals(req.findIndexFile(Tea.Root), "main.go")
+
+	req.index = []string{"main.*"}
+	a.Equals(req.findIndexFile(Tea.Root), "main.go")
 }

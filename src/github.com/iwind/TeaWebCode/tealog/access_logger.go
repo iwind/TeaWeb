@@ -10,6 +10,8 @@ import (
 	"github.com/iwind/TeaGo/lists"
 	"github.com/iwind/TeaGo/maps"
 	"time"
+	"github.com/mongodb/mongo-go-driver/mongo/insertopt"
+	"sync"
 )
 
 var (
@@ -28,8 +30,7 @@ type AccessLogger struct {
 }
 
 type AccessLogItem struct {
-	log     *AccessLog
-	writers []AccessLogWriter
+	log *AccessLog
 }
 
 func NewAccessLogger() *AccessLogger {
@@ -45,10 +46,9 @@ func SharedLogger() *AccessLogger {
 	return accessLogger
 }
 
-func (this *AccessLogger) Push(log *AccessLog, writers []AccessLogWriter) {
+func (this *AccessLogger) Push(log *AccessLog) {
 	this.queue <- &AccessLogItem{
-		log:     log,
-		writers: writers,
+		log: log,
 	}
 }
 
@@ -57,8 +57,24 @@ func (this *AccessLogger) client() *mongo.Client {
 }
 
 func (this *AccessLogger) wait() {
-	latestDoc := this.client().Database("teaweb").
-		Collection("accessLogs").
+	// 构建索引
+	var logCollection = this.client().Database("teaweb").Collection("accessLogs")
+	indexes := logCollection.Indexes()
+	indexes.CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.NewDocument(bson.EC.Int32("id", -1)),
+	})
+	indexes.CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.NewDocument(bson.EC.Int32("id", 1)),
+	})
+	indexes.CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.NewDocument(bson.EC.Int32("status", 1)),
+	})
+	indexes.CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.NewDocument(bson.EC.Int32("timestamp", 1)),
+	})
+
+	// 生成文档ID
+	latestDoc := logCollection.
 		FindOne(context.Background(), nil, findopt.Sort(bson.NewDocument(bson.EC.Int32("id", -1))))
 	one := maps.Map{}
 	err := latestDoc.Decode(one)
@@ -72,6 +88,30 @@ func (this *AccessLogger) wait() {
 	logs.Println("start log id:", newId)
 
 	timestamp := time.Now().Unix()
+
+	var docs = []interface{}{}
+	var docsLocker = sync.Mutex{}
+
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+
+			// 写入到本地数据库
+			if this.client() != nil {
+				docsLocker.Lock()
+				if len(docs) == 0 {
+					docsLocker.Unlock()
+					continue
+				}
+				newDocs := docs
+				docs = []interface{}{}
+				docsLocker.Unlock()
+
+				//logs.Println("insert", len(newDocs), "logs")
+				logCollection.InsertMany(context.Background(), newDocs, insertopt.BypassDocumentValidation(true))
+			}
+		}
+	}()
 
 	for {
 		item := <-this.queue
@@ -96,21 +136,9 @@ func (this *AccessLogger) wait() {
 		// 分析日志
 		log.parse()
 
-		// 写入到本地数据库
-		// @TODO 批量写入
-		if this.client() != nil {
-			this.client().
-				Database("teaweb").
-				Collection("accessLogs").
-				InsertOne(context.Background(), log)
-		}
-
-		// 输出日志到各个接口
-		if len(item.writers) > 0 {
-			for _, writer := range item.writers {
-				writer.Write(log)
-			}
-		}
+		docsLocker.Lock()
+		docs = append(docs, log)
+		docsLocker.Unlock()
 	}
 }
 
@@ -172,7 +200,7 @@ func (this *AccessLogger) CountSuccessLogs(fromTimestamp int64, toTimestamp int6
 	coll := this.client().Database("teaweb").Collection("accessLogs")
 	filter := bson.NewDocument(
 		bson.EC.SubDocument("status", bson.NewDocument(bson.EC.Int64("$lt", 400))),
-		bson.EC.SubDocument("msec", bson.NewDocument(bson.EC.Int64("$lte", toTimestamp), bson.EC.Int64("$gte", fromTimestamp))),
+		bson.EC.SubDocument("timestamp", bson.NewDocument(bson.EC.Int64("$lte", toTimestamp), bson.EC.Int64("$gte", fromTimestamp))),
 	)
 	count, err := coll.CountDocuments(context.Background(), filter)
 	if err != nil {
@@ -187,7 +215,7 @@ func (this *AccessLogger) CountFailLogs(fromTimestamp int64, toTimestamp int64) 
 	coll := this.client().Database("teaweb").Collection("accessLogs")
 	filter := bson.NewDocument(
 		bson.EC.SubDocument("status", bson.NewDocument(bson.EC.Int64("$gte", 400))),
-		bson.EC.SubDocument("msec", bson.NewDocument(bson.EC.Int64("$lte", toTimestamp), bson.EC.Int64("$gte", fromTimestamp))),
+		bson.EC.SubDocument("timestamp", bson.NewDocument(bson.EC.Int64("$lte", toTimestamp), bson.EC.Int64("$gte", fromTimestamp))),
 	)
 	count, err := coll.CountDocuments(context.Background(), filter)
 	if err != nil {

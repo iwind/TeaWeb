@@ -28,3 +28,8 @@ Client  <->  | TeaWeb  |  <->  | Nginx, Apache, Tomcat,     |
 
 # 预览
 ![预览](./resources/screenshot.jpg)
+
+# 感谢
+* [Semantic UI](https://semantic-ui.com) - 一个非常好用的UI组件库
+* [Vue.js](https://cn.vuejs.org/) - 支持双向绑定的DOM操作库
+* [Axios](https://github.com/axios/axios) - 一个好用的HTTP客户端

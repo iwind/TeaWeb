@@ -39,7 +39,8 @@
 
             <!-- 数据管理模块 -->
             <a v-for="module in teaModules" class="item" v-bind:href="Tea.url(module.code)" v-bind:class="{active:teaMenu == module.code}">
-                <i class="window restore outline icon"></i>
+                <i class="window restore outline icon" v-if="module.icon == null"></i>
+                <i class="ui icon" v-if="module.icon != null" :class="module.icon"></i>
                 {{module.menuName}}
             </a>
 

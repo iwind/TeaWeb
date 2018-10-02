@@ -33,7 +33,7 @@ func (this *DetailAction) Run(params struct {
 		"reverse":         location.IsReverse(),
 		"root":            location.Root,
 		"rewrite":         location.Rewrite,
-		"fastcgi":         location.Fastcgi,
+		"fastcgi":         location.FastcgiAtIndex(0),
 	}
 	this.Data["proxy"] = proxy
 

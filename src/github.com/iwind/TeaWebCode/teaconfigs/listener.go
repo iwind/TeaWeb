@@ -108,31 +108,52 @@ func (this *ListenerConfig) AddServer(serverConfig *ServerConfig) {
 
 // 根据域名来查找匹配的域名
 // @TODO 把查找的结果加入缓存
-func (this *ListenerConfig) FindNamedServer(name string) *ServerConfig {
+func (this *ListenerConfig) FindNamedServer(name string) (serverConfig *ServerConfig, serverName string) {
 	countServers := len(this.Servers)
 	if countServers == 0 {
-		return nil
+		return nil, ""
 	}
 
 	// 如果只有一个server，则默认为这个
 	if countServers == 1 {
-		return this.Servers[0]
+		server := this.Servers[0]
+		matchedName, matched := server.MatchName(name)
+		if matched {
+			if len(matchedName) > 0 {
+				return server, matchedName
+			} else {
+				return server, name
+			}
+		}
+
+		// 匹配第一个域名
+		firstName := server.FirstName()
+		if len(firstName) > 0 {
+			return server, firstName
+		}
+		return server, name
 	}
 
 	// 精确查找
 	for _, server := range this.Servers {
 		if lists.Contains(server.Name, name) {
-			return server
+			return server, name
 		}
 	}
 
 	// 模糊查找
 	for _, server := range this.Servers {
-		if server.MatchName(name) {
-			return server
+		if _, matched := server.MatchName(name); matched {
+			return server, name
 		}
 	}
 
 	// 如果没有找到，则匹配到第一个
-	return this.Servers[0]
+	server := this.Servers[0]
+	firstName := server.FirstName()
+	if len(firstName) > 0 {
+		return server, firstName
+	}
+
+	return server, name
 }

@@ -8,11 +8,11 @@
 
 form {
     position: fixed;
-    width: 30%;
+    width: 21em;
     top: 50%;
     left: 50%;
-    margin-left: -15%;
-    margin-top: -15em;
+    margin-left: -10.5em;
+    margin-top: -12em;
 }
 
 form .header {

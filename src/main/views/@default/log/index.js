@@ -55,12 +55,15 @@ Tea.context(function () {
         if (this.fromId > 0) {
             size = 200;
         }
+        var lastSize = 0;
         this.$get(".get")
             .params({
                 "fromId": this.fromId,
                 "size": size
             })
             .success(function (response) {
+                lastSize = response.data.logs.length;
+
                 this.total = Math.ceil(response.data.total * 100 / 10000) / 100;
                 this.countSuccess = Math.ceil(response.data.countSuccess * 100 / 10000) / 100;
                 this.countFail = Math.ceil(response.data.countFail * 100 / 10000) / 100;
@@ -87,7 +90,7 @@ Tea.context(function () {
                 // 每1秒刷新一次
                 Tea.delay(function () {
                     this.loadLogs();
-                }, 1000)
+                }, (lastSize < size) ? 1000 : 100)
             });
     };
 

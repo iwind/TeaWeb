@@ -29,11 +29,10 @@ func (this *AddParamAction) Run(params struct {
 		this.Fail("找不到要修改的路径规则")
 	}
 
-	fastcgi := location.Fastcgi
+	fastcgi := location.FastcgiAtIndex(0)
 	if fastcgi == nil {
 		this.Fail("没有fastcgi配置，请刷新后重试")
 	}
-
 	fastcgi.Params[params.Name] = params.Value
 	proxy.WriteToFilename(params.Filename)
 

@@ -22,7 +22,8 @@ func (this *DeleteAction) Run(params struct {
 		this.Fail("找不到要修改的路径规则")
 	}
 
-	location.Fastcgi = nil
+
+	location.RemoveFastcgiAt(0)
 	proxy.WriteToFilename(params.Filename)
 
 	global.NotifyChange()

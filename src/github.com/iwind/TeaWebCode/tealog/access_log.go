@@ -63,6 +63,7 @@ type AccessLog struct {
 
 	// 代理相关
 	BackendAddress string `var:"backendAddress" bson:"backendAddress" json:"backendAddress"` // 代理的后端的地址
+	FastcgiAddress string `var:"fastcgiAddress" bson:"fastcgiAddress" json:"fastcgiAddress"` // Fastcgi后端地址
 
 	// 扩展
 	Extend struct {

@@ -3,6 +3,7 @@ package fastcgi
 import (
 	"github.com/iwind/TeaGo/actions"
 	"github.com/iwind/TeaWebCode/teaconfigs"
+	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
 )
 
 type UpdateParamAction actions.Action
@@ -29,7 +30,7 @@ func (this *UpdateParamAction) Run(params struct {
 		this.Fail("找不到要修改的路径规则")
 	}
 
-	fastcgi := location.Fastcgi
+	fastcgi := location.FastcgiAtIndex(0)
 	if fastcgi == nil {
 		this.Fail("没有fastcgi配置，请刷新后重试")
 	}
@@ -37,6 +38,8 @@ func (this *UpdateParamAction) Run(params struct {
 	delete(fastcgi.Params, params.OldName)
 	fastcgi.Params[params.Name] = params.Value
 	proxy.WriteToFilename(params.Filename)
+
+	global.NotifyChange()
 
 	this.Success()
 }

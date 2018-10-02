@@ -34,6 +34,7 @@ type LocationConfig struct {
 	LogOnly bool         `yaml:"logOnly" json:"logOnly"` // 是否只记录日志 @TODO
 	Cache   *CacheConfig `yaml:"cache" json:"cache"`     // 缓存设置 @TODO
 	Root    string       `yaml:"root" json:"root"`       // 资源根目录 @TODO
+	Index   []string     `yaml:"index" json:"index"`     // 默认文件 @TODO
 	Charset string       `yaml:"charset" json:"charset"` // 字符集设置 @TODO
 
 	// 日志
@@ -47,7 +48,7 @@ type LocationConfig struct {
 	Deny  []string `yaml:"deny" json:"deny"`   // 禁止的终端地址 @TODO
 
 	Rewrite  []*RewriteRule         `yaml:"rewrite" json:"rewrite"`   // 重写规则 @TODO
-	Fastcgi  *FastcgiConfig         `yaml:"fastcgi" json:"fastcgi"`   // Fastcgi配置 @TODO
+	Fastcgi  []*FastcgiConfig       `yaml:"fastcgi" json:"fastcgi"`   // Fastcgi配置 @TODO
 	Proxy    string                 `yaml:proxy" json:"proxy"`        //  代理配置 @TODO
 	Backends []*ServerBackendConfig `yaml:"backends" json:"backends"` // 后端服务器配置 @TODO
 }
@@ -160,8 +161,8 @@ func (this *LocationConfig) Validate() error {
 	}
 
 	// 校验Fastcgi配置
-	if this.Fastcgi != nil {
-		err := this.Fastcgi.Validate()
+	for _, fastcgi := range this.Fastcgi {
+		err := fastcgi.Validate()
 		if err != nil {
 			return err
 		}
@@ -290,4 +291,43 @@ func (this *LocationConfig) NextBackend() *ServerBackendConfig {
 	rand.Seed(time.Now().UnixNano())
 	index := rand.Int() % countBackends
 	return this.Backends[index]
+}
+
+// 取得下一个可用的fastcgi
+// @TODO 实现fastcgi中的各种参数
+func (this *LocationConfig) NextFastcgi() *FastcgiConfig {
+	countFastcgi := len(this.Fastcgi)
+	if countFastcgi == 0 {
+		return nil
+	}
+	rand.Seed(time.Now().UnixNano())
+	index := rand.Int() % countFastcgi
+	return this.Fastcgi[index]
+}
+
+// 添加fastcgi配置
+func (this *LocationConfig) AddFastcgi(fastcgi *FastcgiConfig) {
+	this.Fastcgi = append(this.Fastcgi, fastcgi)
+}
+
+// 取得在某个的fastcgi配置
+func (this *LocationConfig) FastcgiAtIndex(index int) *FastcgiConfig {
+	if index < 0 || index >= len(this.Fastcgi) {
+		return nil
+	}
+	return this.Fastcgi[index]
+}
+
+// 移除某个fastcgi配置
+func (this *LocationConfig) RemoveFastcgiAt(index int) {
+	if index < 0 || index >= len(this.Fastcgi) {
+		return
+	}
+	if index == 0 {
+		this.Fastcgi = this.Fastcgi[1:]
+	} else if index == len(this.Fastcgi)-1 {
+		this.Fastcgi = this.Fastcgi[:index]
+	} else {
+		this.Fastcgi = append(this.Fastcgi[:index], this.Fastcgi[index+1:] ...)
+	}
 }

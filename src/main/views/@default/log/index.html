@@ -133,8 +133,15 @@
                             <td>本地时间(TimeLocal)：{{log.timeLocal}}</td>
                         </tr>
                         <tr>
-                            <td>后端服务（Backend）：{{log.backendAddress}}</td>
-                            <td></td>
+                            <td>后端服务（Backend）：
+                                <span v-if="log.backendAddress.length > 0">{{log.backendAddress}}</span>
+                                <span v-if="log.backendAddress.length == 0">-</span>
+                            </td>
+                            <td>
+                                Fastcgi服务：
+                                <span v-if="log.fastcgiAddress.length > 0">{{log.fastcgiAddress}}</span>
+                                <span v-if="log.fastcgiAddress.length == 0">-</span>
+                            </td>
                         </tr>
                     </table>
                 </td>

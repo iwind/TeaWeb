@@ -14,15 +14,20 @@ import (
 type ServerConfig struct {
 	On bool `yaml:"on" json:"on"` // 是否开启 @TODO
 
-	Id          string                 `yaml:"id" json:"id"`                   // ID
-	Description string                 `yaml:"description" json:"description"` // 描述
-	Name        []string               `yaml:"name" json:"name"`               // 域名
-	Http        bool                   `yaml:"http" json:"http"`               // 是否支持HTTP
-	Listen      []string               `yaml:"listen" json:"listen"`           // 监听地址
-	Root        string                 `yaml:"root" json:"root"`               // 资源根目录 @TODO
-	Backends    []*ServerBackendConfig `yaml:"backends" json:"backends"`       // 后端服务器配置
-	Locations   []*LocationConfig      `yaml:"locations" json:"locations"`     // 地址配置
-	Charset     string                 `yaml:"charset" json:"charset"`         // 字符集 @TODO
+	Id          string   `yaml:"id" json:"id"`                   // ID
+	Description string   `yaml:"description" json:"description"` // 描述
+	Name        []string `yaml:"name" json:"name"`               // 域名
+	Http        bool     `yaml:"http" json:"http"`               // 是否支持HTTP
+
+	// 监听地址
+	// @TODO 支持参数，比如：127.0.01:1234?ssl=off
+	Listen []string `yaml:"listen" json:"listen"`
+
+	Root      string                 `yaml:"root" json:"root"`           // 资源根目录 @TODO
+	Index     []string               `yaml:"index" json:"index"`         // 默认文件 @TODO
+	Charset   string                 `yaml:"charset" json:"charset"`     // 字符集 @TODO
+	Backends  []*ServerBackendConfig `yaml:"backends" json:"backends"`   // 后端服务器配置
+	Locations []*LocationConfig      `yaml:"locations" json:"locations"` // 地址配置
 
 	Async   bool     `yaml:"async" json:"async"`     // 请求是否异步处理 @TODO
 	Notify  []string `yaml:"notify" json:"notify"`   // 请求转发地址 @TODO
@@ -46,9 +51,9 @@ type ServerConfig struct {
 
 	Filename string `yaml:"filename" json:"filename"` // 配置文件名
 
-	Rewrite []*RewriteRule `yaml:"rewrite" json:"rewrite"` // 重写规则 @TODO
-	Fastcgi *FastcgiConfig `yaml:"fastcgi" json:"fastcgi"` // Fastcgi配置 @TODO
-	Proxy   string         `yaml:proxy" json:"proxy"`      //  代理配置 @TODO
+	Rewrite []*RewriteRule   `yaml:"rewrite" json:"rewrite"` // 重写规则 @TODO
+	Fastcgi []*FastcgiConfig `yaml:"fastcgi" json:"fastcgi"` // Fastcgi配置 @TODO
+	Proxy   string           `yaml:proxy" json:"proxy"`      //  代理配置 @TODO
 }
 
 // 从目录中加载配置
@@ -130,6 +135,22 @@ func (this *ServerConfig) Validate() error {
 		}
 	}
 
+	// fastcgi
+	for _, fastcgi := range this.Fastcgi {
+		err := fastcgi.Validate()
+		if err != nil {
+			return err
+		}
+	}
+
+	// rewrite rules
+	for _, rewriteRule := range this.Rewrite {
+		err := rewriteRule.Validate()
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -196,9 +217,11 @@ func (this *ServerConfig) WriteToFilename(filename string) error {
 }
 
 // 判断是否和域名匹配
-func (this *ServerConfig) MatchName(name string) bool {
+// @TODO 支持  .example.com （所有以example.com结尾的域名，包括example.com）
+// 更多参考：http://nginx.org/en/docs/http/ngx_http_core_module.html#server_name
+func (this *ServerConfig) MatchName(name string) (matchedName string, matched bool) {
 	if len(name) == 0 {
-		return false
+		return "", false
 	}
 	pieces1 := strings.Split(name, ".")
 	countPieces1 := len(pieces1)
@@ -207,7 +230,7 @@ func (this *ServerConfig) MatchName(name string) bool {
 			continue
 		}
 		if name == testName {
-			return true
+			return testName, true
 		}
 		pieces2 := strings.Split(testName, ".")
 		if countPieces1 != len(pieces2) {
@@ -221,8 +244,31 @@ func (this *ServerConfig) MatchName(name string) bool {
 			}
 		}
 		if matched {
-			return true
+			return "", true
 		}
 	}
-	return false
+	return "", false
+}
+
+// 取得第一个非泛解析的域名
+func (this *ServerConfig) FirstName() string {
+	for _, name := range this.Name {
+		if strings.Contains(name, "*") {
+			continue
+		}
+		return name
+	}
+	return ""
+}
+
+// 取得下一个可用的fastcgi
+// @TODO 实现fastcgi中的各种参数
+func (this *ServerConfig) NextFastcgi() *FastcgiConfig {
+	countFastcgi := len(this.Fastcgi)
+	if countFastcgi == 0 {
+		return nil
+	}
+	rand.Seed(time.Now().UnixNano())
+	index := rand.Int() % countFastcgi
+	return this.Fastcgi[index]
 }
