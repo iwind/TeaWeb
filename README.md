@@ -33,3 +33,4 @@ Client  <->  | TeaWeb  |  <->  | Nginx, Apache, Tomcat,     |
 * [Semantic UI](https://semantic-ui.com) - 一个非常好用的UI组件库
 * [Vue.js](https://cn.vuejs.org/) - 支持双向绑定的DOM操作库
 * [Axios](https://github.com/axios/axios) - 一个好用的HTTP客户端
+* [echarts](http://echarts.baidu.com/) - 一个很酷炫的图表库

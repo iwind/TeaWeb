@@ -2,8 +2,8 @@ package proxy
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
+	"github.com/iwind/TeaWebCode/teaconfigs"
 )
 
 type HttpOnAction actions.Action

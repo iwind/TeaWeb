@@ -2,9 +2,9 @@ package fastcgi
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaconfigs"
 	"fmt"
 	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
+	"github.com/iwind/TeaWebCode/teaconfigs"
 )
 
 type UpdateTimeoutAction actions.Action

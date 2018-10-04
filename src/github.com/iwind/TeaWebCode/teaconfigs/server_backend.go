@@ -1,10 +1,14 @@
 package teaconfigs
 
-import "strings"
+import (
+	"strings"
+	"github.com/iwind/TeaGo/utils/string"
+)
 
 // 服务后端配置
 type ServerBackendConfig struct {
 	On          bool     `yaml:"on" json:"on"`                   // 是否启用 @TODO
+	Id          string   `yaml:"id" json:"id"`                   // @TODO
 	Name        []string `yaml:"name" json:"name"`               // 名称
 	Address     string   `yaml:"address" json:"address"`         // 地址
 	Weight      uint     `yaml:"weight" json:"weight"`           //@TODO
@@ -14,6 +18,13 @@ type ServerBackendConfig struct {
 	MaxFails    uint     `yaml:"maxFails" json:"maxFails"`       //@TODO
 	MaxConns    uint     `yaml:"maxConns" json:"maxConns"`       //@TODO
 	IsDown      bool     `yaml:"down" json:"isDown"`             //@TODO
+}
+
+func NewServerBackendConfig() *ServerBackendConfig {
+	return &ServerBackendConfig{
+		On: true,
+		Id: stringutil.Rand(16),
+	}
 }
 
 func (this *ServerBackendConfig) Validate() error {

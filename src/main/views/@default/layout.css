@@ -133,6 +133,12 @@ body.expanded .main {
     vertical-align: middle;
 }
 
+.main table td em {
+    font-weight: normal;
+    font-style: normal;
+    font-size: 0.9em;
+}
+
 .main h3 {
     font-weight: normal;
 }

@@ -2,8 +2,8 @@ package backend
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
+	"github.com/iwind/TeaWebCode/teaconfigs"
 )
 
 type AddAction actions.Action
@@ -22,7 +22,7 @@ func (this *AddAction) Run(params struct {
 		this.Fail(err.Error())
 	}
 
-	backend := new(teaconfigs.ServerBackendConfig)
+	backend := teaconfigs.NewServerBackendConfig()
 	backend.Address = params.Address
 
 	server.Backends = append(server.Backends, backend)

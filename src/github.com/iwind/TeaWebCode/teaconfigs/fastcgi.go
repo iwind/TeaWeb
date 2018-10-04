@@ -5,18 +5,27 @@ import (
 	"github.com/iwind/TeaWebCode/teaconst"
 	"net/http"
 	"path/filepath"
+	"github.com/iwind/TeaGo/utils/string"
 )
 
 // Fastcgi配置
 // 参考：http://nginx.org/en/docs/http/ngx_http_fastcgi_module.html
 type FastcgiConfig struct {
 	On          bool              `yaml:"on" json:"on"`                   // @TODO
+	Id          string            `yaml:"id" json:"id"`                   // @TODO
 	Pass        string            `yaml:"pass" json:"pass"`               //@TODO
 	Index       string            `yaml:"index" json:"index"`             //@TODO
 	Params      map[string]string `yaml:"params" json:"params"`           //@TODO
 	ReadTimeout string            `yaml:"readTimeout" json:"readTimeout"` //@TODO
 
 	paramsMap maps.Map
+}
+
+func NewFastcgiConfig() *FastcgiConfig {
+	return &FastcgiConfig{
+		On: true,
+		Id: stringutil.Rand(16),
+	}
 }
 
 // 校验配置

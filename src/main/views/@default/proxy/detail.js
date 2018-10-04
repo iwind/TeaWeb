@@ -17,21 +17,6 @@ Tea.context(function () {
         }
     };
 
-    // 代理ID
-    this.proxyIdEditing = false;
-
-    this.editId = function () {
-        this.proxyIdEditing = !this.proxyIdEditing;
-    };
-
-    this.editIdSave = function () {
-        this.$post(".updateId")
-            .params({
-                "filename": this.filename,
-                "id": this.proxy.id
-            });
-    };
-
     // 代理说明
     this.proxyDescriptionEditing = false;
     this.editDescription = function () {

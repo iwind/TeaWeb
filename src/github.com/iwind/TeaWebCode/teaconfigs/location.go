@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"math/rand"
 	"time"
+	"github.com/iwind/TeaGo/utils/string"
 )
 
 const (
@@ -17,6 +18,7 @@ const (
 // @TODO 匹配的时候去除路径中多于的斜杠（/）
 type LocationConfig struct {
 	On      bool   `yaml:"on" json:"on"`           // 是否开启 @TODO
+	Id      string `yaml:"id" json:"id"`           // @TODO
 	Pattern string `yaml:"pattern" json:"pattern"` // 匹配规则  @TODO
 
 	patternType int // 规则类型：LocationPattern*
@@ -54,7 +56,10 @@ type LocationConfig struct {
 }
 
 func NewLocationConfig() *LocationConfig {
-	return &LocationConfig{}
+	return &LocationConfig{
+		On: true,
+		Id: stringutil.Rand(16),
+	}
 }
 
 func (this *LocationConfig) Validate() error {

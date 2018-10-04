@@ -23,6 +23,10 @@ func (this *DetailAction) Run(params struct {
 		this.Fail("找不到要修改的路径配置")
 	}
 
+	if location.Index == nil {
+		location.Index = []string{}
+	}
+
 	this.Data["filename"] = params.Filename
 	this.Data["locationIndex"] = params.Index
 	this.Data["location"] = maps.Map{
@@ -34,6 +38,8 @@ func (this *DetailAction) Run(params struct {
 		"root":            location.Root,
 		"rewrite":         location.Rewrite,
 		"fastcgi":         location.FastcgiAtIndex(0),
+		"charset":         location.Charset,
+		"index":           location.Index,
 	}
 	this.Data["proxy"] = proxy
 

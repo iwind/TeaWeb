@@ -15,6 +15,10 @@ func (this *DetailAction) Run(params struct {
 		this.Fail(err.Error())
 	}
 
+	if proxy.Index == nil {
+		proxy.Index = []string{}
+	}
+
 	this.Data["filename"] = params.Filename
 	this.Data["proxy"] = proxy
 

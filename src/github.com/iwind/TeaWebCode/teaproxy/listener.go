@@ -1,11 +1,11 @@
 package teaproxy
 
 import (
-	"github.com/iwind/TeaWebCode/teaconfigs"
 	"net/http"
 	"github.com/iwind/TeaGo/logs"
 	"sync"
 	"github.com/iwind/TeaGo/Tea"
+	"github.com/iwind/TeaWebCode/teaconfigs"
 )
 
 // 监听服务定义

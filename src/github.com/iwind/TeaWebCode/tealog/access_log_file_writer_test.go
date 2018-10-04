@@ -22,7 +22,7 @@ func TestAccessLogFileConfig_Init(t *testing.T) {
 			"sid": "123456",
 		},
 		RemoteAddr:    "127.0.0.1",
-		RemotePort:    "80",
+		RemotePort:    80,
 		TimeLocal:     "23/Jul/2018:22:23:35 +0800",
 		TimeISO8601:   "2018-07-23T22:23:35+08:00",
 		Status:        200,

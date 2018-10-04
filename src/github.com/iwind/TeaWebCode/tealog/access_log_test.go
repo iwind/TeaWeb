@@ -209,7 +209,7 @@ func TestAccessLogger_DB(t *testing.T) {
 			"sid": "123456",
 		},
 		RemoteAddr:    "127.0.0.1",
-		RemotePort:    "80",
+		RemotePort:    80,
 		TimeLocal:     "23/Jul/2018:22:23:35 +0800",
 		TimeISO8601:   "2018-07-23T22:23:35+08:00",
 		Status:        200,
@@ -238,7 +238,7 @@ func TestAccessLog_Format(t *testing.T) {
 			"sid": "123456",
 		},
 		RemoteAddr:    "127.0.0.1",
-		RemotePort:    "80",
+		RemotePort:    80,
 		TimeLocal:     "23/Jul/2018:22:23:35 +0800",
 		TimeISO8601:   "2018-07-23T22:23:35+08:00",
 		Status:        200,
@@ -293,4 +293,16 @@ func TestAccessLog_Decode(t *testing.T) {
 	}
 
 	client.Disconnect(context.Background())
+}
+
+func TestAccessLog_ParseGEO(t *testing.T) {
+	accessLog := &AccessLog{
+		RemoteAddr: "183.131.156.10",
+	}
+
+	//ip := net.ParseIP("183.131.156.10")
+	//ip := net.ParseIP("111.197.204.174")
+	accessLog.parseGeoIP()
+
+	t.Logf("%#v", accessLog.Extend.Geo)
 }

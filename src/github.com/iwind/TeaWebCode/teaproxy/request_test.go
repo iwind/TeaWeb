@@ -5,8 +5,8 @@ import (
 	"github.com/iwind/TeaGo/assert"
 	"net/http"
 	"github.com/iwind/TeaGo/Tea"
-	"github.com/iwind/TeaWebCode/teaconfigs"
 	"bytes"
+	"github.com/iwind/TeaWebCode/teaconfigs"
 )
 
 type testResponseWriter struct {

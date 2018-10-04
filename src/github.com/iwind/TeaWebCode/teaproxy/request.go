@@ -39,25 +39,29 @@ type Request struct {
 	serverAddr string
 	charset    string
 
-	root    string   // 资源根目录
-	index   []string // 目录下默认访问的文件
-	backend *teaconfigs.ServerBackendConfig
-	fastcgi *teaconfigs.FastcgiConfig
-	proxy   *teaconfigs.ServerConfig
+	root     string   // 资源根目录
+	index    []string // 目录下默认访问的文件
+	backend  *teaconfigs.ServerBackendConfig
+	fastcgi  *teaconfigs.FastcgiConfig
+	proxy    *teaconfigs.ServerConfig
+	rewrite  *teaconfigs.RewriteRule
+	location *teaconfigs.LocationConfig
 
 	// 执行请求
 	filePath string
 
-	requestFromTime       time.Time
-	requestTime           float64 // @TODO
-	responseBytesSent     int64   // @TODO
-	responseBodyBytesSent int64   // @TODO
-	responseStatus        int     // @TODO
-	responseStatusMessage string  // @TODO
-	requestTimeISO8601    string
-	requestTimeLocal      string
-	requestMsec           float64
-	requestTimestamp      int64
+	responseBytesSent     int64  // @TODO
+	responseBodyBytesSent int64  // @TODO
+	responseStatus        int    // @TODO
+	responseStatusMessage string // @TODO
+	responseHeader        map[string][]string
+
+	requestFromTime    time.Time
+	requestTime        float64 // @TODO
+	requestTimeISO8601 string
+	requestTimeLocal   string
+	requestMsec        float64
+	requestTimestamp   int64
 
 	shouldLog bool
 }
@@ -109,6 +113,8 @@ func (this *Request) configure(server *teaconfigs.ServerConfig, redirects int) e
 				this.index = location.Index
 			}
 
+			this.location = location
+
 			// rewrite相关配置
 			if len(location.Rewrite) > 0 {
 				for _, rule := range location.Rewrite {
@@ -118,6 +124,8 @@ func (this *Request) configure(server *teaconfigs.ServerConfig, redirects int) e
 					if rule.Apply(path, func(source string) string {
 						return source
 					}) {
+						this.rewrite = rule
+
 						// @TODO 支持带host前缀的URL，比如：http://google.com/hello/world
 						newURI, err := url.ParseRequestURI(rule.TargetURL())
 						if err != nil {
@@ -201,6 +209,8 @@ func (this *Request) configure(server *teaconfigs.ServerConfig, redirects int) e
 			if rule.Apply(path, func(source string) string {
 				return source
 			}) {
+				this.rewrite = rule
+
 				// @TODO 支持带host前缀的URL，比如：http://google.com/hello/world
 				newURI, err := url.ParseRequestURI(rule.TargetURL())
 				if err != nil {
@@ -381,6 +391,8 @@ func (this *Request) callRoot(writer http.ResponseWriter) error {
 			}
 		}
 	}
+
+	this.responseHeader = writer.Header()
 
 	n, err := io.Copy(writer, fp)
 
@@ -598,6 +610,8 @@ func (this *Request) callFastcgi(writer http.ResponseWriter) error {
 			writer.Header().Add(k, subV)
 		}
 	}
+
+	this.responseHeader = writer.Header()
 
 	// 设置响应码
 	writer.WriteHeader(resp.StatusCode)
@@ -919,12 +933,30 @@ func (this *Request) log() {
 		ServerProtocol:  this.requestProto(),
 	}
 
+	if this.server != nil {
+		accessLog.ServerId = this.server.Id
+	}
+
 	if this.backend != nil {
 		accessLog.BackendAddress = this.backend.Address
+		accessLog.BackendId = this.backend.Id
 	}
 
 	if this.fastcgi != nil {
 		accessLog.FastcgiAddress = this.fastcgi.Pass
+		accessLog.FastcgiId = this.fastcgi.Id
+	}
+
+	if this.rewrite != nil {
+		accessLog.RewriteId = this.rewrite.Id
+	}
+
+	if this.location != nil {
+		accessLog.LocationId = this.location.Id
+	}
+
+	if this.responseHeader != nil {
+		accessLog.SentHeader = this.responseHeader
 	}
 
 	tealog.SharedLogger().Push(accessLog)

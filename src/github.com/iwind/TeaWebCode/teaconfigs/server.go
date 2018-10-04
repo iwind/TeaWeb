@@ -8,6 +8,7 @@ import (
 	"strings"
 	"math/rand"
 	"time"
+	"github.com/iwind/TeaGo/utils/string"
 )
 
 // 服务配置
@@ -53,7 +54,7 @@ type ServerConfig struct {
 
 	Rewrite []*RewriteRule   `yaml:"rewrite" json:"rewrite"` // 重写规则 @TODO
 	Fastcgi []*FastcgiConfig `yaml:"fastcgi" json:"fastcgi"` // Fastcgi配置 @TODO
-	Proxy   string           `yaml:proxy" json:"proxy"`      //  代理配置 @TODO
+	Proxy   string           `yaml:"proxy" json:"proxy"`     //  代理配置 @TODO
 }
 
 // 从目录中加载配置
@@ -86,6 +87,7 @@ func LoadServerConfigsFromDir(dirPath string) []*ServerConfig {
 func NewServerConfig() *ServerConfig {
 	return &ServerConfig{
 		On: true,
+		Id: stringutil.Rand(16),
 	}
 }
 

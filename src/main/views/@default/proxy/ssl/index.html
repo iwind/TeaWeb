@@ -9,7 +9,7 @@
 <!--  检测配置是否有更新 end -->
 
 <div>
-    <h3>{{proxy.description}}（{{proxy.id}}）</h3>
+    <h3>{{proxy.description}}<span>（{{filename}}）</span></h3>
 
     <div class="ui text menu blue">
         <a :href="$url('/proxy/detail', { 'filename':filename })" class="item">基本信息</a>

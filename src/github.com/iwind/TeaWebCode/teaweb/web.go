@@ -18,6 +18,8 @@ import (
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/rewrite"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/fastcgi"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/log"
+	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/stat"
+	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/monitor"
 	"github.com/iwind/TeaWebCode/teaweb/helpers"
 )
 

@@ -8,10 +8,10 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo/findopt"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/iwind/TeaGo/lists"
-	"github.com/iwind/TeaGo/maps"
 	"time"
 	"github.com/mongodb/mongo-go-driver/mongo/insertopt"
 	"sync"
+	"github.com/iwind/TeaGo/utils/time"
 )
 
 var (
@@ -27,6 +27,9 @@ type AccessLogger struct {
 	qps             int
 	outputBandWidth int64
 	inputBandWidth  int64
+
+	collectionCacheMap map[string]*mongo.Collection
+	processors         []Processor
 }
 
 type AccessLogItem struct {
@@ -35,7 +38,8 @@ type AccessLogItem struct {
 
 func NewAccessLogger() *AccessLogger {
 	logger := &AccessLogger{
-		queue: make(chan *AccessLogItem, 10240),
+		queue:              make(chan *AccessLogItem, 10240),
+		collectionCacheMap: map[string]*mongo.Collection{},
 	}
 
 	go logger.wait()
@@ -56,42 +60,38 @@ func (this *AccessLogger) client() *mongo.Client {
 	return teamongo.SharedClient()
 }
 
-func (this *AccessLogger) wait() {
+func (this *AccessLogger) collection() *mongo.Collection {
+	collName := "logs." + timeutil.Format("Ymd")
+	coll, found := this.collectionCacheMap[collName]
+	if found {
+		return coll
+	}
+
 	// 构建索引
-	var logCollection = this.client().Database("teaweb").Collection("accessLogs")
-	indexes := logCollection.Indexes()
-	indexes.CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.NewDocument(bson.EC.Int32("id", -1)),
-	})
-	indexes.CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.NewDocument(bson.EC.Int32("id", 1)),
-	})
+	coll = this.client().Database("teaweb").Collection(collName)
+	indexes := coll.Indexes()
 	indexes.CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.NewDocument(bson.EC.Int32("status", 1)),
 	})
 	indexes.CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.NewDocument(bson.EC.Int32("timestamp", 1)),
 	})
+	indexes.CreateOne(context.Background(), mongo.IndexModel{
+		Keys: bson.NewDocument(bson.EC.Int32("remoteAddr", 1), bson.EC.Int32("serverId", 1)),
+	})
 
-	// 生成文档ID
-	latestDoc := logCollection.
-		FindOne(context.Background(), nil, findopt.Sort(bson.NewDocument(bson.EC.Int32("id", -1))))
-	one := maps.Map{}
-	err := latestDoc.Decode(one)
+	this.collectionCacheMap[collName] = coll
 
-	var newId int64
-	if err != nil {
-		newId = time.Now().UnixNano() / 1000000
-	} else {
-		newId = one.GetInt64("id")
-	}
-	logs.Println("start log id:", newId)
+	return coll
+}
 
+func (this *AccessLogger) wait() {
 	timestamp := time.Now().Unix()
 
 	var docs = []interface{}{}
 	var docsLocker = sync.Mutex{}
 
+	// 写入到数据库
 	go func() {
 		for {
 			time.Sleep(1 * time.Second)
@@ -107,12 +107,21 @@ func (this *AccessLogger) wait() {
 				docs = []interface{}{}
 				docsLocker.Unlock()
 
-				//logs.Println("insert", len(newDocs), "logs")
-				logCollection.InsertMany(context.Background(), newDocs, insertopt.BypassDocumentValidation(true))
+				this.collection().InsertMany(context.Background(), newDocs, insertopt.BypassDocumentValidation(true))
+
+				// 对日志进行分析处理
+				if len(this.processors) > 0 {
+					for _, doc := range newDocs {
+						for _, processor := range this.processors {
+							processor.Process(doc.(*AccessLog))
+						}
+					}
+				}
 			}
 		}
 	}()
 
+	// 接收日志
 	for {
 		item := <-this.queue
 		log := item.log
@@ -130,16 +139,17 @@ func (this *AccessLogger) wait() {
 			timestamp = log.Timestamp
 		}
 
-		newId ++
-		log.Id = newId
-
 		// 分析日志
-		log.parse()
+		log.Parse()
 
 		docsLocker.Lock()
 		docs = append(docs, log)
 		docsLocker.Unlock()
 	}
+}
+
+func (this *AccessLogger) AddProcessor(processor Processor) {
+	this.processors = append(this.processors, processor)
 }
 
 func (this *AccessLogger) Close() {

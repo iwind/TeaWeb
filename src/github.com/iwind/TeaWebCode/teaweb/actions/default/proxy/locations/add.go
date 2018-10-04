@@ -46,5 +46,5 @@ func (this *AddAction) Run(params struct {
 		"index":    len(proxy.Locations) - 1,
 	})
 
-	this.Success()
+	this.Success("添加成功")
 }

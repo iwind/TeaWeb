@@ -2,8 +2,9 @@ package teaproxy
 
 import (
 	"sync"
-	"github.com/iwind/TeaWebCode/teaconfigs"
 	"github.com/iwind/TeaGo/logs"
+	"github.com/iwind/TeaWebCode/teaconfigs"
+	_ "github.com/iwind/TeaWebCode/teastats" // 引入统计处理工具
 )
 
 func Start() {

@@ -2,10 +2,10 @@ package fastcgi
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaconfigs"
 	"fmt"
 	"github.com/pquerna/ffjson/ffjson"
 	"github.com/iwind/TeaWebCode/teaweb/actions/default/proxy/global"
+	"github.com/iwind/TeaWebCode/teaconfigs"
 )
 
 type AddAction actions.Action
@@ -41,12 +41,12 @@ func (this *AddAction) Run(params struct {
 		this.Fail("找不到要修改的路径规则")
 	}
 
-	location.AddFastcgi(&teaconfigs.FastcgiConfig{
-		On:          params.On,
-		Pass:        params.Pass,
-		ReadTimeout: fmt.Sprintf("%ds", params.ReadTimeout),
-		Params:      paramsMap,
-	})
+	fastcgi := teaconfigs.NewFastcgiConfig()
+	fastcgi.On = params.On
+	fastcgi.Pass = params.Pass
+	fastcgi.ReadTimeout = fmt.Sprintf("%ds", params.ReadTimeout)
+	fastcgi.Params = paramsMap
+	location.AddFastcgi(fastcgi)
 	proxy.WriteToFilename(params.Filename)
 
 	global.NotifyChange()

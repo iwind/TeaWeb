@@ -20,7 +20,6 @@ func init() {
 			Get("/detail", new(DetailAction)).
 			Get("/httpOn", new(HttpOnAction)).
 			Get("/httpOff", new(HttpOffAction)).
-			Post("/updateId", new(UpdateIdAction)).
 			Post("/updateDescription", new(UpdateDescriptionAction)).
 			Post("/addName", new(AddNameAction)).
 			Post("/updateName", new(UpdateNameAction)).

@@ -9,7 +9,7 @@
 <!--  检测配置是否有更新 end -->
 
 <div>
-    <h3>{{proxy.description}}（{{proxy.id}}）</h3>
+    <h3>{{proxy.description}}<span>（{{filename}}）</span></h3>
 
     <div class="ui text menu blue">
         <a :href="$url('/proxy/detail', { 'filename':filename })" class="item">基本信息</a>
@@ -36,7 +36,7 @@
                 </td>
             </tr>
             <tr>
-                <td class="title">规则</td>
+                <td class="title">规则<em>(pattern)</em></td>
                 <td>{{location.pattern}}</td>
                 <td class="two op">
                     <a href="" title="修改" v-on:click.prevent="editPattern()"><i class="ui icon edit small"></i></a>
@@ -97,7 +97,7 @@
                 </td>
             </tr>
             <tr>
-                <td>文档根目录</td>
+                <td>文档根目录<em>(root)</em></td>
                 <td>
                     <span style="word-break: break-all;" v-if="location.root.length > 0">{{location.root}}</span>
                     <a class="disabled" v-if="location.root.length == 0">还没有设置。</a>
@@ -115,6 +115,22 @@
                     <a href="" v-on:click.prevent="editRootSave()" title="保存"><i class="ui icon check circle"></i></a>
                     <a href="" v-on:click.prevent="editRoot" title="取消"><i class="ui icon arrow left circle"></i> </a>
                 </td>
+            </tr>
+            <tr>
+                <td>字符编码<em>(charset)</em></td>
+                <td>
+                    <span v-if="location.charset.length > 0">{{location.charset}}</span>
+                    <a class="disabled" v-if="location.charset.length == 0">还没有设置。</a>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>首页文件<em>(index)</em></td>
+                <td>
+                    <span v-if="location.index.length > 0">{{location.index.join(', ')}}</span>
+                    <a class="disabled" v-if="location.index.length == 0">还没有设置。</a>
+                </td>
+                <td></td>
             </tr>
         </table>
 
@@ -288,7 +304,7 @@
                         <td>
                             <div class="ui fields inline"  style="margin:0">
                                 <div class="ui field" style="width:10em">{{name}}</div>
-                                <div class="ui field">{{value}}</div>
+                                <div class="ui field" style="max-width:12em;word-break:break-all">{{value}}</div>
                             </div>
                         </td>
                         <td class="two op">

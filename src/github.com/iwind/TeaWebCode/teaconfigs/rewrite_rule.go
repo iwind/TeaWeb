@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 	"github.com/iwind/TeaGo/types"
+	"github.com/iwind/TeaGo/utils/string"
 )
 
 const (
@@ -18,7 +19,8 @@ const (
 // - https://httpd.apache.org/docs/current/mod/mod_rewrite.html
 // - https://httpd.apache.org/docs/2.4/rewrite/flags.html
 type RewriteRule struct {
-	On bool `yaml:"on" json:"on"` // 是否开启
+	On bool   `yaml:"on" json:"on"` // 是否开启
+	Id string `yaml:"id" json:"id"` // ID
 
 	// 开启的条件
 	// 语法为：cond testString condPattern 比如：
@@ -45,7 +47,10 @@ type RewriteRule struct {
 }
 
 func NewRewriteRule() *RewriteRule {
-	return &RewriteRule{}
+	return &RewriteRule{
+		On: true,
+		Id: stringutil.Rand(16),
+	}
 }
 
 func (this *RewriteRule) Validate() error {
