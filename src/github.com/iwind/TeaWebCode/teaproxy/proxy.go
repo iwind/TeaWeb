@@ -2,7 +2,7 @@ package teaproxy
 
 import (
 	"github.com/iwind/TeaWebCode/teaconfigs"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"github.com/iwind/TeaGo/logs"
 	"net/http"
 	"strings"
@@ -12,14 +12,14 @@ import (
 // 代理服务
 type ProxyServer struct {
 	config        *teaconfigs.ServerConfig
-	globalWriters map[*teaconfigs.AccessLogConfig]tealog.AccessLogWriter
+	globalWriters map[*teaconfigs.AccessLogConfig]tealogs.AccessLogWriter
 }
 
 // 获取新代理服务
 func NewServer(config *teaconfigs.ServerConfig) *ProxyServer {
 	return &ProxyServer{
 		config:        config,
-		globalWriters: map[*teaconfigs.AccessLogConfig]tealog.AccessLogWriter{},
+		globalWriters: map[*teaconfigs.AccessLogConfig]tealogs.AccessLogWriter{},
 	}
 }
 

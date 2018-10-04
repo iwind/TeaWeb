@@ -2,7 +2,7 @@ package teastats
 
 import (
 	"github.com/iwind/TeaGo/utils/time"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"context"
 	"github.com/mongodb/mongo-go-driver/mongo/updateopt"
@@ -29,7 +29,7 @@ func (this *TopBrowserStat) Init() {
 	})
 }
 
-func (this *TopBrowserStat) Process(accessLog *tealog.AccessLog) {
+func (this *TopBrowserStat) Process(accessLog *tealogs.AccessLog) {
 	if len(accessLog.Extend.Client.Browser.Family) == 0 {
 		return
 	}

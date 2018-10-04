@@ -2,12 +2,12 @@ package teastats
 
 import (
 	"testing"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"time"
 )
 
 func TestDailyRequestParse(t *testing.T) {
-	log := &tealog.AccessLog{
+	log := &tealogs.AccessLog{
 		ServerId: "123456",
 	}
 

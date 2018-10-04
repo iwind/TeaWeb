@@ -2,7 +2,7 @@ package teastats
 
 import (
 	"github.com/iwind/TeaGo/utils/time"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"context"
 	"github.com/mongodb/mongo-go-driver/mongo/updateopt"
@@ -28,7 +28,7 @@ func (this *DailyUVStat) Init() {
 	})
 }
 
-func (this *DailyUVStat) Process(accessLog *tealog.AccessLog) {
+func (this *DailyUVStat) Process(accessLog *tealogs.AccessLog) {
 	contentType := accessLog.SentContentType()
 	if !strings.HasPrefix(contentType, "text/html") {
 		return

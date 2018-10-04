@@ -1,4 +1,4 @@
-package teaplugin
+package teaplugins
 
 var plugins = []*Plugin{}
 

@@ -1,9 +1,9 @@
 package teastats
 
 import (
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 )
 
 func init() {
-	tealog.SharedLogger().AddProcessor(new(Processor))
+	tealogs.SharedLogger().AddProcessor(new(Processor))
 }

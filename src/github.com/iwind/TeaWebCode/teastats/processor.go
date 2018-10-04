@@ -3,12 +3,12 @@ package teastats
 import (
 	"github.com/iwind/TeaWebCode/teamongo"
 	"sync"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 )
 
 var collectionsMap = map[string]*teamongo.Collection{} // name => collection
 var collectionsMutex = &sync.Mutex{}
-var processors = []tealog.Processor{
+var processors = []tealogs.Processor{
 	new(DailyPVStat),
 	new(HourlyPVStat),
 	new(MonthlyPVStat),
@@ -32,7 +32,7 @@ var processors = []tealog.Processor{
 type Processor struct {
 }
 
-func (this *Processor) Process(accessLog *tealog.AccessLog) {
+func (this *Processor) Process(accessLog *tealogs.AccessLog) {
 	for _, processor := range processors {
 		processor.Process(accessLog)
 	}

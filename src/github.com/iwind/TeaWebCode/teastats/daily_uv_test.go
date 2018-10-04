@@ -6,7 +6,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/mongo/findopt"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"time"
 )
 
@@ -25,7 +25,7 @@ func TestDailyUVStatAccessLogExist(t *testing.T) {
 }
 
 func TestDailyUVStat_Parse(t *testing.T) {
-	accessLog := &tealog.AccessLog{
+	accessLog := &tealogs.AccessLog{
 		RemoteAddr: "127.0.0.1",
 		SentHeader: map[string][]string{
 			"Content-Type": {"text/html"},

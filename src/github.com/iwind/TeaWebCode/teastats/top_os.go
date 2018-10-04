@@ -1,7 +1,7 @@
 package teastats
 
 import (
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"github.com/iwind/TeaGo/utils/time"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"context"
@@ -29,7 +29,7 @@ func (this *TopOSStat) Init() {
 	})
 }
 
-func (this *TopOSStat) Process(accessLog *tealog.AccessLog) {
+func (this *TopOSStat) Process(accessLog *tealogs.AccessLog) {
 	if len(accessLog.Extend.Client.OS.Family) == 0 {
 		return
 	}

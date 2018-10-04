@@ -2,7 +2,7 @@ package teastats
 
 import (
 	"github.com/iwind/TeaGo/utils/time"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"context"
 	"github.com/mongodb/mongo-go-driver/mongo/updateopt"
@@ -26,7 +26,7 @@ func (this *MonthlyPVStat) Init() {
 	})
 }
 
-func (this *MonthlyPVStat) Process(accessLog *tealog.AccessLog) {
+func (this *MonthlyPVStat) Process(accessLog *tealogs.AccessLog) {
 	if !strings.HasPrefix(accessLog.SentContentType(), "text/html") {
 		return
 	}

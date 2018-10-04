@@ -1,7 +1,7 @@
 package teastats
 
 import (
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"github.com/iwind/TeaGo/utils/time"
 	"context"
 	"github.com/mongodb/mongo-go-driver/bson"
@@ -25,7 +25,7 @@ func (this *DailyRequestsStat) Init() {
 	})
 }
 
-func (this *DailyRequestsStat) Process(accessLog *tealog.AccessLog) {
+func (this *DailyRequestsStat) Process(accessLog *tealogs.AccessLog) {
 	day := timeutil.Format("Ymd")
 	coll := findCollection("stats.requests.daily", this.Init)
 

@@ -2,11 +2,11 @@ package teastats
 
 import (
 	"testing"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 )
 
 func TestProcess(t *testing.T) {
-	log := &tealog.AccessLog{
+	log := &tealogs.AccessLog{
 		ServerId:    "123456",
 		RequestTime: 0.023,
 		RemoteAddr:  "183.131.156.10",

@@ -2,7 +2,7 @@ package log
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"time"
 )
 
@@ -12,7 +12,7 @@ func (this *GetAction) Run(params struct {
 	FromId int64 `alias:"fromId" default:"-1"`
 	Size   int64 `default:"10"`
 }) {
-	logger := tealog.SharedLogger()
+	logger := tealogs.SharedLogger()
 	accessLogs := logger.ReadNewLogs(params.FromId, params.Size)
 	this.Data["logs"] = accessLogs
 

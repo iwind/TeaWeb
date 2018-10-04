@@ -1,4 +1,4 @@
-package tealog
+package tealogs
 
 type Processor interface {
 	Process(accessLog *AccessLog)

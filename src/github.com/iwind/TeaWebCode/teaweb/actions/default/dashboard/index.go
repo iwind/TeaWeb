@@ -2,7 +2,7 @@ package dashboard
 
 import (
 	"github.com/iwind/TeaGo/actions"
-	"github.com/iwind/TeaWebCode/teaplugin"
+	"github.com/iwind/TeaWebCode/teaplugins"
 	"github.com/iwind/TeaWebCode/teamongo"
 )
 
@@ -20,7 +20,7 @@ func (this *IndexAction) Run(params struct{}) {
 
 	this.Data["teaMenu"] = "dashboard"
 
-	widgets := teaplugin.DashboardWidgets()
+	widgets := teaplugins.DashboardWidgets()
 	this.Data["widgets"] = widgets
 
 	this.Show()

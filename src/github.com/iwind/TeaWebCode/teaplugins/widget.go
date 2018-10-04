@@ -1,4 +1,4 @@
-package teaplugin
+package teaplugins
 
 type Widget struct {
 	Name      string `json:"name"`

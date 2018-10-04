@@ -1,22 +1,22 @@
 package log
 
 import (
-	"github.com/iwind/TeaWebCode/teaplugin"
+	"github.com/iwind/TeaWebCode/teaplugins"
 	"github.com/iwind/TeaGo"
 	"github.com/iwind/TeaWebCode/teaweb/helpers"
 )
 
 func init() {
-	plugin := teaplugin.NewPlugin()
+	plugin := teaplugins.NewPlugin()
 
-	widget := teaplugin.NewWidget()
+	widget := teaplugins.NewWidget()
 	widget.Dashboard = true
 	widget.Name = "QPS"
 	widget.Title = "QPS/带宽"
 	widget.URL = "/log/widget"
 	plugin.AddWidget(widget)
 
-	teaplugin.Register(plugin)
+	teaplugins.Register(plugin)
 
 	TeaGo.BeforeStart(func(server *TeaGo.Server) {
 		server.

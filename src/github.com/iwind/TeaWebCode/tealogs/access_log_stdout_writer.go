@@ -1,4 +1,4 @@
-package tealog
+package tealogs
 
 import (
 	"os"

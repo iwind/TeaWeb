@@ -1,4 +1,4 @@
-package teaplugin
+package teaplugins
 
 type Plugin struct {
 	Name      string

@@ -1,7 +1,7 @@
 package teastats
 
 import (
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"github.com/iwind/TeaGo/utils/time"
 	"context"
 	"github.com/mongodb/mongo-go-driver/mongo/findopt"
@@ -31,7 +31,7 @@ func (this *TopCostStat) Init() {
 	})
 }
 
-func (this *TopCostStat) Process(accessLog *tealog.AccessLog) {
+func (this *TopCostStat) Process(accessLog *tealogs.AccessLog) {
 	month := timeutil.Format("Ym")
 	coll := findCollection("stats.top.cost.monthly", this.Init)
 

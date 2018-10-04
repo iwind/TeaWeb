@@ -18,7 +18,7 @@ import (
 	"regexp"
 	"github.com/iwind/TeaWebCode/teaconst"
 	"github.com/iwind/TeaWebCode/teaproxy/fcgiclient"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"path/filepath"
 	"mime"
 )
@@ -898,7 +898,7 @@ func (this *Request) log() {
 		cookies[cookie.Name] = cookie.Value
 	}
 
-	accessLog := &tealog.AccessLog{
+	accessLog := &tealogs.AccessLog{
 		TeaVersion:      teaconst.TeaVersion,
 		RemoteAddr:      this.requestRemoteAddr(),
 		RemotePort:      this.requestRemotePort(),
@@ -959,7 +959,7 @@ func (this *Request) log() {
 		accessLog.SentHeader = this.responseHeader
 	}
 
-	tealog.SharedLogger().Push(accessLog)
+	tealogs.SharedLogger().Push(accessLog)
 }
 
 func (this *Request) findIndexFile(dir string) string {

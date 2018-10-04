@@ -2,7 +2,7 @@ package teastats
 
 import (
 	"github.com/iwind/TeaGo/utils/time"
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"context"
 	"github.com/mongodb/mongo-go-driver/mongo/updateopt"
@@ -25,7 +25,7 @@ func (this *HourlyRequestsStat) Init() {
 	})
 }
 
-func (this *HourlyRequestsStat) Process(accessLog *tealog.AccessLog) {
+func (this *HourlyRequestsStat) Process(accessLog *tealogs.AccessLog) {
 	hour := timeutil.Format("YmdH")
 	coll := findCollection("stats.requests.hourly", this.Init)
 

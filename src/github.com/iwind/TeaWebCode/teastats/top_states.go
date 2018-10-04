@@ -1,7 +1,7 @@
 package teastats
 
 import (
-	"github.com/iwind/TeaWebCode/tealog"
+	"github.com/iwind/TeaWebCode/tealogs"
 	"github.com/iwind/TeaGo/utils/time"
 	"github.com/mongodb/mongo-go-driver/bson"
 	"context"
@@ -29,7 +29,7 @@ func (this *TopStateStat) Init() {
 	})
 }
 
-func (this *TopStateStat) Process(accessLog *tealog.AccessLog) {
+func (this *TopStateStat) Process(accessLog *tealogs.AccessLog) {
 	if len(accessLog.Extend.Geo.Region) == 0 || len(accessLog.Extend.Geo.State) == 0 {
 		return
 	}
