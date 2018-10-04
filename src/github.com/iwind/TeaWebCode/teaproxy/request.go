@@ -592,6 +592,12 @@ func (this *Request) callFastcgi(writer http.ResponseWriter) error {
 			params["HTTP_"+strings.ToUpper(k)] = subV
 		}
 	}
+
+	host, found := params["HTTP_HOST"]
+	if !found || len(host) == 0 {
+		params["HTTP_HOST"] = this.host
+	}
+
 	resp, err := fcgi.Request(params, this.raw.Body)
 	if err != nil {
 		this.serverError(writer)

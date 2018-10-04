@@ -1,0 +1,44 @@
+.main-box .chart {
+    height: 20em;
+}
+
+.main-box .ranks {
+}
+
+.main-box .ranks table {
+    width: 22em!important;
+    float: left;
+    margin-right: 1em!important;
+    margin-top: 0!important;
+}
+
+.main-box .ranks table td {
+    -ms-word-wrap: break-word;
+    word-wrap: break-word;
+    -ms-word-break: break-all;
+    word-break: break-all;
+}
+
+.main-box .filter-menu {
+    z-index: 10!important;
+    margin-left: 1em!important;
+    margin-right: 1em!important;
+    position: relative;
+}
+
+.main-box .filter-menu .title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    text-align: center;
+    font-size: 1.4em;
+    display: block;
+    line-height: 1.6em;
+    z-index: 0;
+}
+
+.main-box .filter-menu .item {
+    z-index: 1;
+}

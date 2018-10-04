@@ -8,8 +8,8 @@ import (
 // 日志配置
 // 参考 http://nginx.org/en/docs/http/ngx_http_log_module.html#access_log
 type AccessLogConfig struct {
+	On     bool                   `yaml:"on" json:"on"`
 	Target string                 `yaml:"target" json:"target"`
-	Off    bool                   `yaml:"off" json:"off"`
 	Config map[string]interface{} `yaml:"config" json:"config"`
 }
 

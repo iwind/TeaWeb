@@ -12,6 +12,7 @@ func init() {
 			Helper(new(Helper)).
 			Prefix("/stat").
 			Get("", new(IndexAction)).
+			Get("/data", new(DataAction)).
 			EndAll()
 	})
 }

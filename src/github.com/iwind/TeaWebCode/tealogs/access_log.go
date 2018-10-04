@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"github.com/iwind/TeaWebCode/teautils"
 	"github.com/pquerna/ffjson/ffjson"
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
 )
 
 var userAgentParserCache = &sync.Map{}
@@ -25,6 +26,8 @@ var accessLogVars = map[string]string{}
 
 // 参考：http://nginx.org/en/docs/http/ngx_http_log_module.html#log_format
 type AccessLog struct {
+	Id objectid.ObjectID `var:"id" bson:"_id" json:"id"` // 数据库存储的ID
+
 	ServerId   string `var:"serverId" bson:"serverId" json:"serverId"`       // 服务ID
 	BackendId  string `var:"backendId" bson:"backendId" json:"backendId"`    // 后端服务ID
 	LocationId string `var:"locationId" bson:"locationId" json:"locationId"` // 路径配置ID

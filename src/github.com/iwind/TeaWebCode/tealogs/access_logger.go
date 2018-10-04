@@ -9,9 +9,11 @@ import (
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/iwind/TeaGo/lists"
 	"time"
-	"github.com/mongodb/mongo-go-driver/mongo/insertopt"
 	"sync"
 	"github.com/iwind/TeaGo/utils/time"
+	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"github.com/iwind/TeaGo/timers"
+	"github.com/mongodb/mongo-go-driver/mongo/insertopt"
 )
 
 var (
@@ -71,10 +73,7 @@ func (this *AccessLogger) collection() *mongo.Collection {
 	coll = this.client().Database("teaweb").Collection(collName)
 	indexes := coll.Indexes()
 	indexes.CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.NewDocument(bson.EC.Int32("status", 1)),
-	})
-	indexes.CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.NewDocument(bson.EC.Int32("timestamp", 1)),
+		Keys: bson.NewDocument(bson.EC.Int32("status", 1), bson.EC.Int32("timestamp", 1)),
 	})
 	indexes.CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.NewDocument(bson.EC.Int32("remoteAddr", 1), bson.EC.Int32("serverId", 1)),
@@ -92,34 +91,40 @@ func (this *AccessLogger) wait() {
 	var docsLocker = sync.Mutex{}
 
 	// 写入到数据库
-	go func() {
-		for {
-			time.Sleep(1 * time.Second)
-
-			// 写入到本地数据库
-			if this.client() != nil {
-				docsLocker.Lock()
-				if len(docs) == 0 {
-					docsLocker.Unlock()
-					continue
-				}
-				newDocs := docs
-				docs = []interface{}{}
+	timers.Loop(1*time.Second, func(looper *timers.Looper) {
+		// 写入到本地数据库
+		if this.client() != nil {
+			docsLocker.Lock()
+			if len(docs) == 0 {
 				docsLocker.Unlock()
+				return
+			}
+			newDocs := docs
+			docs = []interface{}{}
+			docsLocker.Unlock()
 
-				this.collection().InsertMany(context.Background(), newDocs, insertopt.BypassDocumentValidation(true))
+			// 分析
+			for _, doc := range newDocs {
+				doc.(*AccessLog).Parse()
+				doc.(*AccessLog).Id = objectid.New()
+			}
 
-				// 对日志进行分析处理
-				if len(this.processors) > 0 {
-					for _, doc := range newDocs {
-						for _, processor := range this.processors {
-							processor.Process(doc.(*AccessLog))
-						}
+			// 批量写入数据库
+			_, err := this.collection().InsertMany(context.Background(), newDocs, insertopt.BypassDocumentValidation(true))
+			if err != nil {
+				logs.Error(err)
+			}
+
+			// 其他
+			if len(this.processors) > 0 {
+				for _, doc := range newDocs {
+					for _, processor := range this.processors {
+						processor.Process(doc.(*AccessLog))
 					}
 				}
 			}
 		}
-	}()
+	})
 
 	// 接收日志
 	for {
@@ -139,19 +144,18 @@ func (this *AccessLogger) wait() {
 			timestamp = log.Timestamp
 		}
 
-		// 分析日志
-		log.Parse()
-
 		docsLocker.Lock()
 		docs = append(docs, log)
 		docsLocker.Unlock()
 	}
 }
 
+// 添加处理器
 func (this *AccessLogger) AddProcessor(processor Processor) {
 	this.processors = append(this.processors, processor)
 }
 
+// 关闭
 func (this *AccessLogger) Close() {
 	if this.client() != nil {
 		this.client().Disconnect(context.Background())
@@ -159,7 +163,7 @@ func (this *AccessLogger) Close() {
 }
 
 // 读取日志
-func (this *AccessLogger) ReadNewLogs(fromId int64, size int64) []AccessLog {
+func (this *AccessLogger) ReadNewLogs(fromId string, size int64) []AccessLog {
 	if this.client() == nil {
 		return []AccessLog{}
 	}
@@ -169,18 +173,29 @@ func (this *AccessLogger) ReadNewLogs(fromId int64, size int64) []AccessLog {
 	}
 
 	result := []AccessLog{}
-	coll := this.client().Database("teaweb").Collection("accessLogs")
+	coll := this.collection()
 
-	filter := bson.NewDocument(bson.EC.SubDocument("id", bson.NewDocument(bson.EC.Int64("$gt", fromId))))
+	filter := map[string]interface{}{}
+	if len(fromId) > 0 {
+		objectId, err := objectid.FromHex(fromId)
+		if err == nil {
+			filter["_id"] = map[string]interface{}{
+				"$gt": objectId,
+			}
+		} else {
+			logs.Error(err)
+		}
+	}
 
 	opts := []findopt.Find{}
 	isReverse := false
-	if fromId <= 0 {
-		opts = append(opts, findopt.Sort(bson.NewDocument(bson.EC.Int32("id", -1))))
+
+	if len(fromId) == 0 {
+		opts = append(opts, findopt.Sort(bson.NewDocument(bson.EC.Int32("_id", -1))))
 		opts = append(opts, findopt.Limit(size))
 		isReverse = true
 	} else {
-		opts = append(opts, findopt.Sort(bson.NewDocument(bson.EC.Int32("id", 1))))
+		opts = append(opts, findopt.Sort(bson.NewDocument(bson.EC.Int32("_id", 1))))
 		opts = append(opts, findopt.Limit(size))
 	}
 
@@ -189,6 +204,7 @@ func (this *AccessLogger) ReadNewLogs(fromId int64, size int64) []AccessLog {
 		logs.Error(err)
 		return []AccessLog{}
 	}
+	defer cursor.Close(context.Background())
 
 	for cursor.Next(context.Background()) {
 		accessLog := AccessLog{}
@@ -207,7 +223,7 @@ func (this *AccessLogger) ReadNewLogs(fromId int64, size int64) []AccessLog {
 }
 
 func (this *AccessLogger) CountSuccessLogs(fromTimestamp int64, toTimestamp int64) int64 {
-	coll := this.client().Database("teaweb").Collection("accessLogs")
+	coll := this.collection()
 	filter := bson.NewDocument(
 		bson.EC.SubDocument("status", bson.NewDocument(bson.EC.Int64("$lt", 400))),
 		bson.EC.SubDocument("timestamp", bson.NewDocument(bson.EC.Int64("$lte", toTimestamp), bson.EC.Int64("$gte", fromTimestamp))),
@@ -222,7 +238,7 @@ func (this *AccessLogger) CountSuccessLogs(fromTimestamp int64, toTimestamp int6
 }
 
 func (this *AccessLogger) CountFailLogs(fromTimestamp int64, toTimestamp int64) int64 {
-	coll := this.client().Database("teaweb").Collection("accessLogs")
+	coll := this.collection()
 	filter := bson.NewDocument(
 		bson.EC.SubDocument("status", bson.NewDocument(bson.EC.Int64("$gte", 400))),
 		bson.EC.SubDocument("timestamp", bson.NewDocument(bson.EC.Int64("$lte", toTimestamp), bson.EC.Int64("$gte", fromTimestamp))),

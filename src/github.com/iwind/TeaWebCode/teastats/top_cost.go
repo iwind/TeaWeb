@@ -8,6 +8,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/iwind/TeaGo/types"
 	"github.com/iwind/TeaGo/logs"
+	"time"
 )
 
 type TopCostStat struct {
@@ -28,6 +29,9 @@ func (this *TopCostStat) Init() {
 	})
 	coll.CreateIndex(map[string]bool{
 		"cost": false,
+	})
+	coll.CreateIndex(map[string]bool{
+		"month": true,
 	})
 }
 
@@ -78,4 +82,50 @@ func (this *TopCostStat) Process(accessLog *tealogs.AccessLog) {
 			logs.Error(err)
 		}
 	}
+}
+
+func (this *TopCostStat) List(size int64) (result []TopCostStat) {
+	if size <= 0 {
+		size = 10
+	}
+
+	result = []TopCostStat{}
+
+	// 最近两个月
+	months := []string{}
+	month1 := timeutil.Format("Ym")
+	month2 := timeutil.Format("Ym", time.Now().AddDate(0, -1, 0))
+	if month1 != month2 {
+		months = append(months, month1, month2)
+	} else {
+		months = append(months, month1)
+	}
+
+	// 开始查找
+	coll := findCollection("stats.top.cost.monthly", nil)
+	cursor, err := coll.Find(context.Background(), map[string]interface{}{
+		"month": map[string]interface{}{
+			"$in": months,
+		},
+	}, findopt.Sort(map[string]interface{}{
+		"cost": -1,
+	}), findopt.Limit(size))
+	if err != nil {
+		logs.Error(err)
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	for cursor.Next(context.Background()) {
+		one := TopCostStat{}
+		err := cursor.Decode(&one)
+		if err == nil {
+
+			result = append(result, one)
+		} else {
+			logs.Error(err)
+		}
+	}
+
+	return
 }

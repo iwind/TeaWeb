@@ -7,6 +7,9 @@ import (
 	"context"
 	"github.com/mongodb/mongo-go-driver/mongo/updateopt"
 	"strings"
+	"github.com/iwind/TeaGo/logs"
+	"time"
+	"github.com/iwind/TeaGo/types"
 )
 
 type DailyPVStat struct {
@@ -44,8 +47,66 @@ func (this *DailyPVStat) Process(accessLog *tealogs.AccessLog) {
 		)),
 	)
 
-	coll.UpdateOne(context.Background(), bson.NewDocument(
+	_, err := coll.UpdateOne(context.Background(), bson.NewDocument(
 		bson.EC.String("serverId", accessLog.ServerId),
 		bson.EC.String("day", day),
 	), stat, updateopt.OptUpsert(true))
+	if err != nil {
+		logs.Error(err)
+	}
+}
+
+func (this *DailyPVStat) ListLatestDays(days int) []map[string]interface{} {
+	if days <= 0 {
+		days = 7
+	}
+
+	result := []map[string]interface{}{}
+	for i := days - 1; i >= 0; i -- {
+		day := timeutil.Format("Ymd", time.Now().AddDate(0, 0, -i))
+		total := this.SumDayPV([]string{day})
+		result = append(result, map[string]interface{}{
+			"day":   day,
+			"total": total,
+		})
+	}
+	return result
+}
+
+func (this *DailyPVStat) SumDayPV(days []string) int64 {
+	if len(days) == 0 {
+		return 0
+	}
+	sumColl := findCollection("stats.pv.daily", nil)
+	sumCursor, err := sumColl.Aggregate(context.Background(), bson.NewArray(bson.VC.DocumentFromElements(
+		bson.EC.SubDocumentFromElements(
+			"$match",
+			bson.EC.Interface("day", map[string]interface{}{
+				"$in": days,
+			}),
+		),
+	), bson.VC.DocumentFromElements(bson.EC.SubDocumentFromElements(
+		"$group",
+		bson.EC.Interface("_id", nil),
+		bson.EC.Interface("total", map[string]interface{}{
+			"$sum": "$count",
+		}),
+	))))
+	if err != nil {
+		logs.Error(err)
+		return 0
+	}
+	defer sumCursor.Close(context.Background())
+
+	if sumCursor.Next(context.Background()) {
+		sumMap := map[string]interface{}{}
+		err = sumCursor.Decode(sumMap)
+		if err == nil {
+			return types.Int64(sumMap["total"])
+		} else {
+			logs.Error(err)
+		}
+	}
+
+	return 0
 }

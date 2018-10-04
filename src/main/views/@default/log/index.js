@@ -3,7 +3,7 @@ Tea.context(function () {
 
     this.logs = [];
     this.sourceLogs = [];
-    this.fromId = -1;
+    this.fromId = "";
     this.total = 0;
     this.countSuccess = 0;
     this.countFail = 0;
