@@ -51,6 +51,13 @@ form p.comment {
     padding-top: 0.4em;
 }
 
+.truncate {
+    white-space: nowrap;
+    -ms-text-overflow: ellipsis;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /** 操作按钮容器 **/
 .op.two {
     width: 6em;

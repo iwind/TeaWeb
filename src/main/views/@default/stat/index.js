@@ -1,7 +1,40 @@
 Tea.context(function () {
-    this.dataType = "pv";
-    this.dataRange = "daily";
+    var that = this;
+
+    this.dataType = "req";
+    this.dataRange = "hourly";
     this.chartTitle = "";
+
+    // 处理数据
+    [this.topRequests, this.topOS, this.topBrowsers, this.topRegions, this.topStates ].$each(function (_, ranks) {
+        ranks.$each(function (k, v) {
+            var max = ranks[0].percent;
+            var current = v.percent;
+            if (max == 0) {
+                v.compareMax = 0;
+                return;
+            }
+
+            v.compareMax = current * 100;
+        });
+    });
+
+    [this.topRequests, this.topCostRequests].$each(function (_, ranks) {
+        ranks.$each(function (k, v) {
+            var shortURL = v.url.substring(v.url.indexOf("//") + 2);
+            v.uri = shortURL.substring(shortURL.indexOf("/"));
+        });
+    });
+
+    this.topCostRequests.$each(function (k, v) {
+        var max =  that.topCostRequests[0].cost;
+        var current = v.cost;
+        if (max == 0) {
+            v.compareMax = 0;
+            return;
+        }
+        v.compareMax = current * 50 / max;
+    });
 
     this.$delay(function () {
         this.loadChart();
@@ -42,7 +75,16 @@ Tea.context(function () {
                         name: '',
                         type: 'line',
                         data: response.data.data,
-                        areaStyle: {}
+                        areaStyle: {
+                            color: "#2185d0",
+                            opacity: 0.8
+                        },
+                        lineStyle: {
+                            color: "rgba(0, 0, 0, 0)"
+                        },
+                        itemStyle: {
+                            color: "#2185d0"
+                        }
                     }],
                     grid: {
                         left: 50,
