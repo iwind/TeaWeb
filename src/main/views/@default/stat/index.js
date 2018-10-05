@@ -39,6 +39,10 @@ Tea.context(function () {
     this.$delay(function () {
         this.loadChart();
 
+        setInterval(function () {
+            that.loadChart();
+        }, 60000);
+
         var that = this;
         window.addEventListener("resize", function () {
             var chart = echarts.init(that.$find(".main-box .chart")[0]);

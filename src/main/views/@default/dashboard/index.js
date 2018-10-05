@@ -1,8 +1,19 @@
 Tea.context(function () {
-    var that = this;
-    this.widgetHeight = parseInt((window.innerWidth - 220) * 0.75 / 3);
+    this.widgetGroups = [];
 
-    window.addEventListener("resize", function () {
-        that.widgetHeight = parseInt((window.innerWidth - 220) * 0.75 / 3);
+    this.$delay(function () {
+        this.loadWidgets();
     });
+
+    this.loadWidgets = function () {
+        this.$get(".widgets")
+            .success(function (response) {
+                this.CHART.updateWidgetGroups(response.data.widgetGroups);
+            })
+            .done(function () {
+                this.$delay(function () {
+                    this.loadWidgets();
+                }, 3000);
+            });
+    };
 });

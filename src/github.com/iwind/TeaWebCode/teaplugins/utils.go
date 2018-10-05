@@ -1,12 +1,20 @@
 package teaplugins
 
+import "sync"
+
 var plugins = []*Plugin{}
+var pluginsLocker = &sync.Mutex{}
 
 func Register(plugin *Plugin) {
+	pluginsLocker.Lock()
 	plugins = append(plugins, plugin)
+	pluginsLocker.Unlock()
 }
 
 func TopBarWidgets() []*Widget {
+	pluginsLocker.Lock()
+	defer pluginsLocker.Unlock()
+
 	result := []*Widget{}
 	for _, plugin := range plugins {
 		for _, widget := range plugin.Widgets {
@@ -19,6 +27,9 @@ func TopBarWidgets() []*Widget {
 }
 
 func MenuBarWidgets() []*Widget {
+	pluginsLocker.Lock()
+	defer pluginsLocker.Unlock()
+
 	result := []*Widget{}
 	for _, plugin := range plugins {
 		for _, widget := range plugin.Widgets {
@@ -31,6 +42,9 @@ func MenuBarWidgets() []*Widget {
 }
 
 func HelperBarWidgets() []*Widget {
+	pluginsLocker.Lock()
+	defer pluginsLocker.Unlock()
+
 	result := []*Widget{}
 	for _, plugin := range plugins {
 		for _, widget := range plugin.Widgets {
@@ -42,11 +56,14 @@ func HelperBarWidgets() []*Widget {
 	return result
 }
 
-func DashboardWidgets() []*Widget {
+func DashboardWidgets(group WidgetGroup) []*Widget {
+	pluginsLocker.Lock()
+	defer pluginsLocker.Unlock()
+
 	result := []*Widget{}
 	for _, plugin := range plugins {
 		for _, widget := range plugin.Widgets {
-			if widget.Dashboard {
+			if widget.Dashboard && widget.Group == group {
 				result = append(result, widget)
 			}
 		}

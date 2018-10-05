@@ -1,24 +1,20 @@
-.widgets-box {
-    padding: 10em;
-}
-
-.widgets-box .column {
+.chart-groups {
 
 }
 
-.widgets-box .column .title {
+.chart-groups .chart-group {
+    width: 26em;
+    float: left;
+    margin-right: 1em;
+    margin-left: 1em;
+    margin-top: 0;
+}
+
+.chart-groups .chart-group .header {
     font-weight: bold;
-    font-size: 12px;
+    padding-bottom: 1em;
 }
 
-.widgets-box .column .widget-box  {
-    margin-top: 6px;
-    border: 1px #ccc solid;
-}
-
-.widgets-box .widget-box frame {
-}
-
-.message {
-    margin-bottom: 1em!important;
+.chart-groups .chart-group .table-box {
+    margin-bottom: 1em;
 }

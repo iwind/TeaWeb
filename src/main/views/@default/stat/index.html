@@ -16,9 +16,12 @@
                     <a class="ui item" style="padding:0">|</a>
                     <a class="ui item" :class="{active:dataRange=='monthly'}" v-on:click.prevent="changeRange('monthly')">最近一年</a>
 
-                    <a class="ui item right" :class="{active:dataType=='pv'}" v-on:click.prevent="changeType('pv')">PV</a>
+                    <a class="ui item right" :class="{active:dataType=='req'}" v-on:click.prevent="changeType('req')">Req(请求)</a>
+                    <a class="ui item" style="padding:0">|</a>
+                    <a class="ui item" :class="{active:dataType=='pv'}" v-on:click.prevent="changeType('pv')">PV</a>
+                    <a class="ui item" style="padding:0">|</a>
                     <a class="ui item" :class="{active:dataType=='uv'}" v-on:click.prevent="changeType('uv')">UV</a>
-                    <a class="ui item" :class="{active:dataType=='req'}" v-on:click.prevent="changeType('req')">Req(请求)</a>
+
 
                     <span class="title">{{chartTitle}}</span>
                 </div>
@@ -43,7 +46,7 @@
                 <tr v-for="req in topRequests">
                     <td>
                         <span :title="req.url">{{req.uri}}</span>
-                        <a :href="req.url" target="_blank" title="新窗口打开"><i class="ui external icon tiny"></i></a>
+                        <a :href="req.url" target="_blank" title="新窗口打开"><i class="ui external icon tiny grey"></i></a>
                     </td>
                     <td class="four wide">{{formatPercent(req.percent)}}%
                         <div class="ui progress tiny blue">
@@ -68,7 +71,7 @@
                 <tr v-for="req in topCostRequests">
                     <td>
                         <span :title="req.url">{{req.uri}}</span>
-                        <a :href="req.url" target="_blank" title="新窗口打开"><i class="ui external icon tiny"></i></a>
+                        <a :href="req.url" target="_blank" title="新窗口打开"><i class="ui external icon tiny grey"></i></a>
                     </td>
                     <td class="four wide">{{formatMS(req.cost)}}ms
                         <div class="ui progress tiny blue">

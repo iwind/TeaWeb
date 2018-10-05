@@ -1,4 +1,4 @@
-package log
+package dashboard
 
 import (
 	"github.com/iwind/TeaGo"
@@ -8,11 +8,10 @@ import (
 func init() {
 	TeaGo.BeforeStart(func(server *TeaGo.Server) {
 		server.
-			EndAll().
 			Helper(new(helpers.UserMustAuth)).
-			Prefix("/log").
+			Prefix("/dashboard").
 			Get("", new(IndexAction)).
-			Get("/get", new(GetAction)).
+			Get("/widgets", new(WidgetsAction)).
 			EndAll()
 	})
 }

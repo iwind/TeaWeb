@@ -9,6 +9,7 @@ import (
 	"strings"
 	"github.com/iwind/TeaGo/types"
 	"github.com/iwind/TeaGo/lists"
+	"github.com/iwind/TeaGo/logs"
 )
 
 // 本地监听服务配置
@@ -32,22 +33,26 @@ func ParseConfigs() ([]*ListenerConfig, error) {
 	for _, configFile := range files {
 		configData, err := ioutil.ReadFile(configFile)
 		if err != nil {
-			return nil, err
+			logs.Error(err)
+			continue
 		}
 
 		serverConfig := &ServerConfig{}
 		err = yaml.Unmarshal(configData, serverConfig)
 		if err != nil {
-			return nil, err
+			logs.Error(err)
+			continue
 		}
 
 		if len(serverConfig.Listen) == 0 {
-			return nil, errors.New("'listen' in config should not be empty")
+			logs.Error(errors.New("'listen' in config should not be empty"))
+			continue
 		}
 
 		err = serverConfig.Validate()
 		if err != nil {
-			return nil, err
+			logs.Error(err)
+			continue
 		}
 
 		if !serverConfig.On {
