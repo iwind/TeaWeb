@@ -5,6 +5,7 @@ import (
 	"github.com/iwind/TeaWebCode/teacharts"
 	"github.com/iwind/TeaGo/logs"
 	"math"
+	"fmt"
 )
 
 func init() {
@@ -41,6 +42,16 @@ func createWidget(plugin *teaplugins.Plugin) {
 		}
 	})
 	widget.AddChart(outputBandWidthChart)
+
+	// QPS
+	qpsTable := teacharts.NewTable()
+
+	qpsTable.OnReload(func() {
+		qpsTable.ResetRows()
+		qpsTable.SetWidth(20, 80)
+		qpsTable.AddRow("QPS:", fmt.Sprintf("%dReq/s", SharedLogger().QPS()))
+	})
+	widget.AddChart(qpsTable)
 
 	// 日志
 	chart := teacharts.NewTable()

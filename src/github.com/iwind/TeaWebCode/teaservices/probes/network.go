@@ -1,4 +1,4 @@
-package teaservices
+package probes
 
 import (
 	"github.com/iwind/TeaWebCode/teaplugins"

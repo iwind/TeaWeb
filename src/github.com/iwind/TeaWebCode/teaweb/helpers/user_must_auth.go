@@ -42,13 +42,13 @@ func (this *UserMustAuth) BeforeAction(actionPtr actions.ActionWrapper, paramNam
 		{
 			"code":     "stat",
 			"menuName": "统计",
-			"icon":     "chart line",
+			"icon":     "chart area",
 		},
-		{
+		/**{
 			"code":     "monitor",
 			"menuName": "监控",
 			"icon":     "bell outline",
-		},
+		},**/
 	}
 	action.Data["teaSubMenus"] = []map[string]interface{}{}
 	action.Data["teaTabbar"] = []map[string]interface{}{}

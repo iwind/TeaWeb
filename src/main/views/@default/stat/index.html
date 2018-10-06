@@ -48,7 +48,7 @@
                         <span :title="req.url">{{req.uri}}</span>
                         <a :href="req.url" target="_blank" title="新窗口打开"><i class="ui external icon tiny grey"></i></a>
                     </td>
-                    <td class="four wide">{{formatPercent(req.percent)}}%
+                    <td class="five wide">{{formatPercent(req.percent)}}%
                         <div class="ui progress tiny blue">
                             <div class="bar" :style="{'width':req.compareMax  + '%'}"></div>
                         </div>
@@ -73,7 +73,7 @@
                         <span :title="req.url">{{req.uri}}</span>
                         <a :href="req.url" target="_blank" title="新窗口打开"><i class="ui external icon tiny grey"></i></a>
                     </td>
-                    <td class="four wide">{{formatMS(req.cost)}}ms
+                    <td class="five wide">{{formatMS(req.cost)}}ms
                         <div class="ui progress tiny blue">
                             <div class="bar" :style="{'width':req.compareMax  + '%'}"></div>
                         </div>
@@ -95,7 +95,7 @@
                 </tr>
                 <tr v-for="os in topOS">
                     <td>{{os.family}}</td>
-                    <td class="four wide">{{formatPercent(os.percent)}}%
+                    <td class="five wide">{{formatPercent(os.percent)}}%
 
                         <div class="ui progress tiny blue">
                             <div class="bar" :style="{'width':os.compareMax  + '%'}"></div>
@@ -118,7 +118,7 @@
                 </tr>
                 <tr v-for="browser in topBrowsers">
                     <td>{{browser.family}}</td>
-                    <td class="four wide">{{formatPercent(browser.percent)}}%
+                    <td class="five wide">{{formatPercent(browser.percent)}}%
                         <div class="ui progress tiny blue">
                             <div class="bar" :style="{'width':browser.compareMax  + '%'}"></div>
                         </div>
@@ -140,7 +140,7 @@
                 </tr>
                 <tr v-for="region in topRegions">
                     <td>{{region.region}}</td>
-                    <td class="four wide">{{formatPercent(region.percent)}}%
+                    <td class="five wide">{{formatPercent(region.percent)}}%
                         <div class="ui progress tiny blue">
                             <div class="bar" :style="{'width':region.compareMax  + '%'}"></div>
                         </div>
@@ -162,7 +162,7 @@
                 </tr>
                 <tr v-for="state in topStates">
                     <td>{{state.state}}</td>
-                    <td class="four wide">{{formatPercent(state.percent)}}%
+                    <td class="five wide">{{formatPercent(state.percent)}}%
                         <div class="ui progress tiny blue">
                             <div class="bar" :style="{'width':state.compareMax  + '%'}"></div>
                         </div>

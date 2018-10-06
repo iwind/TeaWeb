@@ -1,5 +1,7 @@
 package teacharts
 
+import "sync"
+
 type Row struct {
 	Columns []*Column `json:"columns"`
 }
@@ -12,7 +14,8 @@ type Column struct {
 type Table struct {
 	Chart
 
-	Rows []*Row `json:"rows"`
+	Rows   []*Row `json:"rows"`
+	locker sync.Mutex
 
 	width []float64
 }
@@ -34,10 +37,16 @@ func (this *Table) SetUniqueId(id string) {
 }
 
 func (this *Table) ResetRows() {
+	this.locker.Lock()
+	defer this.locker.Unlock()
+
 	this.Rows = []*Row{}
 }
 
 func (this *Table) AddRow(text ... string) {
+	this.locker.Lock()
+	defer this.locker.Unlock()
+
 	columns := []*Column{}
 	for index, t := range text {
 		if index < len(this.width) {

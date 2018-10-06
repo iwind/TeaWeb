@@ -22,14 +22,15 @@ func DashboardGroups() []*Group {
 			Widgets: DashboardWidgets(WidgetGroupRealTime),
 		},
 		{
-			Id:      WidgetGroupService,
-			Name:    "服务",
-			Widgets: DashboardWidgets(WidgetGroupService),
-		},
-		{
 			Id:      WidgetGroupSystem,
 			Name:    "系统信息",
 			Widgets: DashboardWidgets(WidgetGroupSystem),
+		},
+
+		{
+			Id:      WidgetGroupService,
+			Name:    "服务",
+			Widgets: DashboardWidgets(WidgetGroupService),
 		},
 	}
 }

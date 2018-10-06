@@ -1,4 +1,4 @@
-package teaservices
+package probes
 
 import "fmt"
 

@@ -27,7 +27,9 @@ Client  <->  | TeaWeb  |  <->  | Nginx, Apache, Tomcat,     |
 何为"智能化"？`TeaWeb`会智能发现软件服务、智能提醒软件状态、智能提供性能优化建议，无需太多的配置，当你启动的时候，一切都为你准备好了。
 
 # 预览
-![预览](./resources/screenshot.jpg)
+![预览](./resources/screen-shot-1.jpg)
+
+![预览](./resources/screen-shot-2.jpg)
 
 # 感谢
 * [Semantic UI](https://semantic-ui.com) - 一个非常好用的UI组件库

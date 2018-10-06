@@ -31,7 +31,11 @@ Tea.context(function () {
         var chartId = this.id(options);
 
         setTimeout(function () {
-            var chart = echarts.init(document.getElementById(chartId));
+            var chartBox = document.getElementById(chartId);
+            if (chartBox == null) {
+                return;
+            }
+            var chart = echarts.init(chartBox);
             var option = {
                 textStyle: {
                     fontFamily: "Lato,'Helvetica Neue',Arial,Helvetica,sans-serif"
@@ -48,7 +52,10 @@ Tea.context(function () {
                 },
                 legend: {
                     data: options.lines.$map(function (_, line) {
-                        return line.name;
+                        if (line != null) {
+                            return line.name;
+                        }
+                        return "";
                     }),
                     bottom: -10,
                     y: "bottom",
@@ -122,7 +129,11 @@ Tea.context(function () {
         var chartId = this.id(options);
 
         setTimeout(function () {
-            var chart = echarts.init(document.getElementById(chartId));
+            var chartBox = document.getElementById(chartId);
+            if (chartBox == null) {
+                return;
+            }
+            var chart = echarts.init(chartBox);
 
             var option = {
                 textStyle: {
@@ -206,7 +217,11 @@ Tea.context(function () {
         var chartId = this.id(options);
 
         setTimeout(function () {
-            var chart = echarts.init(document.getElementById(chartId));
+            var chartBox = document.getElementById(chartId);
+            if (chartBox == null) {
+                return;
+            }
+            var chart = echarts.init(chartBox);
 
             var option = {
                 textStyle: {

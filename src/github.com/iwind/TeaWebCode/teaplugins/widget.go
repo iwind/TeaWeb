@@ -44,6 +44,10 @@ func (this *Widget) AddChart(chart teacharts.ChartInterface) {
 	this.Charts = append(this.Charts, chart)
 }
 
+func (this *Widget) ResetCharts() {
+	this.Charts = []teacharts.ChartInterface{}
+}
+
 func (this *Widget) OnReload(f func()) {
 	this.reloadLocker.Lock()
 	defer this.reloadLocker.Unlock()

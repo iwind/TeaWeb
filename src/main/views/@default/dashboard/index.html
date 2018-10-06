@@ -8,7 +8,7 @@
    <div class="ui chart-group" v-for="group in widgetGroups">
        <div class="header">{{group.name}}</div>
 
-        <div class="table-box" v-for="widget in group.widgets" v-if="group.widgets.length > 0">
+        <div class="table-box" v-for="widget in group.widgets" v-if="group.widgets.length > 0 && widget.charts.length > 0">
             <table class="ui table">
                 <thead>
                     <tr>

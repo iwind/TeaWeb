@@ -22,8 +22,8 @@ pre {
     z-index: 9999;
 }
 
-a.disabled {
-    color: #ccc;
+a.disabled, a.disabled:hover, a.disabled:active {
+    color: #ccc!important;
 }
 
 a.enabled {
