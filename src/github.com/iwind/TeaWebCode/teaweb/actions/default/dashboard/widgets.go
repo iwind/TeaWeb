@@ -8,7 +8,11 @@ import (
 type WidgetsAction actions.Action
 
 func (this *WidgetsAction) Run() {
-	this.Data["widgetGroups"] = teaplugins.DashboardGroups()
+	groups := teaplugins.DashboardGroups()
+	for _, group := range groups {
+		group.Reload()
+	}
+	this.Data["widgetGroups"] = groups
 
 	this.Success()
 }

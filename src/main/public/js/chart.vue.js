@@ -13,12 +13,18 @@ Tea.context(function () {
     };
 
     this.CHART.progressBar = function (options) {
-        return '<div class="chart-box progress">' +
-            '   <div class="ui progress blue tiny">' +
+        var chartId = this.id(options);
+        var chartBox = Tea.element("#" + chartId);
+        var inner =  '   <div class="ui progress ' + options.color + ' tiny">' +
             '       <div class="bar" style="width:' + options.value.toString() + '%"></div>' +
-            '       <div class="label">' + options.name + " <em>(" + options.detail + ')</em></div>' +
-            '   </div>' +
-            '</div>';
+            '       <div class="label">' + options.name + " &nbsp; <em>" + ((options.detail.length > 0) ? "(" + options.detail + ")" : "" ) + '</em></div>' +
+            '   </div>';
+        if (chartBox.length == 0) {
+            return '<div class="chart-box progress" id="' + chartId + '">' + inner + '</div>';
+        } else {
+            chartBox.html(inner);
+        }
+        return "";
     };
 
     this.CHART.line = function (options) {
@@ -51,7 +57,10 @@ Tea.context(function () {
                     }
                 },
                 xAxis: {
-                    data: options.labels
+                    data: options.labels,
+                    axisTick: {
+                        show: options.xShowTick
+                    }
                 },
                 axisLabel: {
                     formatter: function (v) {
@@ -61,15 +70,31 @@ Tea.context(function () {
                         fontSize: 10
                     }
                 },
-                yAxis: {},
+                yAxis: {
+                    max: (options.max != 0 ) ? options.max : null,
+                    splitNumber: (options.yTickCount >= 1) ? options.yTickCount : null,
+                    axisTick: {
+                        show: options.yShowTick
+                    }
+                },
                 series: options.lines.$map(function (_, line) {
                     return {
                         name: line.name,
                         type: 'line',
                         data: line.values,
                         lineStyle: {
-                            width: 1.2
+                            width: 1.2,
+                            color: line.color,
+                            opacity: 0.5
                         },
+                        itemStyle: {
+                            color: line.color,
+                            opacity: line.showItems ? 1 : 0
+                        },
+                        areaStyle: {
+                            color: line.color,
+                            opacity: line.filled ? 0.5 : 0
+                        }
                     };
                 }),
                 grid: {
@@ -208,13 +233,13 @@ Tea.context(function () {
                 series: [{
                     name: '',
                     type: 'gauge',
-                    min: 0,
-                    max: 100,
+                    min: options.min,
+                    max: options.max,
 
                     data: [
                         {
                             "name": options.detail,
-                            "value": options.value
+                            "value": Math.round(options.value * 100) / 100
                         }
                     ],
                     radius: "80%",
@@ -279,18 +304,22 @@ Tea.context(function () {
     this.CHART.table = function (options) {
         var chartId = this.id(options);
         var chartBox = Tea.element("#" + chartId);
-        var s = '<table class="ui table selectable"><thead><tr><th colspan="' + ((options.rows.length > 0) ? options.rows[0].columns.length : 1) + '">' + options.name  + '</th></tr></thead>';
-        for (var i = 0; i < options.rows.length; i++) {
-            s += "<tr>";
-            for (var j = 0; j < options.rows[i].columns.length; j++) {
-                var column = options.rows[i].columns[j];
-                if (column.width > 0) {
-                    s += "<td width=\"" + column.width + "%\">" + column.text + "</td>";
-                } else {
-                    s += "<td>" + column.text + "</td>";
-                }
-            }
-            s += "</tr>";
+        var s = '<table class="ui table selectable">';
+        // s += '<thead><tr><th colspan="' + ((options.rows.length > 0) ? options.rows[0].columns.length : 1) + '">' + options.name  + '</th></tr></thead>';
+        if (options.rows.length == 0) {
+            s += '<tr><td>还没有数据</td></tr>';
+        } else {
+            options.rows.$each(function (_, row) {
+                s += "<tr>";
+                row.columns.$each(function (_, column) {
+                    if (column.width > 0) {
+                        s += "<td width=\"" + column.width + "%\">" + column.text + "</td>";
+                    } else {
+                        s += "<td>" + column.text + "</td>";
+                    }
+                });
+                s += "</tr>";
+            });
         }
         s += '</table>';
 

@@ -33,3 +33,15 @@ func DashboardGroups() []*Group {
 		},
 	}
 }
+
+func (this *Group) Reload() {
+	for _, widget := range this.Widgets {
+		widget.Reload()
+	}
+}
+
+func (this *Group) ForceReload() {
+	for _, widget := range this.Widgets {
+		widget.ForceReload()
+	}
+}

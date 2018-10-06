@@ -1,8 +1,11 @@
 package teacharts
 
+import "sync"
+
 type ChartInterface interface {
 	UniqueId() string
 	SetUniqueId(id string)
+	Reload()
 }
 
 type Chart struct {
@@ -10,4 +13,25 @@ type Chart struct {
 	Type   string `json:"type"`
 	Name   string `json:"name"`
 	Detail string `json:"detail"`
+
+	onReloadFuncs []func()
+	locker        sync.Mutex
+}
+
+func (this *Chart) OnReload(f func()) {
+	this.locker.Lock()
+	defer this.locker.Unlock()
+
+	this.onReloadFuncs = append(this.onReloadFuncs, f)
+}
+
+func (this *Chart) Reload() {
+	if len(this.onReloadFuncs) == 0 {
+		return
+	}
+	go func() {
+		for _, f := range this.onReloadFuncs {
+			f()
+		}
+	}()
 }

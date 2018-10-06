@@ -3,6 +3,7 @@ package teaplugins
 import (
 	"github.com/iwind/TeaWebCode/teacharts"
 	"github.com/iwind/TeaGo/utils/string"
+	"sync"
 )
 
 type Widget struct {
@@ -21,6 +22,13 @@ type Widget struct {
 
 	// 图表类型
 	Charts []teacharts.ChartInterface `json:"charts"`
+
+	// 刷新回调
+	onReloadFuncs []func()
+	reloadLocker  sync.Mutex
+
+	onForceReloadFuncs []func()
+	forceReloadLocker  sync.Mutex
 }
 
 func NewWidget() *Widget {
@@ -34,4 +42,68 @@ func (this *Widget) AddChart(chart teacharts.ChartInterface) {
 		chart.SetUniqueId(stringutil.Rand(16))
 	}
 	this.Charts = append(this.Charts, chart)
+}
+
+func (this *Widget) OnReload(f func()) {
+	this.reloadLocker.Lock()
+	defer this.reloadLocker.Unlock()
+
+	this.onReloadFuncs = append(this.onReloadFuncs, f)
+}
+
+func (this *Widget) Reload() {
+	if len(this.onReloadFuncs) == 0 && len(this.Charts) == 0 {
+		return
+	}
+
+	// 异步执行
+	if len(this.onReloadFuncs) == 0 {
+		go func() {
+			for _, chart := range this.Charts {
+				chart.Reload()
+			}
+		}()
+	} else {
+		go func() {
+			for _, f := range this.onReloadFuncs {
+				f()
+			}
+
+			for _, chart := range this.Charts {
+				chart.Reload()
+			}
+		}()
+	}
+}
+
+func (this *Widget) OnForceReload(f func()) {
+	this.forceReloadLocker.Lock()
+	defer this.forceReloadLocker.Unlock()
+
+	this.onForceReloadFuncs = append(this.onForceReloadFuncs, f)
+}
+
+func (this *Widget) ForceReload() {
+	if len(this.onForceReloadFuncs) == 0 && len(this.Charts) == 0 {
+		return
+	}
+
+	// 异步执行
+	if len(this.onForceReloadFuncs) == 0 {
+		go func() {
+			for _, chart := range this.Charts {
+				chart.Reload()
+			}
+		}()
+	} else {
+		go func() {
+			for _, f := range this.onForceReloadFuncs {
+				f()
+			}
+
+			for _, chart := range this.Charts {
+				chart.Reload()
+			}
+		}()
+	}
 }

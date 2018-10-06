@@ -13,7 +13,7 @@ Tea.context(function () {
             .done(function () {
                 this.$delay(function () {
                     this.loadWidgets();
-                }, 3000);
+                }, 1000);
             });
     };
 });

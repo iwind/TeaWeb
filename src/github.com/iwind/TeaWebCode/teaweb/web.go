@@ -20,6 +20,7 @@ import (
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/log"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/stat"
 	_ "github.com/iwind/TeaWebCode/teaweb/actions/default/monitor"
+	_ "github.com/iwind/TeaWebCode/teaservices"
 	"github.com/iwind/TeaWebCode/teaweb/helpers"
 )
 

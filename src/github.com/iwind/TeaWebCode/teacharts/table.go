@@ -33,7 +33,7 @@ func (this *Table) SetUniqueId(id string) {
 	this.Id = id
 }
 
-func (this *Table) ClearRows() {
+func (this *Table) ResetRows() {
 	this.Rows = []*Row{}
 }
 

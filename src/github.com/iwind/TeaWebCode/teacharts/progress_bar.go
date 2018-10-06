@@ -1,13 +1,18 @@
 package teacharts
 
+type ProgressBarColor string
+
 type ProgressBar struct {
 	Chart
 
 	Value float64 `json:"value"`
+	Color Color   `json:"color"`
 }
 
 func NewProgressBar() *ProgressBar {
-	p := &ProgressBar{}
+	p := &ProgressBar{
+		Color: ColorBlue,
+	}
 	p.Type = "progressBar"
 	return p
 }

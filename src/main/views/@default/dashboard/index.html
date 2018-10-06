@@ -5,14 +5,14 @@
 {$end}
 
 <div class="chart-groups" v-cloak>
-   <div class="ui chart-group segment" v-for="group in widgetGroups">
+   <div class="ui chart-group" v-for="group in widgetGroups">
        <div class="header">{{group.name}}</div>
 
         <div class="table-box" v-for="widget in group.widgets" v-if="group.widgets.length > 0">
             <table class="ui table">
                 <thead>
                     <tr>
-                        <th>{{widget.name}}</th>
+                        <th>{{widget.name}} <a :href="widget.moreUrl" v-if="widget.moreUrl.length > 0" title="更多信息"><i class="ui icon external small"></i></a></th>
                     </tr>
                 </thead>
                 <tr v-for="chart in widget.charts">
