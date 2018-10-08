@@ -28,7 +28,7 @@ func (this *PHPFPMProbe) Run() {
 	})
 
 	widget := this.Plugin.Widgets[0]
-	result := ps("php-fpm", []string{"php-fpm$"}, true)
+	result := ps("php-fpm", []string{"php-fpm(:|$)"}, true)
 	widget.ResetCharts()
 	if len(result) == 0 {
 		return
@@ -36,7 +36,7 @@ func (this *PHPFPMProbe) Run() {
 	for _, proc := range result {
 		chart := teacharts.NewTable()
 		chart.AddRow("PID:", fmt.Sprintf("%d", proc.Pid), "<i class=\"ui icon dot circle green\"></i>")
-		chart.SetWidth(15, 70, 15)
+		chart.SetWidth(25, 60, 15)
 		widget.AddChart(chart)
 	}
 }

@@ -3,7 +3,6 @@ package teaproxy
 import (
 	"net/http"
 	"github.com/iwind/TeaWebCode/teaconfigs"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/iwind/TeaGo/Tea"
 	"strings"
 	"os"
@@ -17,10 +16,11 @@ import (
 	"github.com/iwind/TeaGo/types"
 	"regexp"
 	"github.com/iwind/TeaWebCode/teaconst"
-	"github.com/iwind/TeaWebCode/teaproxy/fcgiclient"
 	"github.com/iwind/TeaWebCode/tealogs"
 	"path/filepath"
 	"mime"
+	"errors"
+	"github.com/iwind/gofcgi"
 )
 
 var requestVarReg = regexp.MustCompile("\\${[\\w.-]+}")
@@ -64,6 +64,7 @@ type Request struct {
 	requestTimestamp   int64
 
 	shouldLog bool
+	debug     bool
 }
 
 // 获取新的请求
@@ -310,6 +311,10 @@ func (this *Request) callRoot(writer http.ResponseWriter) error {
 		requestPath = uri.Path
 		query = uri.RawQuery
 	}
+
+	// 去掉其中的奇怪的路径
+	requestPath = strings.Replace(requestPath, "..\\", "", -1)
+
 	if requestPath == "/" {
 		// 根目录
 		indexFile := this.findIndexFile(this.root)
@@ -397,7 +402,9 @@ func (this *Request) callRoot(writer http.ResponseWriter) error {
 	n, err := io.Copy(writer, fp)
 
 	if err != nil {
-		logs.Error(err)
+		if this.debug {
+			logs.Error(err)
+		}
 		return nil
 	}
 
@@ -552,15 +559,17 @@ func (this *Request) callFastcgi(writer http.ResponseWriter) error {
 		}
 	}
 
-	// @TODO 使用连接池
 	// @TODO 支持unix://...
-	fcgi, err := fcgiclient.Dial("tcp", this.fastcgi.Pass)
+	poolSize := this.fastcgi.PoolSize
+	if poolSize <= 0 {
+		poolSize = 16
+	}
+	client, err := gofcgi.SharedPool("tcp", this.fastcgi.Pass, uint(poolSize)).Client()
 	if err != nil {
 		this.serverError(writer)
 		logs.Error(err)
 		return nil
 	}
-	defer fcgi.Close()
 
 	// 请求相关
 	if !env.Has("REQUEST_METHOD") {
@@ -598,10 +607,17 @@ func (this *Request) callFastcgi(writer http.ResponseWriter) error {
 		params["HTTP_HOST"] = this.host
 	}
 
-	resp, err := fcgi.Request(params, this.raw.Body)
+	fcgiReq := gofcgi.NewRequest()
+	fcgiReq.SetTimeout(this.fastcgi.Timeout())
+	fcgiReq.SetParams(params)
+	fcgiReq.SetBody(this.raw.Body, uint32(this.requestLength()))
+
+	resp, err := client.Call(fcgiReq)
 	if err != nil {
 		this.serverError(writer)
+		//if this.debug {
 		logs.Error(err)
+		//}
 		return nil
 	}
 
@@ -898,6 +914,7 @@ func (this *Request) log() {
 	if !this.shouldLog {
 		return
 	}
+	//return //@TODO
 
 	cookies := map[string]string{}
 	for _, cookie := range this.raw.Cookies() {

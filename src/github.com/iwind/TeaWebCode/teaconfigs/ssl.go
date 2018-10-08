@@ -1,6 +1,6 @@
 package teaconfigs
 
-import "github.com/syndtr/goleveldb/leveldb/errors"
+import "errors"
 
 // SSL配置
 type SSLConfig struct {

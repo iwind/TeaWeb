@@ -6,7 +6,7 @@ import (
 	"github.com/iwind/TeaGo/logs"
 	"net/http"
 	"strings"
-	"github.com/syndtr/goleveldb/leveldb/errors"
+	"errors"
 )
 
 // 代理服务

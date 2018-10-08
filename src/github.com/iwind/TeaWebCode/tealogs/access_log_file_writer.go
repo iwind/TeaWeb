@@ -7,7 +7,7 @@ import (
 	"github.com/iwind/TeaGo/logs"
 	"github.com/iwind/TeaWebCode/teaconfigs"
 	"sync"
-	"github.com/syndtr/goleveldb/leveldb/errors"
+	"errors"
 )
 
 type AccessLogFileWriter struct {

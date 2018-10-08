@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 export GOPATH=`pwd`/../../
-export CGO_ENABLED=0
+export CGO_ENABLED=1
 
-go build -o ${GOPATH}/dist/bin/teaweb main.go
+go build -o teaweb main.go
 echo "OK"

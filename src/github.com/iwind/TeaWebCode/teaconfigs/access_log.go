@@ -2,7 +2,7 @@ package teaconfigs
 
 import (
 	"github.com/iwind/TeaGo/logs"
-	"github.com/syndtr/goleveldb/leveldb/errors"
+	"errors"
 )
 
 // 日志配置

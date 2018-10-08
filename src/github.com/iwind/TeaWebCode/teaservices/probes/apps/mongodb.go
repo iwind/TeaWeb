@@ -36,7 +36,7 @@ func (this *MongoDBProbe) Run() {
 	for _, proc := range result {
 		chart := teacharts.NewTable()
 		chart.AddRow("PID:", fmt.Sprintf("%d", proc.Pid), "<i class=\"ui icon dot circle green\"></i>")
-		chart.SetWidth(15, 70, 15)
+		chart.SetWidth(25, 60, 15)
 		widget.AddChart(chart)
 	}
 }

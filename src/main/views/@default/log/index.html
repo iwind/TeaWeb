@@ -148,5 +148,8 @@
             </tr>
         </table>
     </div>
-    <div v-if="logs.length == 0"><a class="disabled">当天还没有访问。</a></div>
+    <div v-if="logs.length == 0">
+        <a class="disabled" v-if="!hasSearchConditions()">当天还没有访问。</a>
+        <a class="disabled" v-if="hasSearchConditions()">当天还没有筛选符合条件的访问，可以尝试去掉筛选条件（<a href="" v-on:click.prevent="resetSearchBox()">清除筛选条件</a> ）。</a>
+    </div>
 </div>

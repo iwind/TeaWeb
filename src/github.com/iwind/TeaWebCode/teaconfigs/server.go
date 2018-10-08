@@ -3,12 +3,12 @@ package teaconfigs
 import (
 	"github.com/iwind/TeaGo/files"
 	"github.com/iwind/TeaGo/Tea"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/iwind/TeaGo/logs"
 	"strings"
 	"math/rand"
 	"time"
 	"github.com/iwind/TeaGo/utils/string"
+	"errors"
 )
 
 // 服务配置

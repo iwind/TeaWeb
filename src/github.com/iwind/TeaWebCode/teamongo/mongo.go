@@ -5,10 +5,10 @@ import (
 	"github.com/iwind/TeaGo/files"
 	"github.com/iwind/TeaGo/Tea"
 	"github.com/iwind/TeaGo/logs"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	"context"
 	"time"
 	"github.com/mongodb/mongo-go-driver/mongo/findopt"
+	"errors"
 )
 
 var sharedClient *mongo.Client

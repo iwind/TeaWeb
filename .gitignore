@@ -14,14 +14,15 @@ src/github.com/oschwald
 src/github.com/pbnjay
 src/github.com/pquerna
 src/github.com/stretchr
-src/github.com/syndtr
 src/github.com/ua-parser
 src/github.com/go-restit
 src/github.com/go-ini
-src/github.com/tomasen
 src/github.com/shirou
+src/github.com/iwind/gofcgi
+src/github.com/iwind/TeaGo
 src/golang.org
 src/gopkg.in
+src/main/teaweb
 src/main/tmp/*
 src/main/logs/*
 src/main/configs/*.proxy.conf

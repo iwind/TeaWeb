@@ -2,8 +2,8 @@ package tealogs
 
 import (
 	"github.com/iwind/TeaWebCode/teaconfigs"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/iwind/TeaWebCode/teautils"
+	"errors"
 )
 
 type AccessLogWriter interface {

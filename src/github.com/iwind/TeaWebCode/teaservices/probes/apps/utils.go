@@ -20,7 +20,6 @@ func ps(lookup string, matchPatterns []string, onlyParent bool) (result []*proce
 	cmd := exec.Command(file, "-f", lookup)
 	data, err := cmd.Output()
 	if err != nil {
-		logs.Error(err)
 		return
 	}
 	dataString := strings.TrimSpace(string(data))

@@ -3,10 +3,17 @@
 }
 
 .servers-box .table-box {
-    width: 18em;
+    min-width: 18em;
+    width: 28%;
     float: left;
     margin-right: 1em;
     margin-bottom: 1em;
+    height: 22em;
+    overflow-y: auto;
+}
+
+.servers-box .table-box::-webkit-scrollbar {
+    width: 2px;
 }
 
 .servers-box .table-box table td strong {

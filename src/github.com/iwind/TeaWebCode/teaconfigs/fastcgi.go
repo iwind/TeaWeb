@@ -6,19 +6,25 @@ import (
 	"net/http"
 	"path/filepath"
 	"github.com/iwind/TeaGo/utils/string"
+	"time"
 )
 
 // Fastcgi配置
 // 参考：http://nginx.org/en/docs/http/ngx_http_fastcgi_module.html
 type FastcgiConfig struct {
-	On          bool              `yaml:"on" json:"on"`                   // @TODO
-	Id          string            `yaml:"id" json:"id"`                   // @TODO
-	Pass        string            `yaml:"pass" json:"pass"`               //@TODO
+	On bool   `yaml:"on" json:"on"` // @TODO
+	Id string `yaml:"id" json:"id"` // @TODO
+
+	// @TODO 支持unix://...
+	Pass string `yaml:"pass" json:"pass"` // @TODO
+
 	Index       string            `yaml:"index" json:"index"`             //@TODO
 	Params      map[string]string `yaml:"params" json:"params"`           //@TODO
-	ReadTimeout string            `yaml:"readTimeout" json:"readTimeout"` //@TODO
+	ReadTimeout string            `yaml:"readTimeout" json:"readTimeout"` // 超时时间
+	PoolSize    int               `yaml:"poolSize" json:"poolSize"`       // 连接池尺寸 @TODO
 
 	paramsMap maps.Map
+	timeout   time.Duration
 }
 
 func NewFastcgiConfig() *FastcgiConfig {
@@ -44,6 +50,17 @@ func (this *FastcgiConfig) Validate() error {
 		this.paramsMap["GATEWAY_INTERFACE"] = "CGI/1.1"
 	}
 
+	// 超时时间
+	if len(this.ReadTimeout) > 0 {
+		duration, err := time.ParseDuration(this.ReadTimeout)
+		if err != nil {
+			return err
+		}
+		this.timeout = duration
+	} else {
+		this.timeout = 3 * time.Second
+	}
+
 	return nil
 }
 
@@ -67,4 +84,12 @@ func (this *FastcgiConfig) FilterParams(req *http.Request) maps.Map {
 	}
 
 	return params
+}
+
+// 超时时间
+func (this *FastcgiConfig) Timeout() time.Duration {
+	if this.timeout <= 0 {
+		this.timeout = 30 * time.Second
+	}
+	return this.timeout
 }
