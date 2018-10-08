@@ -74,7 +74,16 @@ Tea.context(function () {
                     xAxis: {
                         data: response.data.labels
                     },
-                    yAxis: {},
+                    yAxis: {
+                        axisLabel: {
+                            formatter: function (value) {
+                                if (value < 10000) {
+                                    return value;
+                                }
+                                return (Math.round(value * 100 / 10000) / 100) + "万"
+                            }
+                        }
+                    },
                     series: [{
                         name: '',
                         type: 'line',

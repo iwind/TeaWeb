@@ -301,12 +301,23 @@ func (this *LocationConfig) NextBackend() *ServerBackendConfig {
 // 取得下一个可用的fastcgi
 // @TODO 实现fastcgi中的各种参数
 func (this *LocationConfig) NextFastcgi() *FastcgiConfig {
-	countFastcgi := len(this.Fastcgi)
-	if countFastcgi == 0 {
+	if len(this.Fastcgi) == 0 {
 		return nil
 	}
+
+	availableServers := []*FastcgiConfig{}
+	for _, f := range this.Fastcgi {
+		if !f.On {
+			continue
+		}
+		availableServers = append(availableServers, f)
+	}
+	if len(availableServers) == 0 {
+		return nil
+	}
+
 	rand.Seed(time.Now().UnixNano())
-	index := rand.Int() % countFastcgi
+	index := rand.Int() % len(availableServers)
 	return this.Fastcgi[index]
 }
 

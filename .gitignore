@@ -23,10 +23,15 @@ src/github.com/iwind/TeaGo
 src/golang.org
 src/gopkg.in
 src/main/teaweb
+src/main/build-plugin.sh
+src/main/run-plugin.sh
 src/main/tmp/*
 src/main/logs/*
+src/main/teaweb-linux
+src/main/main-plugin.go
 src/main/configs/*.proxy.conf
 src/main/configs/*.pem
 src/main/configs/*.key
+src/main/plugin-test.go
 dist/
 bin/

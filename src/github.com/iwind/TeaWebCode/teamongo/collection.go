@@ -30,6 +30,7 @@ func (this *Collection) CreateIndex(indexes map[string]bool) {
 	}
 
 	manager.CreateOne(context.Background(), mongo.IndexModel{
-		Keys: doc,
+		Keys:    doc,
+		Options: bson.NewDocument(bson.EC.Boolean("background", true)),
 	})
 }

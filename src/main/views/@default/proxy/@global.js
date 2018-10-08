@@ -15,7 +15,7 @@ Tea.context(function () {
 
     this.$delay(function () {
         this.refreshStatus();
-    }, 1000);
+    }, 100);
 
     this.restart = function () {
         this.$get("/proxy/restart")

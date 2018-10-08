@@ -9,6 +9,8 @@ Tea.context(function () {
     this.countFail = 0;
     this.qps = 0;
 
+    this.started = false;
+
     // 搜索相关
     this.searchBoxVisible = teaweb.getBool("searchBoxVisible");
     this.searchIp = teaweb.getString("searchIp");
@@ -50,19 +52,21 @@ Tea.context(function () {
         teaweb.set("searchKeyword", that.searchKeyword);
     });
 
+    var loadSize = 100;
     this.loadLogs = function () {
-        var size = 100;
-        if (this.fromId > 0) {
-            size = 200;
-        }
         var lastSize = 0;
         this.$get(".get")
             .params({
                 "fromId": this.fromId,
-                "size": size
+                "size": loadSize
             })
             .success(function (response) {
                 lastSize = response.data.logs.length;
+                if (lastSize == loadSize) {
+                    loadSize = 1000;
+                } else {
+                    loadSize = 100;
+                }
 
                 this.total = Math.ceil(response.data.total * 100 / 10000) / 100;
                 this.countSuccess = Math.ceil(response.data.countSuccess * 100 / 10000) / 100;
@@ -87,10 +91,12 @@ Tea.context(function () {
                 this.filterLogs();
             })
             .done(function () {
+                this.started = true;
+
                 // 每1秒刷新一次
                 Tea.delay(function () {
                     this.loadLogs();
-                }, (lastSize < size) ? 1000 : 100)
+                }, (lastSize < loadSize) ? 1000 : 100)
             });
     };
 

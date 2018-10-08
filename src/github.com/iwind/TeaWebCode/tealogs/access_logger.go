@@ -13,7 +13,6 @@ import (
 	"github.com/iwind/TeaGo/utils/time"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
 	"github.com/iwind/TeaGo/timers"
-	"github.com/mongodb/mongo-go-driver/mongo/insertopt"
 )
 
 var (
@@ -73,10 +72,12 @@ func (this *AccessLogger) collection() *mongo.Collection {
 	coll = this.client().Database("teaweb").Collection(collName)
 	indexes := coll.Indexes()
 	indexes.CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.NewDocument(bson.EC.Int32("status", 1), bson.EC.Int32("timestamp", 1)),
+		Keys:    bson.NewDocument(bson.EC.Int32("status", 1), bson.EC.Int32("timestamp", 1)),
+		Options: bson.NewDocument(bson.EC.Boolean("background", true)),
 	})
 	indexes.CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.NewDocument(bson.EC.Int32("remoteAddr", 1), bson.EC.Int32("serverId", 1)),
+		Keys:    bson.NewDocument(bson.EC.Int32("remoteAddr", 1), bson.EC.Int32("serverId", 1)),
+		Options: bson.NewDocument(bson.EC.Boolean("background", true)),
 	})
 
 	this.collectionCacheMap[collName] = coll
@@ -107,20 +108,37 @@ func (this *AccessLogger) wait() {
 			for _, doc := range newDocs {
 				doc.(*AccessLog).Parse()
 				doc.(*AccessLog).Id = objectid.New()
-			}
 
-			// 批量写入数据库
-			_, err := this.collection().InsertMany(context.Background(), newDocs, insertopt.BypassDocumentValidation(true))
-			if err != nil {
-				logs.Error(err)
-			}
-
-			// 其他
-			if len(this.processors) > 0 {
-				for _, doc := range newDocs {
+				// 其他处理器
+				if len(this.processors) > 0 {
 					for _, processor := range this.processors {
 						processor.Process(doc.(*AccessLog))
 					}
+				}
+			}
+
+			total := len(newDocs)
+
+			// 批量写入数据库
+			bulkSize := 1024
+			offset := 0
+			for {
+				end := offset + bulkSize
+				if end > total {
+					end = total
+				}
+
+				logs.Println("dump", end-offset, "docs ...")
+				_, err := this.collection().InsertMany(context.Background(), newDocs[offset:end])
+				if err != nil {
+					logs.Error(err)
+					return
+				}
+				logs.Println("done")
+
+				offset = end
+				if end >= total {
+					break
 				}
 			}
 		}

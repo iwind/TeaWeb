@@ -28,7 +28,7 @@ func (this *RedisProbe) Run() {
 	})
 
 	widget := this.Plugin.Widgets[0]
-	result := ps("redis-server", []string{"redis-server$"}, true)
+	result := ps("redis-server", []string{"redis-server"}, true)
 	widget.ResetCharts()
 	if len(result) == 0 {
 		return

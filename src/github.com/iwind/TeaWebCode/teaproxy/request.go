@@ -598,7 +598,7 @@ func (this *Request) callFastcgi(writer http.ResponseWriter) error {
 			continue
 		}
 		for _, subV := range v {
-			params["HTTP_"+strings.ToUpper(k)] = subV
+			params["HTTP_"+strings.ToUpper(strings.Replace(k, "-", "_", -1))] = subV
 		}
 	}
 
@@ -680,6 +680,19 @@ func (this *Request) serverError(writer http.ResponseWriter) {
 }
 
 func (this *Request) requestRemoteAddr() string {
+	// Real-IP
+	realIP := this.raw.Header.Get("X-Real-IP")
+	if len(realIP) > 0 {
+		return realIP
+	}
+
+	// X-Forwarded-For
+	forwardedFor := this.raw.Header.Get("X-Forwarded-For")
+	if len(forwardedFor) > 0 {
+		return forwardedFor
+	}
+
+	// Remote-Addr
 	remoteAddr := this.raw.RemoteAddr
 	index := strings.LastIndex(remoteAddr, ":")
 	if index < 0 {

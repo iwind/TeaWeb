@@ -5,5 +5,5 @@ export CGO_ENABLED=0
 export GOOS=linux
 export GOARCH=amd64
 
-go build -o ${GOPATH}/dist/linux/bin/teaweb main.go
+go build -o teaweb-linux main.go
 echo "OK"
