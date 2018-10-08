@@ -20,7 +20,9 @@ type FastcgiConfig struct {
 
 	Index       string            `yaml:"index" json:"index"`             //@TODO
 	Params      map[string]string `yaml:"params" json:"params"`           //@TODO
-	ReadTimeout string            `yaml:"readTimeout" json:"readTimeout"` // 超时时间
+	ReadTimeout string            `yaml:"readTimeout" json:"readTimeout"` // @TODO 读取超时时间
+	SendTimeout string            `yaml:"sendTimeout" json:"sendTimeout"` // @TODO 发送超时时间
+	ConnTimeout string            `yaml:"connTimeout" json:"connTimeout"` // @TODO 连接超时时间
 	PoolSize    int               `yaml:"poolSize" json:"poolSize"`       // 连接池尺寸 @TODO
 
 	paramsMap maps.Map

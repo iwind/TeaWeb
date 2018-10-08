@@ -914,7 +914,6 @@ func (this *Request) log() {
 	if !this.shouldLog {
 		return
 	}
-	//return //@TODO
 
 	cookies := map[string]string{}
 	for _, cookie := range this.raw.Cookies() {
